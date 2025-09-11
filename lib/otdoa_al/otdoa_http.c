@@ -19,12 +19,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <otdoa_al/otdoa_al_log.h>
 #include <otdoa_al/otdoa_fs.h>
-#include <otdoa_al/otdoa_http.h>
 #include <otdoa_al/phywi_otdoa_api.h>
 #include <otdoa_al/phywi_otdoa2al_api.h>
-#include <otdoa_al/otdoa_http_h1.h>
+#include "otdoa_al_log.h"
+#include "otdoa_http.h"
+#include "otdoa_http_h1.h"
+
 // forward declarations
 tOTDOA_HTTP_MEMBERS gHTTP = {};
 

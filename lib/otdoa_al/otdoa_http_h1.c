@@ -17,13 +17,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <otdoa_al/phywi_al_api.h>
 #include <otdoa_al/phywi_otdoa2al_api.h>     // for otdoa_sleep_msec() and otdoa_message_xxx()
 #include <otdoa_al/phywi_al2otdoa_api.h>
-#include <otdoa_al/otdoa_http.h>
-#include <otdoa_al/otdoa_http_h1.h>
 #include <otdoa_al/otdoa_log.h>
-#include <otdoa_al/otdoa_al_log.h>
+#include "otdoa_http.h"
+#include "otdoa_http_h1.h"
+#include "otdoa_al_log.h"
 
 #define NONBLOCK_RETRY_MILLISECONDS 100
 #define NONBLOCK_RETRY_LIMIT (13 * 10)     // increased for v0.9.x of nrf9161DK board (PHYW-275) was 15 * 10

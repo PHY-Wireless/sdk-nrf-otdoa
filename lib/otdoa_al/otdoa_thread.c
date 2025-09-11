@@ -14,7 +14,7 @@
 
 #include <otdoa_al/phywi_otdoa2al_api.h>
 #include <otdoa_al/phywi_al2otdoa_api.h>
-#include <otdoa_al/otdoa_http.h>
+#include "otdoa_http.h"
 
 typedef struct message_work {
     struct k_work work;

@@ -15,8 +15,8 @@
 
 #include <stdbool.h>
 
-#include "otdoa_log.h"
-#include "phywi_otdoa_api.h"
+#include <otdoa_al/otdoa_log.h>
+#include <otdoa_al/phywi_otdoa_api.h>
 #include "autoconf.h"
 
 #define DEFAULT_UBSA_DLEARFCN   5230    // Default DLEARFCN if not available from modem

@@ -5,7 +5,7 @@
  *                   All Rights Reserved                            |
  *------------------------------------------------------------------+
  *
- * phywi_otdoa2al_api.h - API Definitions for Adaption Layer for 
+ * phywi_otdoa2al_api.h - API Definitions for Adaption Layer for
  *                  the PHY Wireless OTDOA module
  *
  * This API is designed to be accessed by the OTDOA libary.  In general,
@@ -23,9 +23,20 @@ extern "C" {
 #include <stddef.h>
 
 #include "otdoa_nordic_at_h1.h"
+#include "phywi_otdoa_api.h"
 
 int otdoa_start();                                                                           \
 int otdoa_stop();                                                                            \
+
+ /**
+ * @brief Initialize the OTDOA AL library
+ * @param[in] ubsa_file_path Points to a string containing the full path to where
+ *                           the uBSA file resides
+ * @param[in] callback Callback function used by the library
+ *                     to return results and status to the client
+ * @return 0 on success
+ */
+int32_t otdoa_al_init(otdoa_api_callback_t event_callback);
 
 /***************************************************************************
  * Message Handling Functions

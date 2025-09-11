@@ -2,7 +2,7 @@
 #ifndef OTDOA_AL_LOG_H__
 #define OTDOA_AL_LOG_H__
 
-#include "otdoa_log.h"
+#include <otdoa_al/otdoa_log.h>
 
 #define OTDOA_LOG_DBG(fmt, ...) otdoa_log_dbg(fmt, ##__VA_ARGS__)
 #define OTDOA_LOG_INF(fmt, ...) otdoa_log_inf(fmt, ##__VA_ARGS__)

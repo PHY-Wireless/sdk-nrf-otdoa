@@ -17,8 +17,8 @@
 #include <zephyr/net/tls_credentials.h>
 
 #include "modem/modem_key_mgmt.h"
-#include <otdoa_al/otdoa_http.h>
-#include <otdoa_al/otdoa_al_log.h>
+#include "otdoa_http.h"
+#include "otdoa_al_log.h"
 
 
 #define CHECK_IP

@@ -11,9 +11,9 @@
 #include <stdlib.h>
 
 #include <otdoa_al/phywi_otdoa_api.h>
-#include <otdoa_al/otdoa_http.h>
-#include <otdoa_al/otdoa_al_log.h>
 #include <otdoa_al/otdoa_nordic_at_h1.h>
+#include "otdoa_http.h"
+#include "otdoa_al_log.h"
 
 static otdoa_api_callback_t al_event_callback;
  /**

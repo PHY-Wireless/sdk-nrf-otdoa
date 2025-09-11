@@ -17,8 +17,8 @@
 #include "nrf_modem_at.h"
 
 #include <otdoa_al/phywi_otdoa_api.h>
-#include <otdoa_al/otdoa_al_log.h>
 #include <otdoa_al/otdoa_nordic_at_h1.h>
+#include "otdoa_al_log.h"
 
 #define DEFAULT_UBSA_DLEARFCN   5230
 

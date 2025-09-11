@@ -11,7 +11,7 @@
 #include <zephyr/kernel.h>
 
 #include <otdoa_al/otdoa_log.h>
-#include <otdoa_al/otdoa_al_log.h>
+#include "otdoa_al_log.h"
 
 #ifdef CONFIG_LOG_MODE_MINIMAL
 #error "MINIMAL"
