@@ -473,6 +473,7 @@ int otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE *pMsg) {
             }
 
             break;
+#ifdef CONFIG_OTDOA_ENABLE_UPLOAD_RESULTS
         case OTDOA_HTTP_MSG_UPLOAD_OTDOA_RESULTS:
             OTDOA_LOG_INF("HTTP_H1 received OTDOA_HTTP_MSG_UPLOAD_OTDOA_RESULTS");
             rc = otdoa_http_h1_rebind(pMsg->http_upload_results.pURL);
@@ -493,6 +494,7 @@ int otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE *pMsg) {
             OTDOA_LOG_INF("OTDOA position estimate %s", (rc==0 ? "SUCCESS" : "FAILURE"));
             otdoa_http_invoke_callback_ul_compl(rc==0 ? OTDOA_DL_STATUS_SUCCESS : OTDOA_DL_STATUS_FAIL_NTWK_CONN);
             break;
+#endif
         case OTDOA_HTTP_MSG_TEST_JWT:
             if (otdoa_http_h1_rebind(NULL)) {
                 OTDOA_LOG_ERR("Failed to bind to server socket");
@@ -2004,6 +2006,7 @@ exit:
 
 extern void log_response_string(const char*, const char*);
 
+#ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
 /**
  * Generate an HTTPS request from the OTDOA results
  */
@@ -2134,6 +2137,7 @@ int otdoa_http_h1_handle_otdoa_results(tOTDOA_HTTP_MEMBERS* pG, const tOTDOA_HTT
 
     return rc;
 }
+#endif
 
 /**
  * Check if an ECGI is on the blacklist, and decrements the age of all entries
