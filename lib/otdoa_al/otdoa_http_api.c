@@ -112,7 +112,7 @@ int otdoa_api_cfg_download(void) {
 }
 
 
-
+#ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
 int32_t otdoa_api_upload_results(const otdoa_api_results_t* p_results,
                                  const char* true_lat,  const char* true_lon,
                                  const char* notes)
@@ -128,3 +128,5 @@ int32_t otdoa_api_upload_results(const otdoa_api_results_t* p_results,
     return (rv == 0 ? OTDOA_API_SUCCESS : OTDOA_API_INTERNAL_ERROR);
 
 }
+#endif
+
