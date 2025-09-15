@@ -20,11 +20,11 @@ config OTDOA_HTTP_QUEUE_PRIORITY
     int "HTTP work queue priority"
     default 5
 
-config OTDOA_RS_QUEUE_STACK_SIZE
+config OTDOA_RS_THREAD_STACK_SIZE
     int "RS work queue stack size in bytes"
     default 4096
 
-config OTDOA_RS_QUEUE_PRIORITY
+config OTDOA_RS_THREAD_PRIORITY
     int "RS work queue priority"
     default 5
 
