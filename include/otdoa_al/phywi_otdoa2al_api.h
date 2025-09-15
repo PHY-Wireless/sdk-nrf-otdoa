@@ -44,6 +44,7 @@ int32_t otdoa_al_init(otdoa_api_callback_t event_callback);
 int32_t otdoa_send_to_main_thread(const void* pvMsg, uint32_t u32Length);
 int otdoa_queue_rs_message(const void* msg, const size_t length);
 int otdoa_queue_http_message(const void* msg, const size_t length);
+int32_t otdoa_http_send_stop_req(int fail_or_cancelled);
 int otdoa_message_check_pending_stop();
 int otdoa_message_free(void*  pMessage);
 
