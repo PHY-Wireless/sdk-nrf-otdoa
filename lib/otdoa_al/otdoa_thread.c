@@ -7,6 +7,7 @@
 
 #include "otdoa_al_log.h"
 #include "otdoa_http.h"
+#include "otdoa_rs.h"
 
 typedef struct http_work {
     struct k_work work;
@@ -26,7 +27,7 @@ static struct {
     atomic_t ready;
 } gOTDOA;
 
-static struct {
+static struct http_stop_work_item {
     struct k_work work;
     int fail_or_cancel;
 } http_stop_work;
@@ -117,8 +118,9 @@ void otdoa_queue_handle_http(struct k_work *work) {
     struct http_work *parent = CONTAINER_OF(work, struct http_work, work);
     if (parent) {
         if ((void *)parent == (void *)&http_stop_work) {
-            // this isn't a real message and there's nothing for HTTP to do with
-            // it
+            // Tell the RS to stop now that the pending HTTP operation has been stopped
+            const struct http_stop_work_item* stop_req = CONTAINER_OF(work, struct http_stop_work_item, work);
+            otdoa_rs_send_stop_req(stop_req->fail_or_cancel);
             return;
         }
         otdoa_http_handle_message(&parent->msg);
