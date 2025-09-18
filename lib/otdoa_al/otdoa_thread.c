@@ -1,168 +1,153 @@
 // File: otdoa_thread.c
 
-// #define DEBUG
-#define TIMING
-
+#include <otdoa_al/phywi_al2otdoa_api.h>
+#include <stdlib.h>
 #include <zephyr/kernel.h>
 #include <zephyr/posix/unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 
-// Time...
-#include "date_time.h"
-
-#include <otdoa_al/phywi_otdoa2al_api.h>
-#include <otdoa_al/phywi_al2otdoa_api.h>
+#include "otdoa_al_log.h"
 #include "otdoa_http.h"
 
-typedef struct message_work {
+typedef struct http_work {
     struct k_work work;
     tOTDOA_HTTP_MESSAGE msg;
-} tOTDOA_WORK_ITEM;
+} tOTDOA_HTTP_WORK;
 
-typedef struct stop_work {
+#define SLAB_COUNT (10)
+
+static struct k_work_q http_workq;
+static struct k_fifo rs_fifo;
+static struct k_thread rs_thread_data;
+static void *message_slab_buffer;
+struct k_mem_slab message_slab; // PHYW-399 TODO: make this static
+
+static struct {
+    atomic_t terminate;
+    atomic_t ready;
+} gOTDOA;
+
+static struct http_stop_work_item {
     struct k_work work;
-    uint32_t cancel_or_timeout;
-} tOTDOA_STOP_WORK_ITEM;
+    int fail_or_cancel;
+} http_stop_work;
 
-static tOTDOA_STOP_WORK_ITEM rs_stop_work;
-
-// Maximum allowable message size (library or AL)
-static size_t max_msg_size = 0;
-
-// prep the OTDOA and AL work queues
 K_THREAD_STACK_DEFINE(http_workq_stack, CONFIG_OTDOA_HTTP_QUEUE_STACK_SIZE);
-K_THREAD_STACK_DEFINE(rs_workq_stack, CONFIG_OTDOA_RS_QUEUE_STACK_SIZE);
-struct k_work_q http_workq, rs_workq;
-
-#define SLAB_COUNT 10
-#define SLAB_ALIGN 4
-// #define OTDOA_SLAB_MESSAGE_SIZE (sizeof (tOTDOA_WORK_ITEM))
-struct k_mem_slab message_slab; // PHYW-399 ToDo: make static
-static void* p_message_slab_buffer = NULL;
+K_THREAD_STACK_DEFINE(rs_thread_stack, CONFIG_OTDOA_RS_THREAD_STACK_SIZE);
 
 LOG_MODULE_DECLARE(otdoa, LOG_LEVEL_DBG);
 
-int otdoa_message_free(void* msg) {
-    if (msg != &rs_stop_work) {
-        k_mem_slab_free(&message_slab, msg);
-    }
-    return 0;
-}
-
-void* otdoa_message_alloc(size_t length) {
-    if (length > message_slab.info.block_size) {
-        LOG_ERR("Message too large (%u bytes) for allocation", length);
-        return NULL;
-    }
-
-    void* pReturn = 0;
-    const int rv = k_mem_slab_alloc(&message_slab, (void**) &pReturn, K_NO_WAIT);
-    if (rv == 0) {
-        memset(pReturn, 0, length);
-    } else {
-        LOG_ERR("Memory allocation failure %d", rv);
-    }
-    return pReturn;
-}
+void rs_entry_point(void *, void *, void *);
 
 int otdoa_start() {
-    // init the work queues
+    // init the message slab
+    const unsigned int MAX_MSG_SIZE =
+        MAX(OTDOA_MAX_MESSAGE_SIZE, sizeof(tOTDOA_HTTP_WORK));
+    message_slab_buffer = calloc(SLAB_COUNT, MAX_MSG_SIZE);
+    k_mem_slab_init(&message_slab, message_slab_buffer, MAX_MSG_SIZE,
+                    SLAB_COUNT);
+
+    // init the HTTP workqueue
     struct k_work_queue_config http_cfg = {.name = "http_workq"};
-    struct k_work_queue_config rs_cfg = {.name = "rs_workq"};
     k_work_queue_init(&http_workq);
-    k_work_queue_init(&rs_workq);
-    k_work_queue_start(&http_workq, http_workq_stack, K_THREAD_STACK_SIZEOF(http_workq_stack), CONFIG_OTDOA_HTTP_QUEUE_PRIORITY, &http_cfg);
-    k_work_queue_start(&rs_workq, rs_workq_stack, K_THREAD_STACK_SIZEOF(rs_workq_stack), CONFIG_OTDOA_RS_QUEUE_PRIORITY, &rs_cfg);
+    k_work_queue_start(&http_workq, http_workq_stack,
+                       K_THREAD_STACK_SIZEOF(http_workq_stack),
+                       CONFIG_OTDOA_HTTP_QUEUE_PRIORITY, &http_cfg);
 
-    // Allocate message slab with buffers sized to fit maximum message size
-    max_msg_size = OTDOA_MAX_MESSAGE_SIZE;       // Max size of OTDOA library messages
-    if (sizeof(tOTDOA_HTTP_MESSAGE) > max_msg_size)
-        max_msg_size = sizeof(tOTDOA_HTTP_MESSAGE);
-
-    // Add the k_work structure to the size,
-    // and round up to 32b words to account for any packing alignment issues
-    max_msg_size += sizeof(struct k_work);
-    max_msg_size = (max_msg_size + 3) & ~0x03;
-    LOG_INF("Max message size = %u", max_msg_size);
-
-    p_message_slab_buffer = calloc(SLAB_COUNT, max_msg_size);
-    if (!p_message_slab_buffer) {
-        LOG_ERR("Failed to allocate OTDOA message slab");
-        return -1;
-    }
-
-    k_mem_slab_init(&message_slab, p_message_slab_buffer, max_msg_size, SLAB_COUNT);
+    // init the RS fifo thread
+    k_fifo_init(&rs_fifo);
+    k_thread_create(&rs_thread_data, rs_thread_stack,
+                    K_THREAD_STACK_SIZEOF(rs_thread_stack), rs_entry_point,
+                    NULL, NULL, NULL, CONFIG_OTDOA_RS_THREAD_PRIORITY,
+                    K_FP_REGS, K_NO_WAIT);
+    k_thread_name_set(&rs_thread_data, "rs_thread");
 
     return 0;
 }
 
 int otdoa_stop() {
-    // plug the queue, stopping more messages being added, and wait for it to empty
-    if (k_work_queue_drain(&http_workq, true)) {
-        LOG_ERR("Failed to drain OTDOA queue");
-    }
-    if (k_work_queue_drain(&rs_workq, true)) {
-        LOG_ERR("Failed to drain AL queue");
+    atomic_set(&gOTDOA.terminate, 1);
+    int rc = k_thread_join(&rs_thread_data, K_MSEC(10000));
+    if (rc) {
+        OTDOA_LOG_ERR("Timed out waiting for RS Thread to terminate: %d", rc);
     }
 
-    if (p_message_slab_buffer) {
-        free(p_message_slab_buffer);
-        p_message_slab_buffer = NULL;
-    }
-    max_msg_size = 0;
-
-    return 0;
+    free(message_slab_buffer);
+    return rc;
 }
 
-void otdoa_queue_handle_rs(struct k_work* work) {
-    if (!work) return;
-    struct message_work* parent = CONTAINER_OF(work, struct message_work, work);
+void *otdoa_message_alloc(size_t length) {
+    if (length > message_slab.info.block_size) {
+        OTDOA_LOG_ERR("message too large for allocation (%u bytes)", length);
+        return NULL;
+    }
+
+    void *alloc;
+    int rc = k_mem_slab_alloc(&message_slab, &alloc, K_NO_WAIT);
+    if (rc) {
+        OTDOA_LOG_ERR("Memory allocation failure: %d", rc);
+        return NULL;
+    }
+
+    return alloc;
+}
+
+void otdoa_message_free(void *msg) { k_mem_slab_free(&message_slab, msg); }
+
+void rs_entry_point(void *, void *, void *) {
+    OTDOA_LOG_INF("RS Thread Started");
+
+    while (!atomic_get(&gOTDOA.terminate)) {
+        void *msg = k_fifo_get(&rs_fifo, K_FOREVER);
+        if (!msg) {
+            OTDOA_LOG_INF("RS Thread timed out with no message");
+            continue;
+        }
+
+        otdoa_ctrl_handle_message(msg);
+        otdoa_message_free(msg);
+    }
+
+    OTDOA_LOG_INF("RS Thread Exit");
+    atomic_clear(&gOTDOA.terminate);
+}
+
+void otdoa_queue_handle_http(struct k_work *work) {
+    if (!work)
+        return;
+    struct http_work *parent = CONTAINER_OF(work, struct http_work, work);
     if (parent) {
-        otdoa_rs_handle_msg((void*) &parent->msg);
+        if ((void *)parent == (void *)&http_stop_work) {
+            // Tell the RS to stop now that the pending HTTP operation has been stopped
+            const struct http_stop_work_item* stop_req = CONTAINER_OF(work, struct http_stop_work_item, work);
+            otdoa_rs_send_stop_req(stop_req->fail_or_cancel);
+            return;
+        }
+        otdoa_http_handle_message(&parent->msg);
         otdoa_message_free(parent);
     }
 }
 
-void otdoa_queue_handle_stop(struct k_work* work) {
-    if (!work) return;
-    tOTDOA_STOP_WORK_ITEM* parent = CONTAINER_OF(work, tOTDOA_STOP_WORK_ITEM, work);
-    if (parent) {
-        otdoa_rs_handle_stop(parent->cancel_or_timeout);
-    }
-}
-
-void otdoa_queue_handle_http(struct k_work* work) {
-    if (!work) return;
-    struct message_work* parent = CONTAINER_OF(work, struct message_work, work);
-    if (parent) {
-        otdoa_http_handle_message((tOTDOA_HTTP_MESSAGE*) &parent->msg);
-        otdoa_message_free(parent);
-    }
-}
-
-int otdoa_queue_http_message(const void* pv_msg, const size_t length) {
-    const tOTDOA_HTTP_MESSAGE* msg = (const tOTDOA_HTTP_MESSAGE*) pv_msg;
-
-    if (length > max_msg_size) {
-        LOG_ERR("otdoa_queue_http_message: message too long (%u bytes)", length);
+int otdoa_queue_http_message(const void *msg, const size_t length) {
+    if (!msg) {
+        OTDOA_LOG_ERR("no message");
         return -1;
     }
 
-    tOTDOA_WORK_ITEM* work = otdoa_message_alloc(length);
+    tOTDOA_HTTP_WORK *work =
+        otdoa_message_alloc(sizeof(struct k_work) + length);
     if (!work) {
-        LOG_ERR("otdoa_queue_http_message: failed to allocate message");
+        OTDOA_LOG_ERR("failed to alloate http message");
         return -1;
     }
 
     k_work_init(&work->work, otdoa_queue_handle_http);
     memcpy(&work->msg, msg, length);
 
-    const int rc = k_work_submit_to_queue(&http_workq, &work->work);
+    int rc = k_work_submit_to_queue(&http_workq, &work->work);
     if (rc != 1) {
-        // 0 and 2 are success values, but imply the work item has been double-allocated
-        LOG_ERR("otdoa_queue_http_message: failed to send message: %d", rc);
+        // 0 and 2 are success values, but imply the work item has be
+        // double-allocated
+        OTDOA_LOG_ERR("failed to queue http message: %d", rc);
         otdoa_message_free(work);
         return -1;
     }
@@ -170,53 +155,42 @@ int otdoa_queue_http_message(const void* pv_msg, const size_t length) {
     return 0;
 }
 
-int otdoa_queue_rs_message(const void* pv_msg, const size_t length) {
-    tOTDOA_WORK_ITEM* work;
-
-    if (length > max_msg_size) {
-        LOG_ERR("otdoa_queue_rs_message: message too long (%u bytes)", length);
+int otdoa_queue_rs_message(const void *pv_msg, const size_t length) {
+    if (!pv_msg) {
+        OTDOA_LOG_ERR("no message");
         return -1;
     }
 
-    work = otdoa_message_alloc(length);
-    if (!work) {
-        LOG_ERR("otdoa_queue_rs_message: failed to allocate message");
+    void *msg = otdoa_message_alloc(length);
+    if (!msg) {
+        OTDOA_LOG_ERR("failed to allocate rs message");
         return -1;
     }
 
-    k_work_init(&work->work, otdoa_queue_handle_rs);
-    memcpy(&work->msg, pv_msg, length);
-
-    const int rc = k_work_submit_to_queue(&rs_workq, &work->work);
-    if (rc != 1) {
-        // 0 and 2 are success values, but imply the work item has been double-allocated
-        LOG_ERR("otdoa_queue_rs_message: failed to send message: %d", rc);
-        otdoa_message_free(work);
-        return -1;
-    }
+    memcpy(msg, pv_msg, length);
+    k_fifo_put(&rs_fifo, msg);
 
     return 0;
 }
 
-int otdoa_queue_stop_request(uint32_t cancel_or_timeout) {
+bool otdoa_message_check_pending_stop() {
+    const bool pending = k_work_is_pending(&http_stop_work.work);
+    if (pending)
+        k_work_cancel(&http_stop_work.work);
+    return pending;
+}
 
-    // use a known static work item so we can 'peek' and see if a stop request is queued
-    rs_stop_work.cancel_or_timeout = cancel_or_timeout;
+int32_t otdoa_queue_stop_request(int fail_or_cancel) {
+    http_stop_work.fail_or_cancel = fail_or_cancel;
+    k_work_init(&http_stop_work.work, otdoa_queue_handle_http);
 
-    k_work_init(&rs_stop_work.work, otdoa_queue_handle_stop);
-
-    const int rc = k_work_submit_to_queue(&rs_workq, &rs_stop_work.work);
+    int rc = k_work_submit_to_queue(&http_workq, &http_stop_work.work);
     if (rc != 1) {
-        // 0 and 2 are success values, but imply the work item has been double-allocated
-        LOG_ERR("otdoa_queue_rs_message: failed to send stop req");
+        // 0 and 2 are success values, but imply the work item has be
+        // double-allocated
+        OTDOA_LOG_ERR("failed to queue http stop message: %d", rc);
         return -1;
     }
 
     return 0;
-}
-
-int otdoa_message_check_pending_stop() {
-    const int pending = k_work_is_pending(&rs_stop_work.work);
-    if (pending) k_work_cancel(&rs_stop_work.work);
-    return !!pending;
 }
