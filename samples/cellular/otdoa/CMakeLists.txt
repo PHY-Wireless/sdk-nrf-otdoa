@@ -6,7 +6,6 @@
 
 cmake_minimum_required(VERSION 3.13.1)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(otdoa)
@@ -14,10 +13,8 @@ project(otdoa)
 # get settings from sysbuild
 zephyr_get(OTDOA_DEV_VERSION SYSBUILD GLOBAL)
 zephyr_get(OTDOA_DBG_VERSION SYSBUILD GLOBAL)
-zephyr_get(OTDOA_LITTLE_FS   SYSBUILD GLOBAL)
 zephyr_get(FS_EXT_STORAGE    SYSBUILD GLOBAL)
 zephyr_get(OBFUSCATE         SYSBUILD GLOBAL)
-zephyr_get(OTDOA_LIB_PATH    SYSBUILD GLOBAL)
 
 # Optionally disable encrypted uBSA downloads and revert to v2 getuBSA
 if("${OTDOA_DEV_VERSION}" STREQUAL "ON")
@@ -44,7 +41,8 @@ target_link_options(app PRIVATE --gc-sections)
 # NORDIC SDK APP START
 
 add_library(otdoa STATIC IMPORTED)
-set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION ${OTDOA_LIB_PATH})
+set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION "${NRF_DIR}/ext/lib/bin/otdoa/libotdoa.a")
+
 
 option(ENABLE_CAPTURE "Enable capture support" OFF)
 
