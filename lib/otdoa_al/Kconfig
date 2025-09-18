@@ -32,14 +32,6 @@ config OTDOA_TLS_SEC_TAG
     int "Modem security tag slot to install PhyWi TLS certificate to"
     default 42
 
-config OTDOA_RESULTS_UPLOAD_PW
-    string "Password to use for Phywi API authentication when uploading OTDOA results"
-    default ""
-
-config OTDOA_UPLOAD_SERVER_URL
-    string "URL to upload OTDOA results to"
-    default "api.prod.hellaphy.cloud"
-
 config OTDOA_BSA_DL_SERVER_URL
     string "URL to download BSA files from"
     default "api.prod.hellaphy.cloud"
@@ -51,5 +43,19 @@ config OTDOA_HTTPS_PORT
 config OTDOA_HTTP_PORT
     int "Port to use for OTDOA HTTP operations"
     default 80
+
+config OTDOA_ENABLE_RESULTS_UPLOAD
+    bool "Enable uploading of OTDOA results to a server"
+    default false
+
+config OTDOA_RESULTS_UPLOAD_PW
+    string "Password to use for Phywi API authentication when uploading OTDOA results"
+    default ""
+    depends on OTDOA_ENABLE_RESULTS_UPLOAD
+
+config OTDOA_UPLOAD_SERVER_URL
+    string "URL to upload OTDOA results to"
+    default "api.prod.hellaphy.cloud"
+    depends on OTDOA_ENABLE_RESULTS_UPLOAD
 
 endif # OTDOA_AL_LIB
