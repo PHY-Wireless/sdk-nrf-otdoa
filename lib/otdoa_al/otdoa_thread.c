@@ -7,7 +7,6 @@
 
 #include "otdoa_al_log.h"
 #include "otdoa_http.h"
-#include "otdoa_rs.h"
 
 typedef struct http_work {
     struct k_work work;
@@ -181,7 +180,7 @@ bool otdoa_message_check_pending_stop() {
     return pending;
 }
 
-int32_t otdoa_http_send_stop_req(int fail_or_cancel) {
+int32_t otdoa_queue_stop_request(int fail_or_cancel) {
     http_stop_work.fail_or_cancel = fail_or_cancel;
     k_work_init(&http_stop_work.work, otdoa_queue_handle_http);
 
