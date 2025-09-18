@@ -473,7 +473,7 @@ int otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE *pMsg) {
             }
 
             break;
-#ifdef CONFIG_OTDOA_ENABLE_UPLOAD_RESULTS
+#ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
         case OTDOA_HTTP_MSG_UPLOAD_OTDOA_RESULTS:
             OTDOA_LOG_INF("HTTP_H1 received OTDOA_HTTP_MSG_UPLOAD_OTDOA_RESULTS");
             rc = otdoa_http_h1_rebind(pMsg->http_upload_results.pURL);
