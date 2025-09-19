@@ -1,6 +1,7 @@
 // File: otdoa_thread.c
 
 #include <otdoa_al/phywi_al2otdoa_api.h>
+#include <otdoa_al/phywi_otdoa2al_api.h>
 #include <stdlib.h>
 #include <zephyr/kernel.h>
 #include <zephyr/posix/unistd.h>
@@ -91,7 +92,10 @@ void *otdoa_message_alloc(size_t length) {
     return alloc;
 }
 
-void otdoa_message_free(void *msg) { k_mem_slab_free(&message_slab, msg); }
+int otdoa_message_free(void *msg) {
+    k_mem_slab_free(&message_slab, msg);
+    return 0;
+}
 
 void rs_entry_point(void *, void *, void *) {
     OTDOA_LOG_INF("RS Thread Started");
@@ -173,7 +177,7 @@ int otdoa_queue_rs_message(const void *pv_msg, const size_t length) {
     return 0;
 }
 
-bool otdoa_message_check_pending_stop() {
+int otdoa_message_check_pending_stop() {
     const bool pending = k_work_is_pending(&http_stop_work.work);
     if (pending)
         k_work_cancel(&http_stop_work.work);
