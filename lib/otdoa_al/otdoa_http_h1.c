@@ -144,30 +144,30 @@ void otdoa_http_h1_copy_ubsa_params(tOTDOA_HTTP_MEMBERS *pG, const tOTDOA_HTTP_M
 */
 int otdoa_http_h1_get_api_status(int rc)
 {
-    int status = OTDOA_DL_STATUS_SUCCESS;
+    int status = OTDOA_API_SUCCESS;
     // Rough translation of server error codes
     switch(rc)
     {
-        case HTTP_H1_ERROR:                 status = OTDOA_DL_STATUS_OTHER_ERROR;   break;
-        case HTTP_H1_OK:                    status = OTDOA_DL_STATUS_SUCCESS;       break;
-        case HTTP_H1_CANCELLED:             status = OTDOA_DL_STATUS_CANCELLED;     break;
+        case HTTP_H1_ERROR:                 status = OTDOA_API_INTERNAL_ERROR;   break;
+        case HTTP_H1_OK:                    status = OTDOA_API_SUCCESS;       break;
+        case HTTP_H1_CANCELLED:             status = OTDOA_EVENT_FAIL_CANCELLED;     break;
 
         // These two are not valid final results.
-        case HTTP_H1_NOT_READY:             status = OTDOA_DL_STATUS_OTHER_ERROR;   break;
-        case HTTP_H1_PARTIAL_CONTENT:       status = OTDOA_DL_STATUS_OTHER_ERROR;   break;
+        case HTTP_H1_NOT_READY:             status = OTDOA_API_INTERNAL_ERROR;   break;
+        case HTTP_H1_PARTIAL_CONTENT:       status = OTDOA_API_INTERNAL_ERROR;   break;
 
 
-        case HTTP_H1_BAD_REQUEST:           status = OTDOA_DL_STATUS_BAD_REQ;       break;
-        case HTTP_H1_UNAUTHORIZED:          status = OTDOA_DL_STATUS_AUTH_FAIL;     break;
+        case HTTP_H1_BAD_REQUEST:           status = OTDOA_API_ERROR_PARAM;       break;
+        case HTTP_H1_UNAUTHORIZED:          status = OTDOA_EVENT_FAIL_UNAUTHORIZED;     break;
 
-        case HTTP_H1_CONFLICT:              status = OTDOA_DL_STATUS_SERVER_ERROR_RETRY_OK; break;
-        case HTTP_H1_GONE:                  status = OTDOA_DL_STATUS_SERVER_ERROR_RETRY_OK; break;
-        case HTTP_H1_UNPROCESSABLE_CONTENT: status = OTDOA_DL_STATUS_SERVER_ERROR_RETRY_OK; break;
-        case HTTP_H1_TOO_MANY_REQUESTS:     status = OTDOA_DL_STATUS_SERVER_ERROR_RETRY_OK; break;
-        case HTTP_H1_INTERNAL_SERVER_ERROR: status = OTDOA_DL_STATUS_SERVER_ERROR_NO_RETRY; break;
+        case HTTP_H1_CONFLICT:              status = OTDOA_EVENT_FAIL_UBSA_DL; break;
+        case HTTP_H1_GONE:                  status = OTDOA_EVENT_FAIL_UBSA_DL; break;
+        case HTTP_H1_UNPROCESSABLE_CONTENT: status = OTDOA_EVENT_FAIL_UBSA_DL; break;
+        case HTTP_H1_TOO_MANY_REQUESTS:     status = OTDOA_EVENT_FAIL_UBSA_DL; break;
+        case HTTP_H1_INTERNAL_SERVER_ERROR: status = OTDOA_EVENT_FAIL_UBSA_DL; break;
 
-        case HTTP_H1_BAD_CFG:               status = OTDOA_DL_STATUS_BAD_CFG;           break;
-        default:                            status = OTDOA_DL_STATUS_FAIL_NTWK_CONN;    break;
+        case HTTP_H1_BAD_CFG:               status = OTDOA_EVENT_FAIL_BAD_CFG;           break;
+        default:                            status = OTDOA_API_INTERNAL_ERROR;    break;
     }
     return status;
 }
@@ -431,7 +431,7 @@ int otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE *pMsg) {
                 rc = otdoa_http_h1_rebind(NULL);
                 if (rc != 0) {
                     OTDOA_LOG_WRN("Failed to bind socket (for cfg dl). rc = %d", rc);
-                    otdoa_http_invoke_callback_dl_compl(OTDOA_DL_STATUS_FAIL_NTWK_CONN);
+                    otdoa_http_invoke_callback_dl_compl(OTDOA_EVENT_FAIL_NO_CELL);
                     break;
                 }
                 rc = otdoa_http_h1_handle_get_cfg(&gHTTP);
@@ -459,7 +459,7 @@ int otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE *pMsg) {
             rc = otdoa_http_h1_rebind(NULL);
             if (rc != 0) {
                 OTDOA_LOG_WRN("Failed to bind socket (for cfg dl). rc = %d", rc);
-                otdoa_http_invoke_callback_dl_compl(OTDOA_DL_STATUS_FAIL_NTWK_CONN);
+                otdoa_http_invoke_callback_dl_compl(OTDOA_EVENT_FAIL_NO_CELL);
                 break;
             }
             rc = otdoa_http_h1_handle_get_cfg(&gHTTP);
@@ -478,7 +478,7 @@ int otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE *pMsg) {
             OTDOA_LOG_INF("HTTP_H1 received OTDOA_HTTP_MSG_UPLOAD_OTDOA_RESULTS");
             rc = otdoa_http_h1_rebind(pMsg->http_upload_results.pURL);
             if (rc != 0) {
-                otdoa_http_invoke_callback_ul_compl(OTDOA_DL_STATUS_FAIL_NTWK_CONN);
+                otdoa_http_invoke_callback_ul_compl(OTDOA_EVENT_FAIL_NO_CELL);
                 break;
             }
 
@@ -492,7 +492,7 @@ int otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE *pMsg) {
             free(pMsg->http_upload_results.pResults);
             // NB:  This print is used to detect completion of position estimate for CI tests
             OTDOA_LOG_INF("OTDOA position estimate %s", (rc==0 ? "SUCCESS" : "FAILURE"));
-            otdoa_http_invoke_callback_ul_compl(rc==0 ? OTDOA_DL_STATUS_SUCCESS : OTDOA_DL_STATUS_FAIL_NTWK_CONN);
+            otdoa_http_invoke_callback_ul_compl(rc==0 ? OTDOA_API_SUCCESS : OTDOA_EVENT_FAIL_NO_CELL);
             break;
 #endif
         case OTDOA_HTTP_MSG_TEST_JWT:
