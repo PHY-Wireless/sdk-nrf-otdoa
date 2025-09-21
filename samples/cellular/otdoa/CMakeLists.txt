@@ -11,25 +11,22 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(otdoa)
 
 # get settings from sysbuild
-zephyr_get(OTDOA_DEV_VERSION SYSBUILD GLOBAL)
-zephyr_get(OTDOA_DBG_VERSION SYSBUILD GLOBAL)
-zephyr_get(FS_EXT_STORAGE    SYSBUILD GLOBAL)
-zephyr_get(OBFUSCATE         SYSBUILD GLOBAL)
+zephyr_get(otdoa_FS_EXT_STORAGE    SYSBUILD GLOBAL)
+zephyr_get(otdoa_DEBUG_LIBRARY     SYSBUILD GLOBAL)
+message("otdoa_FS_EXT_STORAGE : ${otdoa_FS_EXT_STORAGE}")
+message("otdoa_DEBUG_LIBRARY  : ${otdoa_DEBUG_LIBRARY}")
 
-# Optionally disable encrypted uBSA downloads and revert to v2 getuBSA
-if("${OTDOA_DEV_VERSION}" STREQUAL "ON")
-  add_compile_definitions(OTDOA_CONFIG_TARGET_NRF_DEV OTDOA_MIN_LOG=2)
-elseif("${OTDOA_DBG_VERSION}" STREQUAL "ON")
-  add_compile_definitions(OTDOA_CONFIG_TARGET_NRF_PROD OTDOA_MIN_LOG=2)
+if("${otdoa_DEBUG_LIBRARY}" STREQUAL "ON")
+  add_compile_definitions(OTDOA_MIN_LOG=2)
 else()
-  add_compile_definitions(OTDOA_CONFIG_TARGET_NRF_PROD OTDOA_MIN_LOG=1)
+  add_compile_definitions(OTDOA_MIN_LOG=1)
 endif()
 
 # include littlefs if specified, disable otherwise
 add_compile_definitions(OTDOA_LITTLE_FS=1)
 add_compile_definitions(ZEPHYR_FS_API)
 # determine whether File System mounted on internal/external flash
-if (FS_EXT_STORAGE)
+if ("${otdoa_FS_EXT_STORAGE}" STREQUAL "ON")
   add_compile_definitions(FS_EXT_STORAGE=1)
 else()
   add_compile_definitions(FS_EXT_STORAGE=0)
@@ -41,8 +38,13 @@ target_link_options(app PRIVATE --gc-sections)
 # NORDIC SDK APP START
 
 add_library(otdoa STATIC IMPORTED)
-set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION "${NRF_DIR}/ext/lib/bin/otdoa/libotdoa.a")
-
+if ("${otdoa_DEBUG_LIBRARY}" STREQUAL "ON")
+  # Use library with extended logging
+  message("Building with debug OTDOA library")
+  set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION "${NRF_DIR}/ext/lib/bin/otdoa/libotdoa_dbg.a")
+else()
+  set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION "${NRF_DIR}/ext/lib/bin/otdoa/libotdoa.a")
+endif()
 
 option(ENABLE_CAPTURE "Enable capture support" OFF)
 
