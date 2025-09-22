@@ -212,6 +212,8 @@ int otdoa_http_send_ubsa_req(const char *const pURL, uint32_t u32ECGI, uint32_t 
     tOTDOA_MSG_HTTP_GET_UBSA msg;
     msg.u32MsgId = OTDOA_HTTP_MSG_GET_H1_UBSA;
     OTDOA_LOG_INF("Sending uBSA req for ECGI %u", u32ECGI);
+    // PHYW-511: Reset blacklist when the user requests a uBSA
+    otdoa_http_h1_blacklist_init(&gHTTP);
     msg.u32MsgLen = sizeof msg;
     strncpy(msg.pURL, pURL, sizeof msg.pURL);
     msg.uEcgi = u32ECGI;
