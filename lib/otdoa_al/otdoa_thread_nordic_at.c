@@ -26,7 +26,7 @@
 #ifdef OTDOA_CONFIG_TARGET_NRF_DEV
     #define PRS_SAMPLES_BUFFER_COUNT    2       // two buffers since we hold on to samples longer for icapture
 #else
-    #define PRS_SAMPLES_BUFFER_COUNT    1       // Single buffer should be adequeate
+    #define PRS_SAMPLES_BUFFER_COUNT    CONFIG_OTDOA_PRS_SAMPLES_BUFFER_COUNT
 #endif
 K_MEM_SLAB_DEFINE(nordic_prs_samples_slab, PRS_SAMPLES_BUFFER_SIZE, PRS_SAMPLES_BUFFER_COUNT, 4);
 

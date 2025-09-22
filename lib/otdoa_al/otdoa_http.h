@@ -72,7 +72,8 @@
 
 // Serving Cell ECGI blacklist to block ubsa dl attempts
 #define BLACKLIST_SIZE (5)      // Length of blacklist to keep
-#define BLACKLIST_TIMEOUT (20)  // Number of requests before blacklist entry expires
+// Number of requests before blacklist entry expires
+#define BLACKLIST_TIMEOUT (CONFIG_OTDOA_HTTP_BLACKLIST_TIMEOUT)
 
 // This macro provides for optional fields such as linked list pointers or reference counts.
 // Zephyr uses this field to make a linked list that forms the FIFO.  So messages that
