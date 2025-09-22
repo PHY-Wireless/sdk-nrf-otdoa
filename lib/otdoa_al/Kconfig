@@ -12,6 +12,14 @@ config OTDOA_CFG_DL_INTERVAL
     int "Interval between uBSA downloads to trigger a config download"
     default 5
 
+config OTDOA_PRS_SAMPLES_BUFFER_COUNT
+    int "Number of buffer slabs for PRS samples"
+    default 1
+
+config OTDOA_HTTP_BLACKLIST_TIMEOUT
+    int "Number of uBSA requests to make before removing an SC ECGI from the DL blacklist"
+    default 20
+
 config OTDOA_HTTP_QUEUE_STACK_SIZE
     int "HTTP work queue stack size in bytes"
     default 2048
