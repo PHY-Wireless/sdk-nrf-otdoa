@@ -11,25 +11,15 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(otdoa)
 
 # get settings from sysbuild
-zephyr_get(OTDOA_DEV_VERSION SYSBUILD GLOBAL)
-zephyr_get(OTDOA_DBG_VERSION SYSBUILD GLOBAL)
-zephyr_get(FS_EXT_STORAGE    SYSBUILD GLOBAL)
-zephyr_get(OBFUSCATE         SYSBUILD GLOBAL)
-
-# Optionally disable encrypted uBSA downloads and revert to v2 getuBSA
-if("${OTDOA_DEV_VERSION}" STREQUAL "ON")
-  add_compile_definitions(OTDOA_CONFIG_TARGET_NRF_DEV OTDOA_MIN_LOG=2)
-elseif("${OTDOA_DBG_VERSION}" STREQUAL "ON")
-  add_compile_definitions(OTDOA_CONFIG_TARGET_NRF_PROD OTDOA_MIN_LOG=2)
-else()
-  add_compile_definitions(OTDOA_CONFIG_TARGET_NRF_PROD OTDOA_MIN_LOG=1)
-endif()
+zephyr_get(otdoa_FS_EXT_STORAGE    SYSBUILD GLOBAL)
+message("otdoa_FS_EXT_STORAGE : ${otdoa_FS_EXT_STORAGE}")
+message("CONFIG_OTDOA_DEBUG_LOGS : ${CONFIG_OTDOA_DEBUG_LOGS}")
 
 # include littlefs if specified, disable otherwise
 add_compile_definitions(OTDOA_LITTLE_FS=1)
 add_compile_definitions(ZEPHYR_FS_API)
 # determine whether File System mounted on internal/external flash
-if (FS_EXT_STORAGE)
+if ("${otdoa_FS_EXT_STORAGE}" STREQUAL "ON")
   add_compile_definitions(FS_EXT_STORAGE=1)
 else()
   add_compile_definitions(FS_EXT_STORAGE=0)
@@ -42,6 +32,8 @@ target_link_options(app PRIVATE --gc-sections)
 
 add_library(otdoa STATIC IMPORTED)
 set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION "${NRF_DIR}/ext/lib/bin/otdoa/libotdoa.a")
+
+# Prep the TLS certificate for including
 zephyr_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 generate_inc_file_for_target(
   app
@@ -51,9 +43,12 @@ generate_inc_file_for_target(
 
 option(ENABLE_CAPTURE "Enable capture support" OFF)
 
-# Only the thingy91x board supports periodic position estimates
-if("${CONFIG_BOARD}" STREQUAL "thingy91x")
-    target_compile_definitions(app PRIVATE CONFIG_ENABLE_PERIODIC_POS_EST=1)
+if (CONFIG_OTDOA_DEBUG_LOGS)
+  # Use library with extended logging
+  message("Linking with debug logging version of OTDOA library")
+  set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION "${NRF_DIR}/ext/lib/bin/otdoa/libotdoa_dbg.a")
+else()
+  set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION "${NRF_DIR}/ext/lib/bin/otdoa/libotdoa.a")
 endif()
 
 target_sources(app PRIVATE src/main.c)
