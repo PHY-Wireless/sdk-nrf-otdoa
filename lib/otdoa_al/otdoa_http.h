@@ -270,6 +270,6 @@ void otdoa_http_invoke_callback_dl_compl(int status);
 void otdoa_http_invoke_callback_ul_compl(int status);
 
 const char *otdoa_http_get_download_url();
-int cert_provision(void);
+int cert_provision(const char* cert, size_t len);
 
 #endif // ifndef OTDOA_HTTP_H

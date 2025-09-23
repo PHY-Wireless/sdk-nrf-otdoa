@@ -42,7 +42,12 @@ target_link_options(app PRIVATE --gc-sections)
 
 add_library(otdoa STATIC IMPORTED)
 set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION "${NRF_DIR}/ext/lib/bin/otdoa/libotdoa.a")
-
+zephyr_include_directories(${CMAKE_CURRENT_BINARY_DIR})
+generate_inc_file_for_target(
+  app
+  cert/hellaphy.pem
+  ${CMAKE_CURRENT_BINARY_DIR}/hellaphy.pem.inc
+)
 
 option(ENABLE_CAPTURE "Enable capture support" OFF)
 

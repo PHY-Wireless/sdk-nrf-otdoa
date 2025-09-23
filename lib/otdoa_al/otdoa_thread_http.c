@@ -23,13 +23,6 @@
 
 #define CHECK_IP
 
-// BEGIN - Certificate and TLS Setup
-//  Certificate for `hellaphy_cloud
-static const char cert[] = {
-#include "cert/hellaphy_cloud"
-};
-BUILD_ASSERT(sizeof(cert) < KB(4), "Certificate too large");
-
 struct modem_param_info MPI = {0};
 bool bModemInfoInit = false;
 
@@ -335,9 +328,11 @@ int32_t http_uptime(void) { return k_uptime_get_32(); }
 /**
  * Provision a TLS certificate to the modem
  *
+ * @param[in] cert PEM-formatted TLS certificate to install for server
+ * @param[in] len Length of the PEM certificate
  * @return 0 on success, else error code
  */
-int cert_provision(void)
+int cert_provision(const char* cert, size_t len)
 {
     bool exists;
     int rc = modem_key_mgmt_exists(TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN, &exists);
@@ -357,7 +352,7 @@ int cert_provision(void)
 
     /* provision certificate to the modem */
     OTDOA_LOG_DBG("Provisioning certificate");
-    rc = modem_key_mgmt_write(TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN, cert, sizeof(cert) - 1);
+    rc = modem_key_mgmt_write(TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN, cert, len);
     if (rc) {
         OTDOA_LOG_ERR("Failed to provision certificate: %d", rc);
         return rc;

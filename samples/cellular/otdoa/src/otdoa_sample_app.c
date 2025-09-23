@@ -36,6 +36,12 @@ struct k_timer pos_est_timer;
 // session, and those that are not part of a session (e.g. those for testing uBDA DL)
 static int dl_in_session = 0;
 
+static const char cert[] = {
+    #include "hellaphy.pem.inc"
+    IF_ENABLED(CONFIG_TLS_CREDENTIALS, (0x00))
+};
+BUILD_ASSERT(sizeof(cert) < KB(4), "Certificate too large");
+
 // forward references
 static void otdoa_event_handler(const otdoa_api_event_data_t* p_event_data);
 static void pos_est_timer_cb(struct k_timer *timer);
@@ -78,7 +84,8 @@ int otdoa_sample_main()
         LOG_ERR("otdoa_api_init() failed with return %d", err);
         return err;
     }
-    err = otdoa_al_init(otdoa_event_handler);
+    // don't include the null terminator
+    err = otdoa_al_init(cert, sizeof (cert) - 1, otdoa_event_handler);
     if (err != 0)
     {
         LOG_ERR("otdoa_al_init() failed with return %d", err);
