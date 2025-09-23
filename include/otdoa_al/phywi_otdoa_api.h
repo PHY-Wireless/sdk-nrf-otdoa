@@ -290,11 +290,13 @@ typedef void (*otdoa_api_callback_t)(
  * @brief Initialize the OTDOA library
  * @param[in] ubsa_file_path Points to a string containing the full path to where
  *                           the uBSA file resides
+ * @param[in] cert Points to a string containing a PEM-formatted TLS key for the OTDOA server
+ * @param[in] cert_len The length of the PEM-formatted key string
  * @param[in] callback Callback function used by the library
  *                     to return results and status to the client
  * @return 0 on success
  */
-int32_t otdoa_api_init(const char* const ubsa_file_path, otdoa_api_callback_t event_callback);
+int32_t otdoa_api_init(const char* const ubsa_file_path, const char* const cert, size_t cert_len, otdoa_api_callback_t event_callback);
 
 /**
  * @brief Initiates an OTDOA positioning session

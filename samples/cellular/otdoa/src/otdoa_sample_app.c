@@ -78,28 +78,22 @@ int otdoa_sample_main()
     otdoa_api_cfg_set_file_path("/lfs/config");
 
     // AL and OTDOA library can use the same callback
-    err = otdoa_api_init(UBSA_FILE_PATH, otdoa_event_handler);
+    // Don't include null terminator in PEM file length
+    err = otdoa_api_init(UBSA_FILE_PATH, cert, sizeof (cert) - 1, otdoa_event_handler);
     if (err != 0)
     {
         LOG_ERR("otdoa_api_init() failed with return %d", err);
         return err;
     }
-    // don't include the null terminator
-    err = otdoa_al_init(cert, sizeof (cert) - 1, otdoa_event_handler);
-    if (err != 0)
-    {
-        LOG_ERR("otdoa_al_init() failed with return %d", err);
-        return err;
-    }
 
 	LOG_INF("Connecting to LTE...");
-    
+
 	lte_lc_register_handler(lte_event_handler);
-    
+
 	lte_lc_connect();
 
     k_timer_init(&pos_est_timer, pos_est_timer_cb, NULL);
-    
+
 	k_sem_take(&lte_connected, K_FOREVER);
 
     LOG_INF("Connected!");
