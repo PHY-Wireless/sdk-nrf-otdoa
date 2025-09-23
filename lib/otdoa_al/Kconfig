@@ -8,6 +8,11 @@ if OTDOA_AL_LIB
 module = OTDOA_AL_LIB
 module-str = OTDOA AL library
 
+config OTDOA_DEBUG_LOGS
+    bool "Link with debug logging version of OTDOA library for verbose logging"
+    default false
+
+
 config OTDOA_CFG_DL_INTERVAL
     int "Interval between uBSA downloads to trigger a config download"
     default 5
