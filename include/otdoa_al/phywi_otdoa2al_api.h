@@ -30,13 +30,11 @@ int otdoa_stop();                                                               
 
  /**
  * @brief Initialize the OTDOA AL library
- * @param[in] cert Points to a string containing a PEM-formatted TLS key for the OTDOA server
- * @param[in] cert_len The length of the PEM-formatted key string
  * @param[in] event_callback Callback function used by the library
  *                     to return results and status to the client
  * @return 0 on success
  */
-int32_t otdoa_al_init(const char* cert, size_t cert_len, otdoa_api_callback_t event_callback);
+int32_t otdoa_al_init(otdoa_api_callback_t event_callback);
 
 /***************************************************************************
  * Message Handling Functions

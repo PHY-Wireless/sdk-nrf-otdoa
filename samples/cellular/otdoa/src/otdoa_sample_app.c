@@ -77,9 +77,16 @@ int otdoa_sample_main()
 
     otdoa_api_cfg_set_file_path("/lfs/config");
 
-    // AL and OTDOA library can use the same callback
     // Don't include null terminator in PEM file length
-    err = otdoa_api_init(UBSA_FILE_PATH, cert, sizeof (cert) - 1, otdoa_event_handler);
+    err = otdoa_api_install_tls_cert(cert, sizeof (cert) - 1);
+    if (err != 0)
+    {
+        LOG_ERR("otdoa_api_install_tls_cert() failed with return %d", err);
+        return err;
+    }
+
+    // AL and OTDOA library can use the same callback
+    err = otdoa_api_init(UBSA_FILE_PATH, otdoa_event_handler);
     if (err != 0)
     {
         LOG_ERR("otdoa_api_init() failed with return %d", err);
