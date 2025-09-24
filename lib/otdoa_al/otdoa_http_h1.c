@@ -444,6 +444,10 @@ int otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE *pMsg) {
                 }
             }
 
+            if (pMsg->http_get_ubsa.bResetBlacklist) {
+                otdoa_http_h1_blacklist_init(&gHTTP);
+            }
+
             rc = otdoa_http_h1_download_ubsa(&gHTTP, pMsg);
 
             // send result back to the OTDOA API

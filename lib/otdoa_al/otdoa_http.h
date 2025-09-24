@@ -90,6 +90,7 @@ typedef struct {
     uint32_t u32MsgId;
     uint32_t u32MsgLen;
     char pURL[HTTPS_URL_LMAX];
+    bool bResetBlacklist;
     unsigned uEcgi;
     unsigned uDlearfcn;
     unsigned uRadius;
@@ -251,7 +252,7 @@ void otdoa_http_override_auth_resp(int override);
 int otdoa_http_get_override_auth_resp();
 
 int otdoa_http_send_ubsa_req(const char *const pURL, uint32_t u32ECGI, uint32_t u32DLEARFCN, uint32_t u32Radius,
-                             uint32_t u32NumCells);
+                             uint32_t u32NumCells, bool reset_blacklist);
 int otdoa_http_send_log_upload(const char *vf, uint32_t repeat);
 int otdoa_http_send_vector_upload(const char *vf, uint32_t repeat);
 int otdoa_http_send_results_upload(const char *pURL, otdoa_api_results_t *pResults,
