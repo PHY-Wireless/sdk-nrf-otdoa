@@ -370,6 +370,8 @@ int32_t otdoa_api_upload_results(const otdoa_api_results_t* p_results,
  * @param[in] cert_len Length of PEM data
  * @retval 0 on success
  *        -1 on failure
+ *
+ * @note Kconfig option OTDOA_API_TLS_CERT_INSTALL must be enabled to use this function
  */
 int otdoa_api_install_tls_cert(const char* tls_cert, size_t cert_len);
 

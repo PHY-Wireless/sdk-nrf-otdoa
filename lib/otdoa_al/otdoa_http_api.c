@@ -28,6 +28,21 @@ int32_t otdoa_al_init(otdoa_api_callback_t event_callback)
     otdoa_http_init();
     otdoa_log_init();
 
+#if CONFIG_OTDOA_API_TLS_CERT_INSTALL
+    bool exists;
+    int rc = modem_key_mgmt_exists(CONFIG_OTDOA_TLS_SEC_TAG, OTDOA_TLS_CERT_TYPE, &exists);
+    if (rc) {
+        OTDOA_LOG_ERR("otdoa_al_init: failed to check for TLS certificate in tag %d: %d", CONFIG_OTDOA_TLS_SEC_TAG, rc);
+        return OTDOA_API_INTERNAL_ERROR;
+    }
+
+    if (!exists) {
+        OTDOA_LOG_ERR("otdoa_al_init: TLS certificate not found in tag %d", CONFIG_OTDOA_TLS_SEC_TAG);
+        return OTDOA_API_INTERNAL_ERROR;
+    }
+#endif
+
+
     return OTDOA_API_SUCCESS;
 }
 
