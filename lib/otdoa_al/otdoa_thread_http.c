@@ -335,7 +335,7 @@ int32_t http_uptime(void) { return k_uptime_get_32(); }
 int cert_provision(const char* cert, size_t len)
 {
     bool exists;
-    int rc = modem_key_mgmt_exists(TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN, &exists);
+    int rc = modem_key_mgmt_exists(CONFIG_OTDOA_TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN, &exists);
     if (rc) {
         OTDOA_LOG_ERR("Failed to check for certificate: %d", rc);
         return rc;
@@ -344,7 +344,7 @@ int cert_provision(const char* cert, size_t len)
     if (exists) {
         /* for the sake of simplicity, we delete what is provisioned with
            our security tag and reprovision our certificate */
-        rc = modem_key_mgmt_delete(TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN);
+        rc = modem_key_mgmt_delete(CONFIG_OTDOA_TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN);
         if (rc) {
             OTDOA_LOG_ERR("Failed to delete existing certificate: %d", rc);
         }
@@ -352,7 +352,7 @@ int cert_provision(const char* cert, size_t len)
 
     /* provision certificate to the modem */
     OTDOA_LOG_DBG("Provisioning certificate");
-    rc = modem_key_mgmt_write(TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN, cert, len);
+    rc = modem_key_mgmt_write(CONFIG_OTDOA_TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN, cert, len);
     if (rc) {
         OTDOA_LOG_ERR("Failed to provision certificate: %d", rc);
         return rc;
