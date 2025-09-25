@@ -38,6 +38,11 @@ typedef enum {
     OTDOA_API_ERROR_PARAM = -1,     // Parameter error in API
     OTDOA_API_INTERNAL_ERROR = -2,  // Internal error in OTDOA library. 
 
+    /** The uBSA is still being generated */
+    OTDOA_EVENT_HTTP_NOT_READY = 202,
+
+    /** The uBSA is only partially downloaded */
+    OTDOA_EVENT_HTTP_PARTIAL_CONTENT = 206,
 
     /** EVENT_FAIL result code values */
     /** Failure occurred in the uBSA download */
@@ -46,43 +51,69 @@ typedef enum {
     /** Network failure occurred during OTDOA processing */
     OTDOA_EVENT_FAIL_NO_CELL = 2,
 
+    /** Network connection issue */
+    OTDOA_EVENT_FAIL_NTWK_CONN = 3,
+
     /** PRS session cancelled by application */
-    OTDOA_EVENT_FAIL_CANCELLED = 3,
+    OTDOA_EVENT_FAIL_CANCELLED = 4,
 
     /** Other failure occurred in OTDOA processing */
-    OTDOA_EVENT_FAIL_OTDOA_PROC = 4,
+    OTDOA_EVENT_FAIL_OTDOA_PROC = 5,
     
     /** Session timeout occurred during OTDOA processing or uBSA DL */
-    OTDOA_EVENT_FAIL_TIMEOUT = 5,
+    OTDOA_EVENT_FAIL_TIMEOUT = 6,
 
     /** Error occurred in nrf modem RS capture API */
-    OTDOA_EVENT_FAIL_NRF_RS_CAPTURE = 6,
+    OTDOA_EVENT_FAIL_NRF_RS_CAPTURE = 7,
 
     /** Error in response from Modem */
-    OTDOA_EVENT_FAIL_BAD_MODEM_RESP = 7,
+    OTDOA_EVENT_FAIL_BAD_MODEM_RESP = 8,
 
     /** Modem is not registered to LTE network */
-    OTDOA_EVENT_FAIL_NOT_REGISTERED = 8,
+    OTDOA_EVENT_FAIL_NOT_REGISTERED = 9,
     
     /** Modem has stopped, a higher prority activity stopped the session. */
-    OTDOA_EVENT_FAIL_STOPPED = 9,
+    OTDOA_EVENT_FAIL_STOPPED = 10,
     
     /** Failed to get DLEARFCN from Modem */
-    OTDOA_EVENT_FAIL_NO_DLEARFCN = 10,
+    OTDOA_EVENT_FAIL_NO_DLEARFCN = 11,
 
     /** System Mode is not LTE (e.g. it may be NBIoT mode) */
-    OTDOA_EVENT_FAIL_NOT_LTE_MODE = 11,
+    OTDOA_EVENT_FAIL_NOT_LTE_MODE = 12,
 
     /** Failure to parse the uBSA file */
-    OTDOA_EVENT_FAIL_UBSA_PARSING = 12,
+    OTDOA_EVENT_FAIL_UBSA_PARSING = 13,
 
     /** Bad Config file */
-    OTDOA_EVENT_FAIL_BAD_CFG = 13,
+    OTDOA_EVENT_FAIL_BAD_CFG = 14,
 
     /** Operation is not permitted */
-    OTDOA_EVENT_FAIL_UNAUTHORIZED = 14,
+    OTDOA_EVENT_FAIL_UNAUTHORIZED = 15,
 
-} otdoa_api_error_codes_t; 
+    /** The requested ECGI has been blacklisted */
+    OTDOA_EVENT_FAIL_BLACKLISTED = 16,
+
+    /** Request parameters malformed or invalid */
+    OTDOA_EVENT_FAIL_HTTP_BAD_REQUEST            = 400,
+
+    /** Unable to validate JWT */
+    OTDOA_EVENT_FAIL_HTTP_UNAUTHORIZED           = 401,
+
+    /** Requested resource not found */
+    OTDOA_EVENT_FAIL_HTTP_NOT_FOUND              = 404,
+
+    /** User already has a pending uBSA */
+    OTDOA_EVENT_FAIL_HTTP_CONFLICT               = 409,
+
+    /** uBSA generation was not possible */
+    OTDOA_EVENT_FAIL_HTTP_UNPROCESSABLE_CONTENT  = 422,
+
+    /** Requested too many uBSAs */
+    OTDOA_EVENT_FAIL_HTTP_TOO_MANY_REQUESTS      = 429,
+
+    /** Server error while generating uBSA */
+    OTDOA_EVENT_FAIL_HTTP_INTERNAL_SERVER_ERROR  = 500,
+} otdoa_api_error_codes_t;
 
 /** @brief OTDOA Session Parameters 
  * These parameters are sent to the OTDOA library as part of
