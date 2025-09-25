@@ -16,19 +16,11 @@
 #include <zephyr/net/socket.h>
 #include <zephyr/net/tls_credentials.h>
 
-#include "modem/modem_key_mgmt.h"
 #include "otdoa_http.h"
 #include "otdoa_al_log.h"
 
 
 #define CHECK_IP
-
-// BEGIN - Certificate and TLS Setup
-//  Certificate for `hellaphy_cloud
-static const char cert[] = {
-#include "cert/hellaphy_cloud"
-};
-BUILD_ASSERT(sizeof(cert) < KB(4), "Certificate too large");
 
 struct modem_param_info MPI = {0};
 bool bModemInfoInit = false;
@@ -80,7 +72,7 @@ int tls_setup(int fd, const char* host) {
 
     /* security tag that we provisioned the certificate with */
     const sec_tag_t tls_sec_tag[] = {
-        TLS_SEC_TAG,
+        CONFIG_OTDOA_TLS_SEC_TAG,
     };
 
     /* set up TLS peer verification */
@@ -332,36 +324,42 @@ int http_errno(void) { return errno; }
 void http_sleep(int msec) { k_sleep(K_MSEC(msec)); }
 
 int32_t http_uptime(void) { return k_uptime_get_32(); }
+
+#if CONFIG_OTDOA_API_TLS_CERT_INSTALL
 /**
  * Provision a TLS certificate to the modem
  *
+ * @param[in] cert PEM-formatted TLS certificate to install for server
+ * @param[in] len Length of the PEM certificate
  * @return 0 on success, else error code
  */
-int cert_provision(void)
-{
+int otdoa_api_install_tls_cert(const char* tls_cert, const size_t cert_len) {
+    if (!tls_cert) {return OTDOA_API_ERROR_PARAM;}
+
     bool exists;
-    int rc = modem_key_mgmt_exists(TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN, &exists);
+    int rc = modem_key_mgmt_exists(CONFIG_OTDOA_TLS_SEC_TAG, OTDOA_TLS_CERT_TYPE, &exists);
     if (rc) {
         OTDOA_LOG_ERR("Failed to check for certificate: %d", rc);
-        return rc;
+        return OTDOA_API_INTERNAL_ERROR;
     }
 
     if (exists) {
         /* for the sake of simplicity, we delete what is provisioned with
            our security tag and reprovision our certificate */
-        rc = modem_key_mgmt_delete(TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN);
+        rc = modem_key_mgmt_delete(CONFIG_OTDOA_TLS_SEC_TAG, OTDOA_TLS_CERT_TYPE);
         if (rc) {
-            OTDOA_LOG_ERR("Failed to delete existing certificate: %d", rc);
+            OTDOA_LOG_WRN("Failed to delete existing certificate: %d", rc);
         }
     }
 
     /* provision certificate to the modem */
     OTDOA_LOG_DBG("Provisioning certificate");
-    rc = modem_key_mgmt_write(TLS_SEC_TAG, MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN, cert, sizeof(cert) - 1);
+    rc = modem_key_mgmt_write(CONFIG_OTDOA_TLS_SEC_TAG, OTDOA_TLS_CERT_TYPE, tls_cert, cert_len);
     if (rc) {
         OTDOA_LOG_ERR("Failed to provision certificate: %d", rc);
-        return rc;
+        return OTDOA_API_INTERNAL_ERROR;
     }
 
-    return rc;
+    return OTDOA_API_SUCCESS;
 }
+#endif
