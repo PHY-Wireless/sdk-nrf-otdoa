@@ -36,6 +36,11 @@ struct k_timer pos_est_timer;
 // session, and those that are not part of a session (e.g. those for testing uBDA DL)
 static int dl_in_session = 0;
 
+static const char cert[] = {
+    #include "hellaphy.pem.inc"
+};
+BUILD_ASSERT(sizeof(cert) < KB(4), "Certificate too large");
+
 // forward references
 static void otdoa_event_handler(const otdoa_api_event_data_t* p_event_data);
 static void pos_est_timer_cb(struct k_timer *timer);
@@ -71,6 +76,14 @@ int otdoa_sample_main()
 
     otdoa_api_cfg_set_file_path("/lfs/config");
 
+    // Don't include null terminator in PEM file length
+    err = otdoa_api_install_tls_cert(cert, sizeof (cert) - 1);
+    if (err != 0)
+    {
+        LOG_ERR("otdoa_api_install_tls_cert() failed with return %d", err);
+        return err;
+    }
+
     // AL and OTDOA library can use the same callback
     err = otdoa_api_init(UBSA_FILE_PATH, otdoa_event_handler);
     if (err != 0)
@@ -78,21 +91,15 @@ int otdoa_sample_main()
         LOG_ERR("otdoa_api_init() failed with return %d", err);
         return err;
     }
-    err = otdoa_al_init(otdoa_event_handler);
-    if (err != 0)
-    {
-        LOG_ERR("otdoa_al_init() failed with return %d", err);
-        return err;
-    }
 
 	LOG_INF("Connecting to LTE...");
-    
+
 	lte_lc_register_handler(lte_event_handler);
-    
+
 	lte_lc_connect();
 
     k_timer_init(&pos_est_timer, pos_est_timer_cb, NULL);
-    
+
 	k_sem_take(&lte_connected, K_FOREVER);
 
     LOG_INF("Connected!");
