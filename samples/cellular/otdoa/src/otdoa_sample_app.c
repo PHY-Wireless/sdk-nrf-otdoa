@@ -38,7 +38,6 @@ static int dl_in_session = 0;
 
 static const char cert[] = {
     #include "hellaphy.pem.inc"
-    IF_ENABLED(CONFIG_TLS_CREDENTIALS, (0x00))
 };
 BUILD_ASSERT(sizeof(cert) < KB(4), "Certificate too large");
 
