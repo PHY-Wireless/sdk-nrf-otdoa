@@ -31,6 +31,18 @@ target_link_options(app PRIVATE --gc-sections)
 # NORDIC SDK APP START
 
 add_library(otdoa STATIC IMPORTED)
+set_property(TARGET otdoa PROPERTY IMPORTED_LOCATION "${NRF_DIR}/ext/lib/bin/otdoa/libotdoa.a")
+
+# Prep the TLS certificate for including
+zephyr_include_directories(${CMAKE_CURRENT_BINARY_DIR})
+generate_inc_file_for_target(
+  app
+  cert/hellaphy.pem
+  ${CMAKE_CURRENT_BINARY_DIR}/hellaphy.pem.inc
+)
+
+option(ENABLE_CAPTURE "Enable capture support" OFF)
+
 if (CONFIG_OTDOA_DEBUG_LOGS)
   # Use library with extended logging
   message("Linking with debug logging version of OTDOA library")

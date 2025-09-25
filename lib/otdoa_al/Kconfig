@@ -41,6 +41,10 @@ config OTDOA_RS_THREAD_PRIORITY
     int "RS work queue priority"
     default 5
 
+config OTDOA_API_TLS_CERT_INSTALL
+    bool "Enable otdoa_api_install_tls_cert() to install a TLS certificate through the OTDOA library"
+    default y
+
 config OTDOA_TLS_SEC_TAG
     int "Modem security tag slot to install PhyWi TLS certificate to"
     default 42
