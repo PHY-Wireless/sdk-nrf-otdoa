@@ -18,15 +18,16 @@
 #include <otdoa_al/otdoa_log.h>
 #include <otdoa_al/phywi_otdoa_api.h>
 #include "autoconf.h"
+#include "modem/modem_key_mgmt.h"
 
 #define DEFAULT_UBSA_DLEARFCN   5230    // Default DLEARFCN if not available from modem
 
 // collect our Kconfig values
-#define BSA_DL_SERVER_URL  CONFIG_OTDOA_BSA_DL_SERVER_URL
-#define HTTPS_PORT         CONFIG_OTDOA_HTTPS_PORT
-#define HTTP_PORT          CONFIG_OTDOA_HTTP_PORT
-#define TLS_SEC_TAG        CONFIG_OTDOA_TLS_SEC_TAG
-#define CFG_DL_INTERVAL    CONFIG_OTDOA_CFG_DL_INTERVAL
+#define BSA_DL_SERVER_URL   CONFIG_OTDOA_BSA_DL_SERVER_URL
+#define HTTPS_PORT          CONFIG_OTDOA_HTTPS_PORT
+#define HTTP_PORT           CONFIG_OTDOA_HTTP_PORT
+#define CFG_DL_INTERVAL     CONFIG_OTDOA_CFG_DL_INTERVAL
+#define OTDOA_TLS_CERT_TYPE MODEM_KEY_MGMT_CRED_TYPE_CA_CHAIN
 
 #ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
 #   define RESULTS_UPLOAD_PW  CONFIG_OTDOA_RESULTS_UPLOAD_PW
@@ -270,6 +271,6 @@ void otdoa_http_invoke_callback_dl_compl(int status);
 void otdoa_http_invoke_callback_ul_compl(int status);
 
 const char *otdoa_http_get_download_url();
-int cert_provision(void);
+int cert_provision(const char* cert, size_t len);
 
 #endif // ifndef OTDOA_HTTP_H
