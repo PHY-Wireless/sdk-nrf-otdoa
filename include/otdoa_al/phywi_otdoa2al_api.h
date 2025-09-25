@@ -30,9 +30,7 @@ int otdoa_stop();                                                               
 
  /**
  * @brief Initialize the OTDOA AL library
- * @param[in] ubsa_file_path Points to a string containing the full path to where
- *                           the uBSA file resides
- * @param[in] callback Callback function used by the library
+ * @param[in] event_callback Callback function used by the library
  *                     to return results and status to the client
  * @return 0 on success
  */
