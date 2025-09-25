@@ -6,7 +6,7 @@ Cellular: OTDOA Positioning
    :local:
    :depth: 2
 
-This sample demonstrats how to use the OTDOA library on your device
+This sample demonstrates how to use the OTDOA library on your device
 
 Requirements
 ************
@@ -47,7 +47,7 @@ The following files are available:
 Building and running
 ********************
 
-.. |sample path| replace :file:`samples/cellular/otdoa_sample`
+.. |sample path| replace :file:`samples/cellular/otdoa`
 
 .. include:: /includes/build_and_run_ns.txt
 
