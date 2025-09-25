@@ -1,0 +1,11 @@
+sample:
+  name: otdoa sample
+tests:
+  sample.cellular.otdoa:
+    sysbuild: true
+    build_only: true
+    integration_platforms:
+      - nrf9161dk/nrf9161/ns
+    platform_allow:
+      - nrf9161dk/nrf9161/ns
+    tags: ci_build sysbuild ci_samples_cellular
