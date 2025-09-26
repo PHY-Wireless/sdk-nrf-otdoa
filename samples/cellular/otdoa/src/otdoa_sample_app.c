@@ -210,7 +210,7 @@ static void otdoa_event_handler(const otdoa_api_event_data_t* p_event_data)
                     }
                 }
             }
-            else if (p_event_data->dl_compl.status == OTDOA_DL_STATUS_SUCCESS)
+            else if (p_event_data->dl_compl.status == OTDOA_API_SUCCESS)
             {
                 set_blink_sleep();
                 LOG_INF("OTDOA uBSA DL SUCCESS");
