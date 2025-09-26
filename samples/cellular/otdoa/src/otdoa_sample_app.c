@@ -173,7 +173,7 @@ static void otdoa_event_handler(const otdoa_api_event_data_t* p_event_data)
             LOG_INF("OTDOA_EVENT_UBSA_DL_REQ:");
             LOG_INF("  ecgi: %u  dlearfcn: %u", p_event_data->dl_request.ecgi, p_event_data->dl_request.dlearfcn);
             LOG_INF("  max cells: %u  radius: %u", p_event_data->dl_request.max_cells, p_event_data->dl_request.ubsa_radius_meters);
-            int err = otdoa_api_ubsa_download(&p_event_data->dl_request, UBSA_FILE_PATH);
+            int err = otdoa_api_ubsa_download(&p_event_data->dl_request, UBSA_FILE_PATH, false);
             if (err != OTDOA_API_SUCCESS)
             {
                 LOG_ERR("otdoa_api_ubsa_download() failed with return %d", err);
@@ -291,7 +291,7 @@ void otdoa_sample_ubsa_dl_test(uint32_t ecgi, uint32_t dlearfcn, uint32_t radius
     set_blink_download();
     LOG_INF("Getting uBSA (ECGI: %u (0x%08x) DLEARFCN: %u  Radius: %u  Num Cells: %u)",
             ecgi, ecgi, dlearfcn, radius, max_cells); 
-    int err = otdoa_api_ubsa_download(&dl_req, UBSA_FILE_PATH);
+    int err = otdoa_api_ubsa_download(&dl_req, UBSA_FILE_PATH, true);
     if (err != OTDOA_API_SUCCESS)
     {
         LOG_ERR("otdoa_api_ubsa_download() failed with return %d", err);\
