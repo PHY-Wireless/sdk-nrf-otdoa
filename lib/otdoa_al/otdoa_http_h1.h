@@ -13,28 +13,11 @@
 #ifndef OTDOA_HTTP_H1_H
 #define OTDOA_HTTP_H1_H
 
+#include <otdoa_al/phywi_otdoa_api.h>
+
 /* ---------------------------------------------------------
                            TYPES
    --------------------------------------------------------- */
-typedef enum {
-     HTTP_H1_ERROR = -1,
-     HTTP_H1_CANCELLED = -2,
-     HTTP_H1_MESSAGE_ERROR = -3,
-     HTTP_H1_REGISTRATION_ERROR = -4,
-     HTTP_H1_OK = 0,                // 200
-     HTTP_H1_NOT_READY,             // 202
-     HTTP_H1_PARTIAL_CONTENT,       // 206
-     HTTP_H1_BAD_REQUEST,           // 400
-     HTTP_H1_UNAUTHORIZED,          // 401
-     HTTP_H1_CONFLICT,              // 409
-     HTTP_H1_GONE,                  // 410
-     HTTP_H1_UNPROCESSABLE_CONTENT, // 422
-     HTTP_H1_TOO_MANY_REQUESTS,     // 429
-     HTTP_H1_INTERNAL_SERVER_ERROR, //500
-
-     HTTP_H1_BAD_CFG,               // Failure in config DL
-} tOTDOA_HTTP_H1_RESPONSE_STATUS;
-
 int  otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS*);
 int  otdoa_http_h1_format_range_request(tOTDOA_HTTP_MEMBERS*);
 int  otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE*);
@@ -43,9 +26,9 @@ int  otdoa_http_h1_download_ubsa(tOTDOA_HTTP_MEMBERS* p_http, tOTDOA_HTTP_MESSAG
 int  otdoa_http_h1_send_get_ubsa_auth_req(tOTDOA_HTTP_MEMBERS*);
 int  otdoa_http_h1_send_get_ubsa_range_req(tOTDOA_HTTP_MEMBERS*);
 int  otdoa_http_h1_parse_response_code(const char*);
-tOTDOA_HTTP_H1_RESPONSE_STATUS  otdoa_http_h1_process_config_response_header(tOTDOA_HTTP_MEMBERS*);
-tOTDOA_HTTP_H1_RESPONSE_STATUS  otdoa_http_h1_process_auth_response(tOTDOA_HTTP_MEMBERS*);
-tOTDOA_HTTP_H1_RESPONSE_STATUS  otdoa_http_h1_process_range_response_header(tOTDOA_HTTP_MEMBERS*);
+otdoa_api_error_codes_t otdoa_http_h1_process_config_response_header(tOTDOA_HTTP_MEMBERS*);
+otdoa_api_error_codes_t otdoa_http_h1_process_auth_response(tOTDOA_HTTP_MEMBERS*);
+otdoa_api_error_codes_t otdoa_http_h1_process_range_response_header(tOTDOA_HTTP_MEMBERS*);
 int  otdoa_http_h1_process_config_response_content(tOTDOA_HTTP_MEMBERS*);
 int  otdoa_http_h1_process_range_response_content(tOTDOA_HTTP_MEMBERS*);
 int  otdoa_http_h1_process_ubsa_data(tOTDOA_HTTP_MEMBERS*);

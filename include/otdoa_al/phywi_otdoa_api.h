@@ -39,6 +39,11 @@ typedef enum {
     OTDOA_API_ERROR_PARAM = -1,     // Parameter error in API
     OTDOA_API_INTERNAL_ERROR = -2,  // Internal error in OTDOA library. 
 
+    /** The uBSA is still being generated */
+    OTDOA_EVENT_HTTP_NOT_READY = 202,
+
+    /** The uBSA is only partially downloaded */
+    OTDOA_EVENT_HTTP_PARTIAL_CONTENT = 206,
 
     /** EVENT_FAIL result code values */
     /** Failure occurred in the uBSA download */
@@ -47,40 +52,69 @@ typedef enum {
     /** Network failure occurred during OTDOA processing */
     OTDOA_EVENT_FAIL_NO_CELL = 2,
 
+    /** Network connection issue */
+    OTDOA_EVENT_FAIL_NTWK_CONN = 3,
+
     /** PRS session cancelled by application */
-    OTDOA_EVENT_FAIL_CANCELLED = 3,
+    OTDOA_EVENT_FAIL_CANCELLED = 4,
 
     /** Other failure occurred in OTDOA processing */
-    OTDOA_EVENT_FAIL_OTDOA_PROC = 4,
+    OTDOA_EVENT_FAIL_OTDOA_PROC = 5,
     
     /** Session timeout occurred during OTDOA processing or uBSA DL */
-    OTDOA_EVENT_FAIL_TIMEOUT = 5,
+    OTDOA_EVENT_FAIL_TIMEOUT = 6,
 
     /** Error occurred in nrf modem RS capture API */
-    OTDOA_EVENT_FAIL_NRF_RS_CAPTURE = 6,
+    OTDOA_EVENT_FAIL_NRF_RS_CAPTURE = 7,
 
     /** Error in response from Modem */
-    OTDOA_EVENT_FAIL_BAD_MODEM_RESP = 7,
+    OTDOA_EVENT_FAIL_BAD_MODEM_RESP = 8,
 
     /** Modem is not registered to LTE network */
-    OTDOA_EVENT_FAIL_NOT_REGISTERED = 8,
+    OTDOA_EVENT_FAIL_NOT_REGISTERED = 9,
     
     /** Modem has stopped, a higher prority activity stopped the session. */
-    OTDOA_EVENT_FAIL_STOPPED = 9,
+    OTDOA_EVENT_FAIL_STOPPED = 10,
     
     /** Failed to get DLEARFCN from Modem */
-    OTDOA_EVENT_FAIL_NO_DLEARFCN = 10,
+    OTDOA_EVENT_FAIL_NO_DLEARFCN = 11,
 
     /** System Mode is not LTE (e.g. it may be NBIoT mode) */
-    OTDOA_EVENT_FAIL_NOT_LTE_MODE = 11,
+    OTDOA_EVENT_FAIL_NOT_LTE_MODE = 12,
 
     /** Failure to parse the uBSA file */
-    OTDOA_EVENT_FAIL_UBSA_PARSING = 12,
+    OTDOA_EVENT_FAIL_UBSA_PARSING = 13,
 
     /** Bad Config file */
-    OTDOA_EVENT_FAIL_BAD_CFG = 13,
+    OTDOA_EVENT_FAIL_BAD_CFG = 14,
 
-} otdoa_api_error_codes_t; 
+    /** Operation is not permitted */
+    OTDOA_EVENT_FAIL_UNAUTHORIZED = 15,
+
+    /** The requested ECGI has been blacklisted */
+    OTDOA_EVENT_FAIL_BLACKLISTED = 16,
+
+    /** Request parameters malformed or invalid */
+    OTDOA_EVENT_FAIL_HTTP_BAD_REQUEST            = 400,
+
+    /** Unable to validate JWT */
+    OTDOA_EVENT_FAIL_HTTP_UNAUTHORIZED           = 401,
+
+    /** Requested resource not found */
+    OTDOA_EVENT_FAIL_HTTP_NOT_FOUND              = 404,
+
+    /** User already has a pending uBSA */
+    OTDOA_EVENT_FAIL_HTTP_CONFLICT               = 409,
+
+    /** uBSA generation was not possible */
+    OTDOA_EVENT_FAIL_HTTP_UNPROCESSABLE_CONTENT  = 422,
+
+    /** Requested too many uBSAs */
+    OTDOA_EVENT_FAIL_HTTP_TOO_MANY_REQUESTS      = 429,
+
+    /** Server error while generating uBSA */
+    OTDOA_EVENT_FAIL_HTTP_INTERNAL_SERVER_ERROR  = 500,
+} otdoa_api_error_codes_t;
 
 /** @brief OTDOA Session Parameters 
  * These parameters are sent to the OTDOA library as part of
@@ -186,55 +220,14 @@ typedef struct {
 
 } otdoa_api_ubsa_dl_req_t;
 
-/** 
- * @brief Parameters of the uBSA download complete event
- * This structure is returned by the OTDOA library along
- * with the OTDOA_EVENT_UBSA_DL_COMPL event to indicate that
- * the download of the uBSA has completed
- */
-enum  otdoa_api_ubsa_dl_compl_status {   //Added name otdoa_api_ubsa_dl_compl_status
-    OTDOA_DL_STATUS_SUCCESS = 0,
-    
-    /** A failure occurred in connection to the network */
-    OTDOA_DL_STATUS_FAIL_NTWK_CONN,
-    
-    /** An error was reported by the server */
-    OTDOA_DL_STATUS_SERVER_ERROR,
-    
-    /** The download process was interrupted or cancelled */
-    OTDOA_DL_STATUS_CANCELLED,
-    
-    /** A problem was detected in the donwloaded uBSA file */
-    OTDOA_DL_STATUS_BAD_FILE,
-    
-    /** Problem in download of config file */
-    OTDOA_DL_STATUS_BAD_CFG,
-    
-    /** Problem in download request */
-    OTDOA_DL_STATUS_BAD_REQ,
-    
-    /** Problem with authentication of download request */
-    OTDOA_DL_STATUS_AUTH_FAIL,
-    
-    /** Problem report by server, UE may retry */
-    OTDOA_DL_STATUS_SERVER_ERROR_RETRY_OK,
-
-    /** Server indicated an error where the UE should not retry */
-    OTDOA_DL_STATUS_SERVER_ERROR_NO_RETRY,
-
-    /** Unknown or unclassified error occurred */
-    OTDOA_DL_STATUS_OTHER_ERROR,
-    
-};
-
 typedef struct {
     /** Status of the uBSA download */
-    enum otdoa_api_ubsa_dl_compl_status status; 
+    otdoa_api_error_codes_t status;
 } otdoa_api_ubsa_dl_compl_t;
 
 typedef struct {
     /** Status of the results upload*/
-    enum otdoa_api_ubsa_dl_compl_status status;    // The same status values are used for UL of results and DL of uBSA
+    otdoa_api_error_codes_t status;    // The same status values are used for UL of results and DL of uBSA
 } otdoa_api_ubsa_ul_compl_t;
 
 /** @brief enum defining the type of event retured by the OTDOA library */
