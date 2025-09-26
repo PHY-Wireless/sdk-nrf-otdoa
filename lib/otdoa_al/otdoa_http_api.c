@@ -78,7 +78,8 @@ void otdoa_http_invoke_callback_ul_compl(int status)
 }
 
 int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t* p_dl_request,
-                                const char* const ubsa_file_path)
+                                const char* const ubsa_file_path,
+                                const bool reset_blacklist)
 {
 	int32_t rc = 0;
 
@@ -105,7 +106,8 @@ int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t* p_dl_request,
     rc = otdoa_http_send_ubsa_req(BSA_DL_SERVER_URL, ecgi,
                              dlearfcn,
                              p_dl_request->ubsa_radius_meters,
-                             p_dl_request->max_cells);
+                             p_dl_request->max_cells,
+                             reset_blacklist);
 	return(rc);
 }
 
