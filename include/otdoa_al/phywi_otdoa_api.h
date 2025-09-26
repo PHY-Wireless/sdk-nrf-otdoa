@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -314,10 +315,12 @@ int32_t otdoa_api_cancel_session();
  * @param[in] dl_request Structure containing the parameters of the requested uBSA
  * @param[in] ubsa_file_path Points to a string containing the full path to where
  *                           the uBSA file should be written
+ * @param[in] reset_blacklist If OTDOA should reset the list of blocked ECGIs
  * @retval Error codes as defined in otdoa_api_error_codes_t
  */
 int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t* dl_request,
-                                const char* const ubsa_file_path);
+                                const char* const ubsa_file_path,
+                                bool reset_blacklist);
 
 /**
  * @brief Requests that the OTDOA library initiate download of a new configuration file.
