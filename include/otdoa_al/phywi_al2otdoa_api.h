@@ -49,7 +49,7 @@ int generate_jwt(char *buffer, size_t len, size_t *olen);
 /**
  * Derive a new AES key from two ECDH keys.
  * 
- * @param[in]   svr_pubkey      Server pub key (binary format, not ASCII)
+ * @param[in]   p_svr_pubkey    Pointer to Server pub key (binary format, not ASCII)
  * @param[in]   pubkey_len      Length of the public key
  */
 int otdoa_crypto_set_new_key(const uint8_t* p_svr_pubkey, const size_t pubkey_len);

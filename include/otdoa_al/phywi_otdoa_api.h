@@ -297,7 +297,7 @@ typedef void (*otdoa_api_callback_t)(
  *                     to return results and status to the client
  * @return 0 on success
  */
-int32_t otdoa_api_init(const char* const ubsa_file_path, otdoa_api_callback_t event_callback);
+int32_t otdoa_api_init(const char* const ubsa_file_path, otdoa_api_callback_t callback);
 
 /**
  * @brief Initiates an OTDOA positioning session
