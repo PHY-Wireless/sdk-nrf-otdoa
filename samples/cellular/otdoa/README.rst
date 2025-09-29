@@ -1,12 +1,14 @@
-.. otdoa sample:
+.. _otdoa_sample:
 
 Cellular: OTDOA Positioning
+##################
 
 .. contents::
    :local:
    :depth: 2
 
-This sample demonstrates how to use the OTDOA library on your device
+This sample demonstrates how to use the OTDOA library and adaptation layer
+to estimate the position of your device.
 
 Requirements
 ************
