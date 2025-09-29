@@ -20,6 +20,14 @@
 extern "C" {
 #endif
 
+/**
+ * @file phywi_otdoa_api.h
+ *
+ * @defgroup phywi_otdoa_api PHY Wireless OTDOA module
+ * @{
+ * @brief API Definitions for the PHY Wireless OTDOA module.
+ */
+
 #define OTDOA_API_MAX_CELLS     75
 #define OTDOA_API_MAX_SESSION_LEN   250
 
@@ -393,6 +401,8 @@ void otdoa_api_cfg_set_file_path(const char * psz_path);
  * @brief Gets the path used for the config file
  */
 const char* otdoa_api_cfg_get_file_path();
+
+/** @} */
 
 #ifdef __cplusplus
 }
