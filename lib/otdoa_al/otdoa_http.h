@@ -224,6 +224,8 @@ typedef struct OTDOA_HTTP_MEMBERS {
     unsigned uNumCells;
     unsigned uNumRepeatCount;
     long prsID;
+    uint16_t uMCC;
+    uint16_t uMNC;
 
     tOTDOA_HTTP_BLACKLIST blacklist[BLACKLIST_SIZE];
 } tOTDOA_HTTP_MEMBERS;

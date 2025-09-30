@@ -353,7 +353,7 @@ int otdoa_nordic_at_get_modem_version(char* psz_ver, unsigned max_len)
         return OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
     }
     // Find the end and null-terminate
-    char* p_end = strchr(p_ver_token, '\n');
+    char* p_end = strchr(p_ver_token, '\r');
     if (p_end < resp + MODEM_VER_RESP_LEN)
         *p_end = 0;
 
