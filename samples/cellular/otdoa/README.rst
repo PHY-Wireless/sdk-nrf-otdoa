@@ -1,7 +1,7 @@
 .. _otdoa_sample:
 
 Cellular: OTDOA Positioning
-##################
+###########################
 
 .. contents::
    :local:
@@ -27,15 +27,6 @@ Configuration
 
 |config|
 
-Configuration options
-=====================
-
-Set this option to provide the OTDOA binary
-
-.. OTDOA_LIB_PATH:
-
-OTDOA_LIB_PATH
-   Path to the OTDOA library binary to link
 
 Configuration files
 ===================
@@ -49,7 +40,7 @@ The following files are available:
 Building and running
 ********************
 
-.. |sample path| replace :file:`samples/cellular/otdoa`
+.. |sample path| replace:: :file:`samples/cellular/otdoa`
 
 .. include:: /includes/build_and_run_ns.txt
 

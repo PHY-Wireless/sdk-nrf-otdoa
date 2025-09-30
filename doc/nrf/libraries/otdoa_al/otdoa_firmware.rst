@@ -4,7 +4,10 @@ OTDOA Firmware Architecture
 The OTDOA subsystem consists of an OTDOA library (delivered in binary object code format), 
 and the OTDOA Adaption Layer (delivered as source code as part of the nRF Connect SDK).  
 
-The figure below presents an overview of the OTDOA firmware subsystem.  Functions that are implemented in the OTDOA binary library are shown in red, while those that are implemented in the OTDOA Adaption Layer are shown in blue.  Functions that are part of the nRF Connect SDK / Zephyr environment are shown in green, and functions implemented by the user application are shown in orange.
+The figure below presents an overview of the OTDOA firmware subsystem.  Functions that are implemented
+in the OTDOA binary library are shown in red, while those that are implemented in the OTDOA Adaption 
+Layer are shown in blue.  Functions that are part of the nRF Connect SDK / Zephyr environment are shown
+in green, and functions implemented by the user application are shown in orange.
 
 .. image:: images/otdoa-fw-arch.drawio.png
    :alt: OTDOA Firmware Architecture
@@ -31,16 +34,6 @@ The OTDOA algorithm also includes an enhanced cell-ID (eCID) position estimate f
 that it uses when it cannot make a position estimate using OTDOA (e.g. when there are too
 few cells observed).
 
-OTDOA API
-~~~~~~~~~
-
-The OTDOA binary includes a C-callable API that allows user application code to control and configure the OTDOA system.  With the exception of initialization functions, these APIs are thread-safe.
-
-OTDOA Callback
-~~~~~~~~~~~~~~
-
-The OTDOA binary library includes a callback that implements the transfer of PRS samples from the nrfxlib Reference Signal (RS) Capture API to the OTDOA algorithm.  This callback allocates a buffer, fills the buffer with PRS sample data, and sends a message to the OTDOA algorithm indicating that the data is available for processing.
-
 Assistance Data Generation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -50,12 +43,28 @@ The assistance data generation is typically done using the location of the curre
 cell as a "seed", and selecting a set of cells that are geographically close to the serving
 cell.
 
+OTDOA API
+~~~~~~~~~
+
+The OTDOA binary includes a C-callable API that allows user application code to control
+and configure the OTDOA system.  With the exception of initialization functions, these 
+APIs are thread-safe.
+
+OTDOA Callback
+~~~~~~~~~~~~~~
+
+The OTDOA binary library includes a callback that implements the transfer of PRS samples
+from the nrfxlib Reference Signal (RS) Capture API to the OTDOA algorithm.  This callback
+allocates a buffer, fills the buffer with PRS sample data, and sends a message to the OTDOA
+algorithm indicating that the data is available for processing.
+
 OTDOA Adaption Layer
 --------------------
 
-While the OTDOA adaption layer implements these functions:
+The OTDOA adaption layer implements these functions:
 
 * HTTP REST interface to a cloud server to download the uBSA
+* Optional HTTP REST interface for uploading of position estimate results to a server
 * File Access API
 * Zephyr threading functions
 * Buffering for PRS sample data from the modem via the nrfxlib RS Capture API.
@@ -64,7 +73,8 @@ HTTP REST Interface
 ~~~~~~~~~~~~~~~~~~~
 
 The OTDOA adaption layer includes the HTTP REST interface function that allows it to 
-download the uBSA and configuration information from a cloud server.  The adaption layer uses the Zephyr TLS secure socket functions to communicate with the server.  
+download the uBSA and configuration information from a cloud server.  The adaption 
+layer uses the Zephyr TLS secure socket functions to communicate with the server.  
 
 Once downloaded, the uBSA file and the configuration file are stored in a file system on the UE,
 where they may be accessed by the OTDOA library's algorithm and assistance generation functions.
@@ -72,7 +82,8 @@ where they may be accessed by the OTDOA library's algorithm and assistance gener
 File Access API
 ~~~~~~~~~~~~~~~
 
-The file access API in the allows the adaption layer and the OTDOA binary functions to access files within the Zephyr file system in a thread-safe manner
+The file access API in the allows the adaption layer and the OTDOA binary functions to access
+files within the Zephyr file system in a thread-safe manner
 
 Zephyr Threading Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,10 +91,12 @@ Zephyr Threading Functions
 The adaption layer supports various threading functions for the OTDOA system, including:
 
 * a workqueue thread for the HTTP REST interface
-* a traditional Zephyr thread for the OTDOA binary library functions, including
-  * message queuing functions
+* a traditional Zephyr thread for the OTDOA binary library functions, including a message queue
 
 PRS Sample Buffering
 ~~~~~~~~~~~~~~~~~~~~
 
-The adaption layer provides a mechanism to buffer the data used by the OTDOA algorithm to estimate timing differences between cells.  This data is in the form of in-phase a quadrature-phase (I/Q) samples from the modem, and it is stored in a memory slab within the adaption layer.
+The adaption layer provides a mechanism to buffer the data used by the OTDOA algorithm to
+estimate timing differences between cells.  This data is in the form of in-phase and
+quadrature-phase (I/Q) samples from the modem, and it is stored in a memory slab
+within the adaption layer.
