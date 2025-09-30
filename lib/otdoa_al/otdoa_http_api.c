@@ -82,9 +82,11 @@ int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t* p_dl_request,
     // if input ECGI is 0, get current serving cell ECGI & DLEARFCN
     uint32_t ecgi = p_dl_request->ecgi;
     uint32_t dlearfcn = p_dl_request->dlearfcn;
+    uint16_t mcc = p_dl_request->mcc;
+    uint16_t mnc = p_dl_request->mnc;
     if (ecgi == 0)
     {
-        rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, &dlearfcn);
+        rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, &dlearfcn, &mcc, &mnc);
         OTDOA_LOG_INF("otdoa_nordic_at_get_ecgi_and_dlearfcn() returned %d.  ECGI: %u", rc, ecgi);
         if (rc == OTDOA_EVENT_FAIL_NO_DLEARFCN && ecgi != 0)
         {
@@ -103,6 +105,7 @@ int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t* p_dl_request,
                              dlearfcn,
                              p_dl_request->ubsa_radius_meters,
                              p_dl_request->max_cells,
+                             mcc, mnc,
                              reset_blacklist);
 	return(rc);
 }

@@ -69,11 +69,13 @@ char* otdoa_nordic_at_strtok_r (char *s, char delim, char **save_ptr)
 
 /// Maximum number of tokens we will parse in the AT%%XMONITOR response
 #define XMONITOR_RESP_MAX_TOKENS    16
+#define XMONITOR_RESP_MIN_PLMN_LEN  5  // three digits for MCC, two or three for MNC
 
 /// Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN
 int otdoa_nordic_at_parse_xmonitor_response(
         const char* const psz_resp, size_t u_resp_len,
-        uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn)
+        uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn,
+        uint16_t* pu16_mcc, uint16_t* pu16_mnc)
 {
     int i_ret = 0;
     int n_token = 0;
@@ -133,6 +135,24 @@ int otdoa_nordic_at_parse_xmonitor_response(
             else if (u32_reg_status != REG_STATUS_REGISTERED && u32_reg_status != REG_STATUS_ROAMING)
             {
                 i_ret = OTDOA_EVENT_FAIL_NOT_REGISTERED;
+            }
+            break;
+        }
+        case 3:     // PLMN - MCC/MNC
+        {
+            if (strlen(token) < XMONITOR_RESP_MIN_PLMN_LEN)
+            {
+                i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
+                break;
+            }
+            if (sscanf(token, "%3"SCNu16, pu16_mcc) != 1)
+            {
+                i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
+                break;
+            }
+            if (sscanf(token + 3, "%"SCNu16, pu16_mcc) != 1)
+            {
+                i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
             }
             break;
         }
@@ -217,7 +237,7 @@ error_exit:
 }
 
 // Use AT%%XMONITOR command to get the current ECGI and DLEARFCN from the modem
-int otdoa_nordic_at_get_ecgi_and_dlearfcn( uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn)
+int otdoa_nordic_at_get_ecgi_and_dlearfcn( uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn, uint16_t* pu16_mcc, uint16_t* pu16_mnc)
 {
     int i_ret = 0;
     static char monitor_buf[256] = { 0 };       //  char monitor_buf[CGSN_RESPONSE_LENGTH + 1];
@@ -231,7 +251,7 @@ int otdoa_nordic_at_get_ecgi_and_dlearfcn( uint32_t* pu32_ecgi, uint32_t* pu32_d
     else
     {
         i_ret = otdoa_nordic_at_parse_xmonitor_response(
-                monitor_buf, strlen(monitor_buf), pu32_ecgi, pu32_dlearfcn);
+                monitor_buf, strlen(monitor_buf), pu32_ecgi, pu32_dlearfcn, pu16_mcc, pu16_mnc);
     }
     return i_ret;
 }

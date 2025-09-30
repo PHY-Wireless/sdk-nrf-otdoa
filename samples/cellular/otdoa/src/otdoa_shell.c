@@ -26,7 +26,7 @@
 
 // These APIs are not part of phywi_otdoa_api.h.  They are designed for
 // testing only.  Use with caution!
-int otdoa_nordic_at_get_ecgi_and_dlearfcn( uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn);
+int otdoa_nordic_at_get_ecgi_and_dlearfcn( uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn, uint16_t* pu16_mcc, uint16_t* pu16_mnc);
 int otdoa_nordic_at_get_modem_version(char* psz_ver, unsigned max_len);
 int otdoa_http_send_test_jwt(void);
 
@@ -47,9 +47,13 @@ void otdoa_shell_printf(void* psh, const char* pstring)
 static int cmd_get_ubsa_handler(const struct shell *shell, size_t argc,
                              char **argv)
 {
-    // Get ECGI & DLEARFCN
-    uint32_t u32Ecgi = 0;               // A value of 0 causes OTDOA library to use the current serving cell ECGI
-    uint32_t u32Dlearfcn = 5230;
+    uint32_t u32Ecgi;
+    uint32_t u32Dlearfcn;
+    uint16_t u16MCC;
+    uint16_t u16MNC;
+
+    // use real values as defaults
+    otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32Dlearfcn, &u16MCC, &u16MNC);
 
     uint32_t u32Radius = 100000;        // Default to 100000 since v0.2 of server interprets this as meters
     uint32_t u32NumCells = 1000;        // increase to 1000 18 Jan 2022.  Patch for Atlanta GA field testing
@@ -77,11 +81,29 @@ static int cmd_get_ubsa_handler(const struct shell *shell, size_t argc,
         }
     }
 
-    shell_print(shell, "Getting uBSA (ECGI: %u (0x%08x) DLEARFCN: %u  Radius: %u  Num Cells: %u)\n",
-        u32Ecgi, u32Ecgi, u32Dlearfcn, u32Radius, u32NumCells);
+    if (argc >= 5)
+    {
+        u16MCC = strtoul(argv[4], NULL, 0);
+        if (0 == u16MCC)
+        {
+            shell_error(shell, "Failed to convert MCC (%s)\n", argv[4]);
+        }
+    }
+
+    if (argc >= 6)
+    {
+        u16MNC = strtoul(argv[5], NULL, 0);
+        if (0 == u16MNC)
+        {
+            shell_error(shell, "Failed to convert MNC (%s)\n", argv[5]);
+        }
+    }
+
+    shell_print(shell, "Getting uBSA (ECGI: %u (0x%08x) DLEARFCN: %u  Radius: %u  Num Cells: %u  MCC: %"PRIu16"  MNC:%"PRIu16")\n",
+        u32Ecgi, u32Ecgi, u32Dlearfcn, u32Radius, u32NumCells, u16MCC, u16MNC);
 
 
-    otdoa_sample_ubsa_dl_test(u32Ecgi, u32Dlearfcn, u32Radius, u32NumCells);
+    otdoa_sample_ubsa_dl_test(u32Ecgi, u32Dlearfcn, u32Radius, u32NumCells, u16MCC, u16MNC);
     return 0;
 }
 
@@ -151,14 +173,19 @@ static int cmd_info_handler(const struct shell *shell,
     const char *version;
     char        iccid[256];
     int         rc;
+    uint16_t    mcc;
+    uint16_t    mnc;
 
     printk("Nordic OTDOA Sample\n");
     /* get the ECGI */
-    rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, NULL);
+    rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, NULL, &mcc, &mnc);
     if (rc)
         printk("Failed to get ECGI: %d\n", rc);
-    else
+    else {
         printk("          ECGI: %u\n", ecgi);
+        printk("           MCC: %"PRIu16"\n", mcc);
+        printk("           MNC: %"PRIu16"\n", mnc);
+    }
 
 
     /* get the software version */
@@ -233,7 +260,9 @@ static int cmd_override_handler(const struct shell *shell, size_t argc, char **a
 {
     uint32_t u32Ecgi = 0;
     uint32_t u32DlearFcn = 5230;
-    otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32DlearFcn);
+    uint16_t u16MCC = 0;
+    uint16_t u16MNC = 0;
+    otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32DlearFcn, &u16MCC, &u16MNC);
     printf("Current : INFO ECGI=%u, DLEARFCN=%u\n", u32Ecgi, u32DlearFcn);
 
     uint32_t u32ServCellECGI = 0;   // Zero means don't override
@@ -267,7 +296,7 @@ static void cmd_jwt_handler(const struct shell *shell, size_t argc, char **argv)
 
 /* Creating subcommands (level 1 command) array for command "phywi". */
 SHELL_STATIC_SUBCMD_SET_CREATE(sub_phywi,
-        SHELL_CMD_ARG( get_ubsa,   NULL, " Download a uBSA (ECGI,DLEARFCN,Radius,NumCells)", cmd_get_ubsa_handler, 0, 4),
+        SHELL_CMD_ARG( get_ubsa,   NULL, " Download a uBSA (ECGI,DLEARFCN,Radius,NumCells)", cmd_get_ubsa_handler, 0, 6),
 
         SHELL_CMD(     reset,      NULL, " Soft reset the device", cmd_reset_handler),
         SHELL_CMD_ARG( show,       NULL, " Display the uBSA file (nLines)", cmd_show_handler, 0, 2),
