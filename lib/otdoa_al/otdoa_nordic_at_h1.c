@@ -145,12 +145,14 @@ int otdoa_nordic_at_parse_xmonitor_response(
                 i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
                 break;
             }
-            if (sscanf(token, "%3"SCNu16, pu16_mcc) != 1)
+            int i_scn_rv = sscanf(token, "\"%3"SCNu16, pu16_mcc);
+            if (i_scn_rv != 1)
             {
                 i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
                 break;
             }
-            if (sscanf(token + 3, "%"SCNu16, pu16_mcc) != 1)
+            i_scn_rv = sscanf(token + 4, "%"SCNu16, pu16_mnc); // add 4 for 3 digits of MCC plus leading "
+            if (i_scn_rv != 1)
             {
                 i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
             }
