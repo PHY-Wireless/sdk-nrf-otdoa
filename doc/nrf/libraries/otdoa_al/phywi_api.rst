@@ -13,7 +13,7 @@ Note that the majority of the OTDOA library functions are implemented on a separ
 So API calls made by the location library / app are typically converted into a message that is sent to the OTDOA thread for processing.  These messages are shown in the sequence diagrams below (e.g. the ``otdoa_api_start_session()`` API call gets converted to an ``OTDOA_CTRL_TEST`` message sent to the OTDOA thread).
 
 PRS Session Normal Case without uBSA Download
-=============================================
+---------------------------------------------
 
 In this case, the uBSA is already available in the file system, and it contains the current serving
 cell.  So no uBSA download is required. 
@@ -38,7 +38,7 @@ Once the position estimate is complete, the results are returned to the user app
    :alt: Normal Case
 
 PRS Session Normal Case with uBSA Download
-==========================================
+------------------------------------------
 
 In this sequence, a new uBSA must be downloaded before the position estimate can be done.  The OTDOA library detects that a new uBSA is required, and signals this to the user application in the OTDOA_EVENT_UBSA_DL_REQ event.
 
@@ -50,7 +50,7 @@ When the download completes, the OTDOA library notifies the location library / a
    :alt: Normal Case with uBSA DL
 
 uBSA Download Failure
-=====================
+---------------------
 
 If the uBSA download fails, the error is indicated to the user application in the
 OTDOA_EVENT_UBSA_DL_COMPL event.  There are a number of possible causes for such a
@@ -67,7 +67,7 @@ cancelled error status.
    :alt: uBSA DL Failure
 
 No Network Connection
-=====================
+---------------------
 
 In the case there is no connection to the network, the OTDOA library will return an OTDOA_EVENT_FAIL event to the user application.
 
@@ -75,7 +75,7 @@ In the case there is no connection to the network, the OTDOA library will return
    :alt: No Network Connection
 
 Session Canceled
-================
+----------------
 
 The user application may cancel an OTDOA position estimate by calling the ``otdoa_api_cancel_session()`` API as shown in the figure below.
 
@@ -83,7 +83,7 @@ The user application may cancel an OTDOA position estimate by calling the ``otdo
    :alt: PRS Session Canceled
 
 Session Timeout
-===============
+---------------
 
 If the session times out, an OTDOA_EVENT_FAIL event is returned to the user application 
 as shown in the figure below.

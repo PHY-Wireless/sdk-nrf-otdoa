@@ -1,5 +1,5 @@
-OTDOA Firmware Overview
-=======================
+OTDOA Firmware Architecture
+===========================
 
 The OTDOA subsystem consists of an OTDOA library (delivered in binary object code format), 
 and the OTDOA Adaption Layer (delivered as source code as part of the nRF Connect SDK).  
