@@ -1,7 +1,8 @@
 OTDOA Data Flow
 ===============
 
-This section describes the flow of data through the OTDOA system, including download of the uBSA, estimate of the time of arrival for signals from multiple cells, and formulation of the position estimate.
+This section describes the flow of data through the OTDOA system, including download of the uBSA,
+estimate of the time of arrival for signals from multiple cells, and formulation of the position estimate.
 
 When the OTDOA library is requested to make a position estimate, it retrieves the current uBSA
 information from the file system storage, and uses it to generate a list of cells for measurement.

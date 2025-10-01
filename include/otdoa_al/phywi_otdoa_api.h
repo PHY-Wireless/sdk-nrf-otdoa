@@ -44,17 +44,12 @@ extern "C" {
 typedef enum {
     OTDOA_API_SUCCESS     =  0,     // Success
 
-    /** Return values from API function calls */
-    OTDOA_API_ERROR_PARAM = -1,     // Parameter error in API
-    OTDOA_API_INTERNAL_ERROR = -2,  // Internal error in OTDOA library. 
+    /** Parameter error in API */
+    OTDOA_API_ERROR_PARAM = -1,
 
-    /** The uBSA is still being generated */
-    OTDOA_EVENT_HTTP_NOT_READY = 202,
+    /** Internal error in OTDOA library. */
+    OTDOA_API_INTERNAL_ERROR = -2,
 
-    /** The uBSA is only partially downloaded */
-    OTDOA_EVENT_HTTP_PARTIAL_CONTENT = 206,
-
-    /** EVENT_FAIL result code values */
     /** Failure occurred in the uBSA download */
     OTDOA_EVENT_FAIL_UBSA_DL = 1,
     
@@ -103,6 +98,12 @@ typedef enum {
     /** The requested ECGI has been blacklisted */
     OTDOA_EVENT_FAIL_BLACKLISTED = 16,
 
+    /// The uBSA is still being generated
+    OTDOA_EVENT_HTTP_NOT_READY                   = 202,
+
+    /// The uBSA is only partially downloaded
+    OTDOA_EVENT_HTTP_PARTIAL_CONTENT             = 206,
+    
     /** Request parameters malformed or invalid */
     OTDOA_EVENT_FAIL_HTTP_BAD_REQUEST            = 400,
 
@@ -236,7 +237,7 @@ typedef struct {
 
 typedef struct {
     /** Status of the results upload*/
-    otdoa_api_error_codes_t status;    // The same status values are used for UL of results and DL of uBSA
+    otdoa_api_error_codes_t status;
 } otdoa_api_ubsa_ul_compl_t;
 
 /** @brief enum defining the type of event retured by the OTDOA library */

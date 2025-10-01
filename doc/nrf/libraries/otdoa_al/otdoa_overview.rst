@@ -46,18 +46,30 @@ Not applicable
 
 Requirements
 ------------
+
+OTDOA Binary Library
+====================
 The OTDOA adaption layer requires the OTDOA binary library to be separately downloaded and integrated
 into the nRF Connect SDK by the developer.
 
 Security Requirements
 =====================
 
-* *TLS Certificate* The UE requires a TLS certificate to authenticate with the network server when downloading the uBSA or configuration information.
+TLS Certificate
+~~~~~~~~~~~~~~~
+The UE requires a TLS certificate to authenticate with the network server when downloading the uBSA 
+or configuration information.  This certificate may be installed by the application using the 
+:ref:`otdoa_api_install_tls_cert` API.  Alternatively, the certificate may be installed by the 
+adaption layer using the :kconfig:option:`CONFIG_OTDOA_API_TLS_CERT_INSTALL` configuration option.
 
+Network Server Keys
+~~~~~~~~~~~~~~~~~~~
+The UE requires a public/private key pair to authenticate with the network server when downloading 
+the uBSA or configuration information.  The private key is loaded into the UE using 
+the :ref:`otdoa_api_provision` API.   The public key is sent to the network server where it is 
+used to authenticate the UE.
 
-* *Network Server Keys* The UE requires a public/private key pair to authenticate with the network server when downloading the uBSA or configuration information.
-
-
+Instructions for generating the public/private key pair are provided along with the OTDOA binary library.
 
 
 Configuration
@@ -87,8 +99,9 @@ These options control the BSA download server and the results upload server:
 * :kconfig:option:`CONFIG_OTDOA_RESULTS_UPLOAD_PW` to configure the password to use for Phywi API authentication when uploading OTDOA results.
 * :kconfig:option:`CONFIG_OTDOA_UPLOAD_SERVER_URL` to configure the URL to upload OTDOA results to.
 
-Miscellaneous options:
+Security options:
 
+* :kconfig:option:`CONFIG_OTDOA_API_TLS_CERT_INSTALL` to enable installing a TLS certificate through the OTDOA library.
 * :kconfig:option:`OTDOA_TLS_SEC_TAG` to configure the TLS security tag slot to install PhyWi TLS certificate to.
 
 Shell commands list
