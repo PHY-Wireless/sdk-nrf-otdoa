@@ -296,7 +296,7 @@ static void cmd_jwt_handler(const struct shell *shell, size_t argc, char **argv)
 
 /* Creating subcommands (level 1 command) array for command "phywi". */
 SHELL_STATIC_SUBCMD_SET_CREATE(sub_phywi,
-        SHELL_CMD_ARG( get_ubsa,   NULL, " Download a uBSA (ECGI,DLEARFCN,Radius,NumCells)", cmd_get_ubsa_handler, 0, 6),
+        SHELL_CMD_ARG( get_ubsa,   NULL, " Download a uBSA (ECGI,DLEARFCN,Radius,NumCells,MCC,MNC)", cmd_get_ubsa_handler, 0, 6),
 
         SHELL_CMD(     reset,      NULL, " Soft reset the device", cmd_reset_handler),
         SHELL_CMD_ARG( show,       NULL, " Display the uBSA file (nLines)", cmd_show_handler, 0, 2),
