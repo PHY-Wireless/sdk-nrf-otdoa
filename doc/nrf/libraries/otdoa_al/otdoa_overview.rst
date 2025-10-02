@@ -1,5 +1,5 @@
 OTDOA Overview
-==============
+##############
 
 Observed Time-Difference of Arrival (OTDOA) is a technique for estimating a UE's position.  It involves estimating time differences between signals broadcast using by the terrestrial LTE cellular network.  These time difference estimates can then be used to triangulate the UE's position based upon known cellular base station positions, in much the same way as GNSS systems triangulate a position based upon know satellite positions.  The OTDOA Implementation in this library is *UE-based*, meaning that the position estimate is calculated by the UE application processor, rather than by a network server.
 
@@ -16,7 +16,7 @@ UE-based OTDOA for UE position estimate has the following advantages:
 * Good accuracy comparted to alternative cellular positioning technologies.
 
 Implementation
---------------
+**************
 
 The OTDOA firmware subsystem consists of an OTDOA binary library (delivered in binary object code format), and the OTDOA Adaption Layer (delivered as source code as part of the nRF Connect SDK).  The diagram below shows an overview of the OTDOA firmware subsystem in a typical application.
 
@@ -27,7 +27,7 @@ The OTDOA firmware subsystem consists of an OTDOA binary library (delivered in b
 See :doc:`otdoa_firmware` and :doc:`otdoa_data_flow` for more information.
 
 Supported Features
-------------------
+******************
 The OTDOA adaption layer supports the following features:
 
 * uBSA download via an HTTP REST interface
@@ -41,11 +41,11 @@ The OTDOA binary library supports the following features:
 * Position estimate accuracy estimation algorithm.
 
 Supported backends
-------------------
+******************
 Not applicable
 
 Requirements
-------------
+************
 
 OTDOA Binary Library
 ====================
@@ -56,14 +56,14 @@ Security Requirements
 =====================
 
 TLS Certificate
-~~~~~~~~~~~~~~~
+---------------
 The UE requires a TLS certificate to authenticate with the network server when downloading the uBSA 
 or configuration information.  This certificate may be installed by the application using the 
 :ref:`otdoa_api_install_tls_cert` API.  Alternatively, the certificate may be installed by the 
 adaption layer using the :kconfig:option:`CONFIG_OTDOA_API_TLS_CERT_INSTALL` configuration option.
 
 Network Server Keys
-~~~~~~~~~~~~~~~~~~~
+-------------------
 The UE requires a public/private key pair to authenticate with the network server when downloading 
 the uBSA or configuration information.  The private key is loaded into the UE using 
 the :ref:`otdoa_api_provision` API.   The public key is sent to the network server where it is 
@@ -73,7 +73,7 @@ Instructions for generating the public/private key pair are provided along with 
 
 
 Configuration
--------------
+*************
 To use the OTDOA adaption layer, enable the :kconfig:option:`CONFIG_OTDOA_AL_LIB` configuration option.
 
 You can also configure the following options in the adaption layer:
@@ -105,13 +105,13 @@ Security options:
 * :kconfig:option:`OTDOA_TLS_SEC_TAG` to configure the TLS security tag slot to install PhyWi TLS certificate to.
 
 Shell commands list
--------------------
+*******************
 
 Usage
------
+*****
 
 Samples using the library
--------------------------
+*************************
 The following |NCS| samples use the OTDOA library and adaption layer:
 
 * :ref:`otdoa_sample`
@@ -119,17 +119,17 @@ The following |NCS| samples use the OTDOA library and adaption layer:
 
 
 Application integration
------------------------
+***********************
 
 
 Additional information
-----------------------
+**********************
 
 Limitations
------------
+***********
 
 Dependencies
-------------
+************
 This OTDOA library uses the following nRF Connect SDK libraries:
 
 * LTE Link Control
@@ -151,14 +151,14 @@ It uses the following Zephyr libraries and services:
 * File System (typically Little FS)
 
 FLASH File System
-~~~~~~~~~~~~~~~~~
+=================
 
 The OTDOA library uses a FLASH file system for storage of uBSA information.  Typically this makes use of the Zephyr Little FS file system, mounted on either an external serial FLASH or using the NRF SoC internal FLASH.
 
 Approximately 25KB of storage are used in this file system.
 
 API documentation
------------------
+*****************
 
 | Header file: :file:`include/otdoa_al/phywi_otdoa_api.h`
 | Source files: :file:`lib/otdoa_al/*.c`
