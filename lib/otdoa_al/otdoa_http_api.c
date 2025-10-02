@@ -18,9 +18,7 @@
 static otdoa_api_callback_t al_event_callback;
  /**
  * @brief Initialize the OTDOA AL library
- * @param[in] ubsa_file_path Points to a string containing the full path to where
- *                           the uBSA file resides
- * @param[in] callback Callback function used by the library
+ * @param[in] event_callback Callback function used by the library
  *                     to return results and status to the client
  * @return 0 on success
  */
@@ -29,13 +27,21 @@ int32_t otdoa_al_init(otdoa_api_callback_t event_callback)
     al_event_callback = event_callback;
     otdoa_http_init();
     otdoa_log_init();
-    // Provision the certificate for HTTPS access to uBSA
-    int err = cert_provision();
-    if (err)
-    {
-        OTDOA_LOG_ERR("cert_provision() failed with return %d", err);
-	    return OTDOA_API_INTERNAL_ERROR;
+
+#if CONFIG_OTDOA_API_TLS_CERT_INSTALL
+    bool exists;
+    int rc = modem_key_mgmt_exists(CONFIG_OTDOA_TLS_SEC_TAG, OTDOA_TLS_CERT_TYPE, &exists);
+    if (rc) {
+        OTDOA_LOG_ERR("otdoa_al_init: failed to check for TLS certificate in tag %d: %d", CONFIG_OTDOA_TLS_SEC_TAG, rc);
+        return OTDOA_API_INTERNAL_ERROR;
     }
+
+    if (!exists) {
+        OTDOA_LOG_ERR("otdoa_al_init: TLS certificate not found in tag %d", CONFIG_OTDOA_TLS_SEC_TAG);
+        return OTDOA_API_INTERNAL_ERROR;
+    }
+#endif
+
 
     return OTDOA_API_SUCCESS;
 }
@@ -72,7 +78,8 @@ void otdoa_http_invoke_callback_ul_compl(int status)
 }
 
 int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t* p_dl_request,
-                                const char* const ubsa_file_path)
+                                const char* const ubsa_file_path,
+                                const bool reset_blacklist)
 {
 	int32_t rc = 0;
 
@@ -99,7 +106,8 @@ int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t* p_dl_request,
     rc = otdoa_http_send_ubsa_req(BSA_DL_SERVER_URL, ecgi,
                              dlearfcn,
                              p_dl_request->ubsa_radius_meters,
-                             p_dl_request->max_cells);
+                             p_dl_request->max_cells,
+                             reset_blacklist);
 	return(rc);
 }
 

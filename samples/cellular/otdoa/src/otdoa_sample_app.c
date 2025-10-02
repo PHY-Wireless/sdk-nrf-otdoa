@@ -36,6 +36,11 @@ struct k_timer pos_est_timer;
 // session, and those that are not part of a session (e.g. those for testing uBDA DL)
 static int dl_in_session = 0;
 
+static const char cert[] = {
+    #include "hellaphy.pem.inc"
+};
+BUILD_ASSERT(sizeof(cert) < KB(4), "Certificate too large");
+
 // forward references
 static void otdoa_event_handler(const otdoa_api_event_data_t* p_event_data);
 static void pos_est_timer_cb(struct k_timer *timer);
@@ -71,6 +76,14 @@ int otdoa_sample_main()
 
     otdoa_api_cfg_set_file_path("/lfs/config");
 
+    // Don't include null terminator in PEM file length
+    err = otdoa_api_install_tls_cert(cert, sizeof (cert) - 1);
+    if (err != 0)
+    {
+        LOG_ERR("otdoa_api_install_tls_cert() failed with return %d", err);
+        return err;
+    }
+
     // AL and OTDOA library can use the same callback
     err = otdoa_api_init(UBSA_FILE_PATH, otdoa_event_handler);
     if (err != 0)
@@ -78,21 +91,15 @@ int otdoa_sample_main()
         LOG_ERR("otdoa_api_init() failed with return %d", err);
         return err;
     }
-    err = otdoa_al_init(otdoa_event_handler);
-    if (err != 0)
-    {
-        LOG_ERR("otdoa_al_init() failed with return %d", err);
-        return err;
-    }
 
 	LOG_INF("Connecting to LTE...");
-    
+
 	lte_lc_register_handler(lte_event_handler);
-    
+
 	lte_lc_connect();
 
     k_timer_init(&pos_est_timer, pos_est_timer_cb, NULL);
-    
+
 	k_sem_take(&lte_connected, K_FOREVER);
 
     LOG_INF("Connected!");
@@ -166,7 +173,7 @@ static void otdoa_event_handler(const otdoa_api_event_data_t* p_event_data)
             LOG_INF("OTDOA_EVENT_UBSA_DL_REQ:");
             LOG_INF("  ecgi: %u  dlearfcn: %u", p_event_data->dl_request.ecgi, p_event_data->dl_request.dlearfcn);
             LOG_INF("  max cells: %u  radius: %u", p_event_data->dl_request.max_cells, p_event_data->dl_request.ubsa_radius_meters);
-            int err = otdoa_api_ubsa_download(&p_event_data->dl_request, UBSA_FILE_PATH);
+            int err = otdoa_api_ubsa_download(&p_event_data->dl_request, UBSA_FILE_PATH, false);
             if (err != OTDOA_API_SUCCESS)
             {
                 LOG_ERR("otdoa_api_ubsa_download() failed with return %d", err);
@@ -203,7 +210,7 @@ static void otdoa_event_handler(const otdoa_api_event_data_t* p_event_data)
                     }
                 }
             }
-            else if (p_event_data->dl_compl.status == OTDOA_DL_STATUS_SUCCESS)
+            else if (p_event_data->dl_compl.status == OTDOA_API_SUCCESS)
             {
                 set_blink_sleep();
                 LOG_INF("OTDOA uBSA DL SUCCESS");
@@ -284,7 +291,7 @@ void otdoa_sample_ubsa_dl_test(uint32_t ecgi, uint32_t dlearfcn, uint32_t radius
     set_blink_download();
     LOG_INF("Getting uBSA (ECGI: %u (0x%08x) DLEARFCN: %u  Radius: %u  Num Cells: %u)",
             ecgi, ecgi, dlearfcn, radius, max_cells); 
-    int err = otdoa_api_ubsa_download(&dl_req, UBSA_FILE_PATH);
+    int err = otdoa_api_ubsa_download(&dl_req, UBSA_FILE_PATH, true);
     if (err != OTDOA_API_SUCCESS)
     {
         LOG_ERR("otdoa_api_ubsa_download() failed with return %d", err);\

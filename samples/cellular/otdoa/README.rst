@@ -1,7 +1,7 @@
 .. _otdoa_sample:
 
 Cellular: OTDOA Positioning
-##################
+###########################
 
 .. contents::
    :local:
@@ -27,15 +27,6 @@ Configuration
 
 |config|
 
-Configuration options
-=====================
-
-Set this option to provide the OTDOA binary
-
-.. OTDOA_LIB_PATH:
-
-OTDOA_LIB_PATH
-   Path to the OTDOA library binary to link
 
 Configuration files
 ===================
@@ -49,7 +40,7 @@ The following files are available:
 Building and running
 ********************
 
-.. |sample path| replace :file:`samples/cellular/otdoa`
+.. |sample path| replace:: :file:`samples/cellular/otdoa`
 
 .. include:: /includes/build_and_run_ns.txt
 
@@ -59,7 +50,29 @@ Testing
 |test_sample|
 
 #. |connect_kit|
-#. |connect_terminal|
+#. |connect_terminal|  The terminal application should be set for 921600 baud for this sample.
 #. Power on or reset your device
 #. Observe that the sample starts and connects to the LTE network
-#. Run `phywi test` on the device
+#. Enter 'phywi' on the terminal and verify that the phywi shell command help is displayed.
+
+.. note::
+   The device must be provisioned with a private key before it can be used
+   for OTDOA positioning.  The corresponding public key must be sent to PHY Wireless
+   to be provisioned on the network server.
+
+To provision the device, follow these steps:
+
+#. connect a terminal application as described aove.
+#. Verify that the device boots and 'phywi' displays the shell command help.
+#. Disconnect the terminal application.
+#. Program the private key into the device using the ``pkey`` script (provided with the OTDOA binary library).
+
+.. code-block:: bash
+    
+   # provision the DK with new key
+   # Assumes device is connected with CLI on /dev/ttyACM0
+   ./pkey <file name>.pem /dev/ttyACM0
+
+#. Once completed, the device should be reset (e.g. using its reset button).
+#. Reconnect the terminal application and verify that the device boots and responds to 'phywi'.
+#. Run ``phywi test`` on the device.
