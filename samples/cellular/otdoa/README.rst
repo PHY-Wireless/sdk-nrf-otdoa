@@ -44,8 +44,8 @@ Building and running
 
 .. include:: /includes/build_and_run_ns.txt
 
-Testing
-=======
+Running the sample application
+==============================
 
 |test_sample|
 
