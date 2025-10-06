@@ -1,4 +1,8 @@
-// File: otdoa_thread.c
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
+ *
+ * SPDX-License-Identifier: LicenseRef-PHYW
+ */
 
 #include <otdoa_al/phywi_al2otdoa_api.h>
 #include <otdoa_al/phywi_otdoa2al_api.h>
