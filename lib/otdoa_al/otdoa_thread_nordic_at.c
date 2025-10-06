@@ -1,12 +1,8 @@
-/*------------------------------------------------------------------+
-*     PHY WIRELESS TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL       |
-*       Copyright (C) Acorn Technologies, Inc.  2015-2021          |
-*                   All Rights Reserved                            |
-*------------------------------------------------------------------+
-*
-* otdoa_thread_nordic_at.c - Thread for the Nordic AT functions
-*
-*/
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
+ *
+ * SPDX-License-Identifier: LicenseRef-PHYW
+ */
 
 #include <string.h>
 #include <zephyr/kernel.h>
