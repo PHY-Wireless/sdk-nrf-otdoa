@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
+ *
+ * SPDX-License-Identifier: LicenseRef-PHYW
+ */
+
 #include <zephyr/logging/log.h>
 #include <zephyr/logging/log_backend.h>
 #include <zephyr/logging/log_ctrl.h>

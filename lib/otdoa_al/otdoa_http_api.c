@@ -1,11 +1,7 @@
-/*------------------------------------------------------------------+
- *        ACORN TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL           |
- *       Copyright (C) Acorn Technologies, Inc.  2015-2025          |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * otdoa_http_api.c
- *
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
 #include <string.h>
 #include <stdlib.h>

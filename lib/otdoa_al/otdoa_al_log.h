@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
+ *
+ * SPDX-License-Identifier: LicenseRef-PHYW
+ */
 
 #ifndef OTDOA_AL_LOG_H__
 #define OTDOA_AL_LOG_H__

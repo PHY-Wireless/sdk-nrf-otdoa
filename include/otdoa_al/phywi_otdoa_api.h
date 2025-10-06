@@ -1,12 +1,7 @@
-/*------------------------------------------------------------------+
- *        ACORN TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL           |
- *       Copyright (C)  PHY Wireless, LLC a wholly owned subsidiary |
- *             of Acorn Technologies, Inc.  2015-2025               |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * phywi_otdoa_api.h - API Definitions for the PHY Wireless OTDOA module
- *
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
 
 #ifndef PHYWI_OTDOA_API__
@@ -19,6 +14,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @file phywi_otdoa_api.h
+ *
+ * @defgroup phywi_otdoa_api PHY Wireless OTDOA module
+ * @{
+ * @brief API Definitions for the PHY Wireless OTDOA module.
+ */
 
 #define OTDOA_API_MAX_CELLS     75
 #define OTDOA_API_MAX_SESSION_LEN   250
@@ -36,17 +39,12 @@ extern "C" {
 typedef enum {
     OTDOA_API_SUCCESS     =  0,     // Success
 
-    /** Return values from API function calls */
-    OTDOA_API_ERROR_PARAM = -1,     // Parameter error in API
-    OTDOA_API_INTERNAL_ERROR = -2,  // Internal error in OTDOA library. 
+    /** Parameter error in API */
+    OTDOA_API_ERROR_PARAM = -1,
 
-    /** The uBSA is still being generated */
-    OTDOA_EVENT_HTTP_NOT_READY = 202,
+    /** Internal error in OTDOA library. */
+    OTDOA_API_INTERNAL_ERROR = -2,
 
-    /** The uBSA is only partially downloaded */
-    OTDOA_EVENT_HTTP_PARTIAL_CONTENT = 206,
-
-    /** EVENT_FAIL result code values */
     /** Failure occurred in the uBSA download */
     OTDOA_EVENT_FAIL_UBSA_DL = 1,
     
@@ -95,6 +93,12 @@ typedef enum {
     /** The requested ECGI has been blacklisted */
     OTDOA_EVENT_FAIL_BLACKLISTED = 16,
 
+    /// The uBSA is still being generated
+    OTDOA_EVENT_HTTP_NOT_READY                   = 202,
+
+    /// The uBSA is only partially downloaded
+    OTDOA_EVENT_HTTP_PARTIAL_CONTENT             = 206,
+    
     /** Request parameters malformed or invalid */
     OTDOA_EVENT_FAIL_HTTP_BAD_REQUEST            = 400,
 
@@ -228,7 +232,7 @@ typedef struct {
 
 typedef struct {
     /** Status of the results upload*/
-    otdoa_api_error_codes_t status;    // The same status values are used for UL of results and DL of uBSA
+    otdoa_api_error_codes_t status;
 } otdoa_api_ubsa_ul_compl_t;
 
 /** @brief enum defining the type of event retured by the OTDOA library */
@@ -289,7 +293,7 @@ typedef void (*otdoa_api_callback_t)(
  *                     to return results and status to the client
  * @return 0 on success
  */
-int32_t otdoa_api_init(const char* const ubsa_file_path, otdoa_api_callback_t event_callback);
+int32_t otdoa_api_init(const char* const ubsa_file_path, otdoa_api_callback_t callback);
 
 /**
  * @brief Initiates an OTDOA positioning session
@@ -393,6 +397,8 @@ void otdoa_api_cfg_set_file_path(const char * psz_path);
  * @brief Gets the path used for the config file
  */
 const char* otdoa_api_cfg_get_file_path();
+
+/** @} */
 
 #ifdef __cplusplus
 }

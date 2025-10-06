@@ -1,14 +1,7 @@
-/*------------------------------------------------------------------+
- *        ACORN TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL           |
- *       Copyright (C) Acorn Technologies, Inc.  2015-2025          |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * otdoa_http_h1.c
- *
- * This file contains routines peculiar to the HTTP H1 scheme -- this file
- * does not intend to replace otdoa_http.c at the moment.
- *
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
 
 #include <errno.h>
