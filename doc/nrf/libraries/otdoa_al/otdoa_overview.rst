@@ -1,15 +1,30 @@
+.. otdoa overview:
 OTDOA Overview
 ##############
 
-Observed Time-Difference of Arrival (OTDOA) is a technique for estimating a UE's position.  It involves estimating time differences between signals broadcast using by the terrestrial LTE cellular network.  These time difference estimates can then be used to triangulate the UE's position based upon known cellular base station positions, in much the same way as GNSS systems triangulate a position based upon know satellite positions.  The OTDOA Implementation in this library is *UE-based*, meaning that the position estimate is calculated by the UE application processor, rather than by a network server.
+Observed Time-Difference of Arrival (OTDOA) is a technique for estimating a UE's position.  It involves estimating time differences between signals broadcast by the terrestrial LTE cellular network.  These time difference estimates can then be used to triangulate the UE's position based upon known cellular base station positions, in much the same way as GNSS systems triangulate a position based upon know satellite positions.  The OTDOA implementation in this library is *UE-based*, meaning that the position estimate is calculated by the UE application processor, rather than by a network server.
 
-Cells in the LTE network broadcast Positioning Reference Signals (PRS) signals that may be used to estimate the time difference of arrival by the UE.  The PRS signals are periodically broadcast by the LTE network (typically for 1 msec. every 160 msec.), and they are multiplexed in a way that allows the UE to detect PRS broadcast by multiple base stations at the same time.
+Cells in the LTE network broadcast Positioning Reference Signals (PRS) signals
+that may be used to estimate the time difference of arrival at the UE.  The PRS
+signals are periodically broadcast by the LTE network (typically for 1 msec.
+every 160 msec.), and they are multiplexed in a way that allows the UE to detect
+PRS broadcast by multiple base stations at the same time.
 
-Information about the cellular base stations, including their positions, is contained in micro-Base Station Almanac (uBSA) file that is downloaded to the UE from a network server.  This uBSA is stored in a file system on the UE, and typically covers a large geographic area.  The UE can use this uBSA for many position estimates; if it moves outside the geographic coverage area a new uBSA is automatically downloaded.  An important function of the OTDOA Adaption Layer is to download the uBSA from a network server, and store it in the UE file system for access by the OTDOA binary library.
+Information about the cellular base stations, including their positions,
+is contained in micro-Base Station Almanac (uBSA) file that is downloaded 
+by the UE from a network server.  This uBSA is stored in a file system on 
+the UE, and it typically covers a large geographic area.  The UE uses this
+uBSA for many position estimates; if it moves outside the geographic coverage
+area a new uBSA is automatically downloaded.  An important function of the 
+OTDOA Adaption Layer is to download the uBSA from a network server, and store
+it in the UE file system for access by the OTDOA binary library.
 
-Once the uBSA has been downloaded, all position estimate calculations are done on the UE application processor.  This includes collection of the PRS signals, estimation of time differences of arrival, and triangulation calculations necessary to estimate the UE position.
+Once the uBSA has been downloaded, all position estimate calculations are
+performed by n the UE application processor.  This includes collection of the PRS
+signals, estimation of time differences of arrival, and triangulation
+calculations necessary to estimate the UE position.
 
-UE-based OTDOA for UE position estimate has the following advantages:
+UE-based OTDOA for has the following advantages:
 
 * Very low power consumption
 * Excellent privacy, since position estimates are calculated by the UE without network involvement.
@@ -49,27 +64,30 @@ Requirements
 
 OTDOA Binary Library
 ====================
-The OTDOA adaption layer requires the OTDOA binary library to be separately downloaded and integrated
-into the nRF Connect SDK by the developer.
+The OTDOA adaption layer requires the OTDOA binary library to be separately 
+downloaded and integrated into the nRF Connect SDK by the developer.
 
 Security Requirements
 =====================
 
 TLS Certificate
 ---------------
-The UE requires a TLS certificate to authenticate with the network server when downloading the uBSA 
-or configuration information.  This certificate may be installed by the application using the 
-:ref:`otdoa_api_install_tls_cert` API.  Alternatively, the certificate may be installed by the 
-adaption layer using the :kconfig:option:`CONFIG_OTDOA_API_TLS_CERT_INSTALL` configuration option.
+The UE requires a TLS certificate to authenticate with the network server 
+when downloading the uBSA or configuration information.  This certificate 
+may be installed by the application using the :ref:`otdoa_api_install_tls_cert`
+API.  Alternatively, the certificate may be installed by the adaption layer
+using the :kconfig:option:`CONFIG_OTDOA_API_TLS_CERT_INSTALL` configuration
+option.
 
 Network Server Keys
 -------------------
-The UE requires a public/private key pair to authenticate with the network server when downloading 
-the uBSA or configuration information.  The private key is loaded into the UE using 
-the :ref:`otdoa_api_provision` API.   The public key is sent to the network server where it is 
-used to authenticate the UE.
+The UE requires a public/private key pair to authenticate with the network server
+when downloading the uBSA or configuration information.  The private key is
+loaded into the UE using the :ref:`otdoa_api_provision` API.   The public key
+is sent to the network server where it is used to authenticate the UE.
 
-Instructions for generating the public/private key pair are provided along with the OTDOA binary library.
+Instructions for generating the public/private key pair are provided along with
+the OTDOA binary library.
 
 
 Configuration
@@ -115,7 +133,6 @@ Samples using the library
 The following |NCS| samples use the OTDOA library and adaption layer:
 
 * :ref:`otdoa_sample`
-* :ref:`location_sample`
 
 
 Application integration

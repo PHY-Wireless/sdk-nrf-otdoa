@@ -1,8 +1,12 @@
+.. _otdoa data flow:
 OTDOA Data Flow
 ===============
 
-This section describes the flow of data through the OTDOA system, including download of the uBSA,
-estimate of the time of arrival for signals from multiple cells, and formulation of the position estimate.
+As described in :ref:`otodoa overview`, the OTDOA firmware subsystem consists of an OTDOA binary library
+(delivered in binary object code format), and the OTDOA Adaption Layer (delivered as source code as part 
+of the nRF Connect SDK).  This section describes the flow of data through these components, including 
+download of the uBSA, estimate of the time of arrival for signals from multiple cells, and formulation 
+of the position estimate.
 
 When the OTDOA library is requested to make a position estimate, it retrieves the current uBSA
 information from the file system storage, and uses it to generate a list of cells for measurement.
@@ -20,25 +24,27 @@ arrival for the PRS signal from each detected cell.  It then selects the best re
 as its reference cell, and calculates the time-difference of arrival for each cell by subtracting
 the reference cell time of arrival from each other cell's time of arrival.  The OTDOA library
 then uses the time-difference of arrival values, and each cell's known location, to calculate
-and estimate of the UE's position.
+an estimate of the UE's position.
 
 The OTDOA library also includes an Enhanced Cell ID (ECID) algorithm used as a fallback to
 estimate the UE position when it cannot detect the PRS signals from a sufficent number
 of base stations.  The library also includes algorithms to estimate the accuracy of
 its OTDOA and ECID position estimates.
 
-The OTDOA library executes almost completely on a single Zephyr thread.  An exception to this is
+The OTDOA binary library executes almost completely on a single Zephyr thread.  An exception to this is
 the OTDOA API (see :doc:`phywi_api`), where API function calls are converted to messages
-that are sent to the thread for processing.  The other exception is the callback used by
+that are sent to the thread for processing.  Another exception is the callback used by
 the Nordic RS Capture API, which writes samples into its memory slab buffer and then sends a
-message to the thread to indicate the samples are available for processing.
+message to the thread to indicate the samples are available for processing.  Finally, the OTDOA Adaption
+layer includes a workqueue thread that allows it to interact with a network server to download
+the uBSA.
 
 Real-Time Constraints
 ---------------------
 
-The OTDOA libary is designed to process the PRS from the modem as they are received.  Typically 
-a new block of samples is received every 160 ms.  The OTDOA libary processing typically requires
-only 15% to 20% of this 160 ms. interval.  This leaves plenty of processing time for other 
+The OTDOA binary libary is designed to process the PRS from the modem as they are received.  Typically 
+a new block of samples is received every 160 ms.  The OTDOA binary libary processing for a block typically
+requires only 15% to 20% of this 160 ms. interval.  This leaves plenty of processing time for other 
 application functions, even while the OTDOA positioning system is active.
 
 If the OTDOA library is not able to keep up with the processing of the PRS
@@ -49,6 +55,7 @@ OTDOA algorithms, but otherwise it is not harmful.
 The buffering of the PRS samples is done using a memory slab in the OTDOA adaption layer.  
 Typically, this buffer is sized to hold a single block of samples.  This requires that
 the OTDOA library complete processing of one block of samples before the next block
-is processed.  If the application processor loading is particularly high, the size of
-the memory slab can be increased to allow additional time for the OTDOA library to 
-complete its processing.  However, this is not typically required.
+of samples is received from the nrfxlib RS Capture API.  If the application processor
+loading is particularly high, the size of the memory slab can be increased to allow
+additional time for the OTDOA library to complete its processing.  However, this is 
+not typically required.
