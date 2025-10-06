@@ -1,9 +1,10 @@
-/*------------------------------------------------------------------+
- *     PHY WIRELESS TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL       |
- *       Copyright (C) Acorn Technologies, Inc.  2015-2024          |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
+ * SPDX-License-Identifier: LicenseRef-PHYW
+ */
+
+/*
  * otdoa_fs.c
  *
  * This file is mostly just a wrapper around the Zephyr file system

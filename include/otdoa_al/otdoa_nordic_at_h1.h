@@ -1,14 +1,10 @@
-/*------------------------------------------------------------------+
- *     PHY WIRELESS TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL       |
- *       Copyright (C) Acorn Technologies, Inc.  2015-2024          |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * otdoa_nordic_at_h1.h - AT command/response 
- *                        for Nordic-Based "H1" product
- *
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
-#ifndef INCLUDE_OTDOA_NORDIC_AT_H1_H_
+
+ #ifndef INCLUDE_OTDOA_NORDIC_AT_H1_H_
 #define INCLUDE_OTDOA_NORDIC_AT_H1_H_
 
 #include <stdint.h>

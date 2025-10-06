@@ -1,13 +1,7 @@
-/*------------------------------------------------------------------+
- *        ACORN TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL           |
- *       Copyright (C)  PHY Wireless, LLC a wholly owned subsidiary |
- *             of Acorn Technologies, Inc.  2015-2025               |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * phywi_al2otdoa_api.h - API Definitions for ODTDOA Librar that
- *                        are called by the OTDOA Adaption Layer
- *
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
 
 #ifndef PHYWI_AL2OTDOA_API__
