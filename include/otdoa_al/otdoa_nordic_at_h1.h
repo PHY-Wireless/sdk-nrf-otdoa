@@ -1,24 +1,28 @@
-/*------------------------------------------------------------------+
- *     PHY WIRELESS TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL       |
- *       Copyright (C) Acorn Technologies, Inc.  2015-2024          |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * otdao_nordic_at_h1.c - AT command/response 
- *                        for Nordic-Based "H1" product
- *
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
-#ifndef INCLUDE_OTDOA_NORDIC_AT_H1_H_
+
+ #ifndef INCLUDE_OTDOA_NORDIC_AT_H1_H_
 #define INCLUDE_OTDOA_NORDIC_AT_H1_H_
 
 #include <stdint.h>
 #include <stddef.h>
 
-// @brief Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN
-/// @param psz_resp[in]         response string returned by the modem
-/// @param u_resp_len[in]       Length of the response string 
-/// @param pu32_ecgi[out]       ECGI   
-/// @param pu32_dlearfcn[out]   DLEARFCN
+/**
+ * @file otdoa_nordic_at_h1.h
+ *
+ * @defgroup otdoa_nordic_at_h1 OTDOA Nordic AT Command utilities
+ * @{
+ * @brief AT Command utilities for Nordic-Based "H1" product
+ */
+
+/// @brief Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN
+/// @param psz_resp      [in]   response string returned by the modem
+/// @param u_resp_len    [in]   Length of the response string 
+/// @param pu32_ecgi     [out]  A pointer to where the returned ECGI will be written   
+/// @param pu32_dlearfcn [out]  A pointer to where the returned DLEARFCN will be written
 /// @return     0               Success
 ///
 /// @note response is documented in "nRF91 AT Commands Command Reference Guide" v2.0
@@ -27,16 +31,16 @@
 ///  %XMONITOR: 1,"Verizon Wireless","VZW","311480","2F02",7,13,"00B7F901",282,5230,37,25,"","11100000","11100000","01011110"
 //
 int otdoa_nordic_at_parse_xmonitor_response(
-        const char* const psz_resp, size_t u_resp_len,
-        uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn);
+        const char* const psz_resp, size_t u_resp_len, 
+        uint32_t * pu32_ecgi, uint32_t * pu32_dlearfcn);
 
 
 /// @brief Use AT%%XMONITOR command to get the current ECGI and DLEARFCN from the modem
-/// @param pu32_ecgi[out]       ECGI   
-/// @param pu32_dlearfcn[out]   DLEARFCN
+/// @param pu32_ecgi [out]       A pointer to where the returned ECGI will be written
+/// @param pu32_dlearfcn [out]   A pointer to where the returned DLEARFCN will be written
 /// @return  0 on success
 ///          values from otdoa_api_error_codes_t (in phywi_otdoa_api.h) on any failure
-int otdoa_nordic_at_get_ecgi_and_dlearfcn( uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn);
+int otdoa_nordic_at_get_ecgi_and_dlearfcn(uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn);
 
 
 
@@ -55,9 +59,11 @@ const char* otdoa_get_imei_string();
 char* otdoa_nordic_at_strtok_r (char *s, char delim, char **save_ptr);
 
 /// @brief Returns the version string from the modem firmware
-/// @param psz_ver points to where the version string will be written
-/// @param max_len Maximum length of data to write
+/// @param psz_ver [out] points to where the version string will be written
+/// @param max_len [in]  Maximum length of data to write
 /// @return 0 on success
-int otdoa_nordic_at_get_modem_version(char* psz_ver, unsigned max_len);
+int otdoa_nordic_at_get_modem_version(char *psz_ver, unsigned max_len);
+
+/** @} */
 
 #endif /* INCLUDE_OTDOA_NORDIC_AT_H1_H_ */

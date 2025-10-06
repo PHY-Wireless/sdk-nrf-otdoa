@@ -1,13 +1,7 @@
-/*------------------------------------------------------------------+
- *        ACORN TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL           |
- *       Copyright (C)  PHY Wireless, LLC a wholly owned subsidiary |
- *             of Acorn Technologies, Inc.  2015-2025               |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * phywi_al2otdoa_api.h - API Definitions for ODTDOA Librar that
- *                        are called by the OTDOA Adaption Layer
- *
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
 
 #ifndef PHYWI_AL2OTDOA_API__
@@ -49,7 +43,7 @@ int generate_jwt(char *buffer, size_t len, size_t *olen);
 /**
  * Derive a new AES key from two ECDH keys.
  * 
- * @param[in]   svr_pubkey      Server pub key (binary format, not ASCII)
+ * @param[in]   p_svr_pubkey    Pointer to Server pub key (binary format, not ASCII)
  * @param[in]   pubkey_len      Length of the public key
  */
 int otdoa_crypto_set_new_key(const uint8_t* p_svr_pubkey, const size_t pubkey_len);

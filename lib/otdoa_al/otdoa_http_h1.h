@@ -1,13 +1,7 @@
-/*------------------------------------------------------------------+
- *     PHY WIRELESS TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL       |
- *       Copyright (C) Acorn Technologies, Inc.  2015-2023          |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * otdoa_http_h1.h
- *
- * OTDOA HTTP Module for "H1" product
- *
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
 
 #ifndef OTDOA_HTTP_H1_H

@@ -1,13 +1,7 @@
-/*------------------------------------------------------------------+
- *     PHY WIRELESS TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL       |
- *       Copyright (C) Acorn Technologies, Inc.  2015-2022          |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * otdoa_fs.h
- *
- * File System API for use by OTDOA functions
- *
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
 
 #ifndef _OTDOA_FS_H_

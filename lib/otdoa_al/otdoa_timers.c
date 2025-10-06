@@ -1,13 +1,9 @@
-/*------------------------------------------------------------------+
- *     PHY WIRELESS TECHNOLOGIES PROPRIETARY AND CONFIDENTIAL       |
- *       Copyright (C) Acorn Technologies, Inc.  2015-2025          |
- *                   All Rights Reserved                            |
- *------------------------------------------------------------------+
+/*
+ * Copyright (c) 2025 PHY Wireless, Inc.
  *
- * otdoa_timers.c
- *
- * Timer functions adapted to the Nordic/Zephyr RTOS
+ * SPDX-License-Identifier: LicenseRef-PHYW
  */
+
 #include <zephyr/kernel.h>
 
 #include <stdint.h>
