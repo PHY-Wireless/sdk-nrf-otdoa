@@ -86,6 +86,7 @@ static const char LOCATION_METHOD_CELLULAR_STR[] = "Cellular";
 static const char LOCATION_METHOD_GNSS_STR[] = "GNSS";
 static const char LOCATION_METHOD_WIFI_STR[] = "Wi-Fi";
 static const char LOCATION_METHOD_WIFI_CELLULAR_STR[] = "Wi-Fi + Cellular";
+static const char LOCATION_METHOD_OTDOA_STR[] = "OTDOA";
 static const char LOCATION_METHOD_UNKNOWN_STR[] = "Unknown";
 
 int location_handler_register(location_event_handler_t handler)
@@ -217,6 +218,11 @@ static void location_config_method_defaults_set(
 		method->wifi.timeout = CONFIG_LOCATION_REQUEST_DEFAULT_WIFI_TIMEOUT;
 		method->wifi.service = LOCATION_SERVICE_ANY;
 #endif
+	} else if (method_type == LOCATION_METHOD_OTDOA) {
+#if defined(CONFIG_LOCATION_METHOD_OTDOA)
+		method->otdoa.timeout = CONFIG_LOCATION_REQUEST_DEFAULT_OTDOA_TIMEOUT;
+		method->otdoa.session_length = CONFIG_LOCATION_REQUEST_DEFAULT_OTDOA_SESSION_LENGTH;
+#endif
 	}
 }
 
@@ -301,6 +307,9 @@ const char *location_method_str(enum location_method method)
 
 	case LOCATION_METHOD_WIFI_CELLULAR:
 		return LOCATION_METHOD_WIFI_CELLULAR_STR;
+
+	case LOCATION_METHOD_OTDOA:
+		return LOCATION_METHOD_OTDOA_STR;
 
 	default:
 		return LOCATION_METHOD_UNKNOWN_STR;

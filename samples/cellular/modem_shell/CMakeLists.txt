@@ -32,6 +32,26 @@ add_subdirectory_ifdef(CONFIG_MOSH_STARTUP_CMDS src/startup_cmd)
 add_subdirectory_ifdef(CONFIG_MOSH_GPIO_COUNT src/gpio_count)
 add_subdirectory(src/cloud)
 
+##### TODO Start: How to make these OTDOA specific possibly in lib/otdoa.
+#####             App shouldn't need to worry about it other than maybe turning on some Kconfig.
+
+# get settings from sysbuild
+zephyr_get(otdoa_FS_EXT_STORAGE    SYSBUILD GLOBAL)
+message("otdoa_FS_EXT_STORAGE : ${otdoa_FS_EXT_STORAGE}")
+message("CONFIG_OTDOA_DEBUG_LOGS : ${CONFIG_OTDOA_DEBUG_LOGS}")
+
+# include littlefs if specified, disable otherwise
+add_compile_definitions(OTDOA_LITTLE_FS=1)
+add_compile_definitions(ZEPHYR_FS_API)
+# determine whether File System mounted on internal/external flash
+if ("${otdoa_FS_EXT_STORAGE}" STREQUAL "ON")
+  add_compile_definitions(FS_EXT_STORAGE=1)
+else()
+  add_compile_definitions(FS_EXT_STORAGE=0)
+endif()
+
+##### TODO End
+
 if(NOT ENV{PROJECT_NAME})
   zephyr_compile_definitions(
     PROJECT_NAME=${CMAKE_PROJECT_NAME}

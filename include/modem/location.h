@@ -56,6 +56,8 @@ enum location_method {
 	 * NULL configuration is passed to location_request().
 	 */
 	LOCATION_METHOD_WIFI_CELLULAR,
+	/** OTDOA positioning. */
+	LOCATION_METHOD_OTDOA,
 };
 
 /** Location acquisition mode. */
@@ -531,6 +533,22 @@ struct location_wifi_config {
 	enum location_service service;
 };
 
+/** OTDOA positioning configuration. */
+struct location_otdoa_config {
+	/**
+	 * @brief Timeout (in milliseconds) of how long the OTDOA positioning procedure can take.
+	 * SYS_FOREVER_MS means that the timer is disabled.
+	 *
+	 * @details Default value is 30000 (30 seconds). It is applied when
+	 * @ref location_config_defaults_set function is called and can be changed
+	 * at build time with CONFIG_LOCATION_REQUEST_DEFAULT_OTDOA_TIMEOUT configuration.
+	 */
+	int32_t timeout;
+
+	/** @brief OTDOA session length in PRS occasions. */
+	uint32_t session_length;  
+};
+
 /** Location method configuration. */
 struct location_method_config {
 	/** Location method. */
@@ -542,6 +560,8 @@ struct location_method_config {
 		struct location_gnss_config gnss;
 		/** Configuration for @ref LOCATION_METHOD_WIFI. */
 		struct location_wifi_config wifi;
+		/** Configuration for LOCATION_METHOD_OTDOA. */
+		struct location_otdoa_config otdoa;
 	};
 };
 

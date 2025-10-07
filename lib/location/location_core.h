@@ -12,6 +12,7 @@ struct location_request_info {
 	const struct location_wifi_config *wifi;
 	const struct location_cellular_config *cellular;
 	const struct location_gnss_config *gnss;
+	const struct location_otdoa_config *otdoa;
 
 	/** Configuration given for currently ongoing location request. */
 	struct location_config config;

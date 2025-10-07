@@ -50,9 +50,16 @@ config LOCATION_METHOD_WIFI_NET_IF_UPDOWN
 	  Use the Network Interface Up/Down APIs for Wi-Fi functionality.
 
 
+config LOCATION_METHOD_OTDOA
+	bool "Allow OTDOA positioning to be used for obtaining the location"
+	select OTDOA_AL_LIB
+	depends on FLASH
+	depends on FILE_SYSTEM
+	depends on FILE_SYSTEM_LITTLEFS
+
 config LOCATION_METHODS_LIST_SIZE
 	int "Maximum number of location methods in configuration"
-	default 3
+	default 4
 	help
 	  Maximum number of location methods within location_config structure.
 
@@ -336,6 +343,24 @@ config LOCATION_REQUEST_DEFAULT_WIFI_TIMEOUT
 	  member within location_wifi_config structure.
 
 endif # LOCATION_METHOD_WIFI
+
+if LOCATION_METHOD_OTDOA
+
+config LOCATION_REQUEST_DEFAULT_OTDOA_TIMEOUT
+	int "Default OTDOA timeout in milliseconds"
+	default 60000
+	help
+	  Default value used in location_config_defaults_set() function for timeout
+	  member within location_otdoa_config structure.
+
+config LOCATION_REQUEST_DEFAULT_OTDOA_SESSION_LENGTH
+	int "Default OTDOA session length in PRS occasions"
+	default 32
+	help
+	  Default value used in location_config_defaults_set() function for session_length
+	  member within location_otdoa_config structure.
+
+endif # LOCATION_METHOD_OTDOA
 
 module = LOCATION
 module-str = Location

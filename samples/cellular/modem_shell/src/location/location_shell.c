@@ -120,6 +120,10 @@ static const char location_get_usage_str[] =
 	"  --wifi_timeout, [float]     Wi-Fi timeout in seconds. Zero means timeout is disabled.\n"
 	"  --wifi_service, [str]       Used Wi-Fi positioning service:\n"
 	"                              'any' (default), 'nrf' or 'here'\n"
+	"  --otdoa_timeout, [float]     OTDOA timeout in seconds. Zero means timeout is disabled.\n"
+	"  --otdoa_session_length, [int]\n"
+	"                              The length of the OTDOA session in PRS occasions\n"
+	"                              (default: 32)\n"
 	"  --cloud_resp_disabled,      Do not wait for location response from cloud.\n"
 	"                              Valid if CONFIG_LOCATION_SERVICE_EXTERNAL is set.\n"
 	"  -h, --help,                 Shows this help information";
@@ -142,6 +146,8 @@ enum {
 	LOCATION_SHELL_OPT_CLOUD_RESP_DISABLED,
 	LOCATION_SHELL_OPT_WIFI_TIMEOUT,
 	LOCATION_SHELL_OPT_WIFI_SERVICE,
+	LOCATION_SHELL_OPT_OTDOA_TIMEOUT,
+	LOCATION_SHELL_OPT_OTDOA_SESSION_LENGTH,
 };
 
 /* Specifying the expected options */
@@ -164,6 +170,8 @@ static struct option long_options[] = {
 	{ "cloud_resp_disabled", no_argument, 0, LOCATION_SHELL_OPT_CLOUD_RESP_DISABLED },
 	{ "wifi_timeout", required_argument, 0, LOCATION_SHELL_OPT_WIFI_TIMEOUT },
 	{ "wifi_service", required_argument, 0, LOCATION_SHELL_OPT_WIFI_SERVICE },
+	{ "otdoa_timeout", required_argument, 0, LOCATION_SHELL_OPT_OTDOA_TIMEOUT },
+	{ "otdoa_session_length", required_argument, 0, LOCATION_SHELL_OPT_OTDOA_SESSION_LENGTH },
 	{ "help", no_argument, 0, 'h' },
 	{ 0, 0, 0, 0 }
 };
@@ -552,6 +560,11 @@ static int cmd_location_get(const struct shell *shell, size_t argc, char **argv)
 	bool wifi_timeout_set = false;
 	enum location_service wifi_service = LOCATION_SERVICE_ANY;
 
+	float otdoa_timeout = 0;
+	bool otdoa_timeout_set = false;
+	uint32_t otdoa_session_length = 0;
+	bool otdoa_session_length_set = false;
+
 	arg_cloud_gnss_format = NRF_CLOUD_GNSS_TYPE_PVT;
 	arg_cloud_gnss = false;
 	arg_cloud_details = false;
@@ -628,6 +641,15 @@ static int cmd_location_get(const struct shell *shell, size_t argc, char **argv)
 			}
 			break;
 
+		case LOCATION_SHELL_OPT_OTDOA_TIMEOUT:
+			otdoa_timeout = atof(optarg);
+			otdoa_timeout_set = true;
+			break;
+		case LOCATION_SHELL_OPT_OTDOA_SESSION_LENGTH:
+			otdoa_session_length = atoi(optarg);
+			otdoa_session_length_set = true;
+			break;
+
 		case LOCATION_SHELL_OPT_INTERVAL:
 			interval = atoi(optarg);
 			interval_set = true;
@@ -687,6 +709,8 @@ static int cmd_location_get(const struct shell *shell, size_t argc, char **argv)
 				method_list[method_count] = LOCATION_METHOD_GNSS;
 			} else if (strcmp(optarg, "wifi") == 0) {
 				method_list[method_count] = LOCATION_METHOD_WIFI;
+			} else if (strcmp(optarg, "otdoa") == 0) {
+				method_list[method_count] = LOCATION_METHOD_OTDOA;
 			} else {
 				mosh_error("Unknown method (%s) given. See usage:", optarg);
 				goto show_usage;
@@ -749,6 +773,15 @@ static int cmd_location_get(const struct shell *shell, size_t argc, char **argv)
 			if (wifi_timeout_set) {
 				config.methods[i].wifi.timeout = (wifi_timeout == 0) ?
 					SYS_FOREVER_MS : wifi_timeout * MSEC_PER_SEC;
+			}
+		} else if (config.methods[i].method == LOCATION_METHOD_OTDOA) {
+			if (otdoa_timeout_set) {
+				config.methods[i].otdoa.timeout = (otdoa_timeout == 0) ?
+					SYS_FOREVER_MS : otdoa_timeout * MSEC_PER_SEC;
+			}
+			if (otdoa_session_length_set) {
+				config.methods[i].otdoa.session_length =
+					otdoa_session_length;
 			}
 		}
 	}
