@@ -24,6 +24,9 @@
 #if defined(CONFIG_LOCATION_METHOD_CELLULAR) || defined(CONFIG_LOCATION_METHOD_WIFI)
 #include "method_cloud_location.h"
 #endif
+#if defined(CONFIG_LOCATION_METHOD_OTDOA)
+#include "method_otdoa.h"
+#endif
 
 LOG_MODULE_DECLARE(location, CONFIG_LOCATION_LOG_LEVEL);
 
@@ -115,6 +118,20 @@ static const struct location_method_api method_wifi_api = {
 #define METHOD_WIFI_ACCURACY_THRESHOLD 100
 };
 #endif
+#if defined(CONFIG_LOCATION_METHOD_OTDOA)
+/** OTDOA location method configuration. */
+static const struct location_method_api method_otdoa_api = {
+	.method           = LOCATION_METHOD_OTDOA,
+	.method_string    = "OTDOA",
+	.init             = method_otdoa_init,
+	.location_get     = method_otdoa_location_get,
+	.cancel           = method_otdoa_cancel,
+	.timeout          = method_otdoa_cancel,
+#if defined(CONFIG_LOCATION_DATA_DETAILS)
+	.details_get      = NULL, // TODO: method_otdoa_details_get,
+#endif
+};
+#endif
 #if defined(CONFIG_LOCATION_METHOD_CELLULAR) || defined(CONFIG_LOCATION_METHOD_WIFI)
 /**
  * Configuration for cloud location method, that is, combined Wi-Fi and cellular location method.
@@ -147,6 +164,9 @@ static const struct location_method_api *methods_supported[] = {
 #endif
 #if defined(CONFIG_LOCATION_METHOD_CELLULAR) || defined(CONFIG_LOCATION_METHOD_WIFI)
 	&method_cloud_location_api,
+#endif
+#if defined(CONFIG_LOCATION_METHOD_OTDOA)
+	&method_otdoa_api,
 #endif
 	NULL
 };
@@ -339,6 +359,12 @@ void location_core_config_log(const struct location_config *config)
 				location_core_service_str(config->methods[i].wifi.service),
 				config->methods[i].wifi.service);
 #endif
+#if defined(CONFIG_LOCATION_METHOD_OTDOA)
+		} else if (type == LOCATION_METHOD_OTDOA) {
+			LOG_DBG("      Timeout: %dms", config->methods[i].otdoa.timeout);
+			LOG_DBG("      Session length: %d",
+				config->methods[i].otdoa.session_length);
+#endif
 		}
 	}
 #endif
@@ -419,6 +445,8 @@ static void location_request_info_create(const struct location_config *config)
 			method_wifi_index = i;
 		} else if (loc_req_info.config.methods[i].method == LOCATION_METHOD_GNSS) {
 			loc_req_info.gnss = &loc_req_info.config.methods[i].gnss;
+		} else if (loc_req_info.config.methods[i].method == LOCATION_METHOD_OTDOA) {
+			loc_req_info.otdoa = &loc_req_info.config.methods[i].otdoa;
 		}
 	}
 
