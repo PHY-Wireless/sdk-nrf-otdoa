@@ -5,6 +5,11 @@
  */
 
 #if CONFIG_OTDOA_SHELL_COMMANDS
+#include "otdoa_al/otdoa_nordic_at_h1.h"
+#include "otdoa_al/otdoa_nordic_at_h1.h"
+#include "stdint.h"
+#include "stdint.h"
+#include "stdint.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -38,43 +43,43 @@ static int otdoa_shell_info_handler(const struct shell *shell,
     char        iccid[256];
     int         rc;
 
-    shell_print(shell, "Nordic OTDOA Application\n");
+    shell_print(shell, "Nordic OTDOA Application");
     /* get the ECGI */
-    rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, NULL);
+    rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, NULL, NULL, NULL);
     if (rc)
-        shell_error(shell, "Failed to get ECGI: %d\n", rc);
+        shell_error(shell, "Failed to get ECGI: %d", rc);
     else
-        shell_print(shell, "          ECGI: %u\n", ecgi);
+        shell_print(shell, "          ECGI: %u", ecgi);
 
     /* get the software version */
     version = otdoa_api_get_version();
-    shell_print(shell, "       Version: %s\n", version);
+    shell_print(shell, "       Version: %s", version);
 #ifdef APP_MODEM_TRACE_ENABLED
-    shell_print(shell, "         Trace: ENABLED\n");
+    shell_print(shell, "         Trace: ENABLED");
 #else
-    shell_print(shell, "         Trace: DISABLED\n");
+    shell_print(shell, "         Trace: DISABLED");
 #endif
 
     rc = otdoa_nordic_at_get_modem_version(iccid, sizeof(iccid));
     if (rc) {
-        shell_error(shell, "Failed to get Modem Version\n");
+        shell_error(shell, "Failed to get Modem Version");
     } else {
-        shell_print(shell, "   MFW Version: %s\n", iccid);
+        shell_print(shell, "   MFW Version: %s", iccid);
     }
 
     const char* pszIMEI = otdoa_get_imei_string();
     if (NULL == pszIMEI)
         pszIMEI = "unknown";
-    shell_print(shell, "          IMEI: %s\n", pszIMEI);
+    shell_print(shell, "          IMEI: %s", pszIMEI);
 
     /* get the ICCID */
     rc = nrf_modem_at_cmd(iccid, sizeof iccid, "AT%%XICCID");
     if (rc)
-        shell_error(shell, "Failed to get ICCID: %d\n", rc);
+        shell_error(shell, "Failed to get ICCID: %d", rc);
     else {
         /* find the end of the ICCID and end the string there */
         *strchr(iccid, '\n') = 0;
-        shell_print(shell, "       %s\n", iccid);
+        shell_print(shell, "       %s", iccid);
     }
 
     return 0;
@@ -110,7 +115,7 @@ static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, 
 {
     uint32_t u32Ecgi = 0;
     uint32_t u32DlearFcn = 5230;
-    otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32DlearFcn);
+    otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32DlearFcn, NULL, NULL);
     shell_print(shell, "Current : INFO ECGI=%u, DLEARFCN=%u\n", u32Ecgi, u32DlearFcn);
 
     uint32_t u32ServCellECGI = 0;   // Zero means don't override
@@ -143,9 +148,13 @@ static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, 
 static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc,
                              char **argv)
 {
-    // Get ECGI & DLEARFCN
-    uint32_t u32Ecgi = 0;           // Value of ECGI causes OTDOA library to use current serving cell
-    uint32_t u32Dlearfcn = 5230;
+    uint32_t u32Ecgi;
+    uint32_t u32Dlearfcn;
+    uint16_t u16MCC;
+    uint16_t u16MNC;
+
+    // use the real values as defaults
+    otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32Dlearfcn, &u16MCC, &u16MNC);
 
     uint32_t u32Radius = 100000;        // Default to 100000 since v0.2 of server interprets this as meters
     uint32_t u32NumCells = 1000;        // increase to 1000 18 Jan 2022.  Patch for Atlanta GA field testing
@@ -173,6 +182,24 @@ static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc,
         if (0 == u32NumCells)
         {
             shell_error(shell, "Failed to convert number of cells (%s)\n", argv[3]);
+        }
+    }
+
+    if (argc >= 5)
+    {
+        u16MCC = strtoul(argv[4], NULL, 0);
+        if (0 == u16MCC)
+        {
+            shell_error(shell, "Failed to convert MCC (%s)\n", argv[4]);
+        }
+    }
+
+    if (argc >= 6)
+    {
+        u16MNC = strtoul(argv[5], NULL, 0);
+        if (0 == u16MNC)
+        {
+            shell_error(shell, "Failed to convert MNC (%s)\n", argv[5]);
         }
     }
 
@@ -251,7 +278,7 @@ static int otdoa_shell_loc_handler(const struct shell *shell, size_t argc,
 SHELL_SUBCMD_ADD((phywi), info,       &otdoa_cmds, " Show current OTDOA info", otdoa_shell_info_handler, 0, 0);
 SHELL_SUBCMD_ADD((phywi), get_config, &otdoa_cmds, " Download a config file",  otdoa_shell_get_config_handler, 0, 0);
 SHELL_SUBCMD_ADD((phywi), jwt,        &otdoa_cmds, " Test generate JWT token", otdoa_shell_jwt_handler, 0, 0);
-SHELL_SUBCMD_ADD((phywi), get_ubsa,   &otdoa_cmds, " Download a uBSA (ECGI, Radius, NumCells)", otdoa_shell_get_ubsa_handler, 0, 4);
+SHELL_SUBCMD_ADD((phywi), get_ubsa,   &otdoa_cmds, " Download a uBSA (ECGI, Radius, NumCells, MCC, MNC)", otdoa_shell_get_ubsa_handler, 0, 6);
 SHELL_SUBCMD_ADD((phywi), loc,        &otdoa_cmds, " Perform a location estimate (length,flags)", otdoa_shell_loc_handler, 0, 2);
 SHELL_SUBCMD_ADD((phywi), provision,  &otdoa_cmds, " Provision a key to use for JWT generation", otdoa_shell_provision_handler, 0, 1);
 SHELL_SUBCMD_ADD((phywi), reset,      &otdoa_cmds, " Soft reset the device", otdoa_shell_reset_handler, 0, 0);
