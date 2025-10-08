@@ -31,16 +31,19 @@
 ///  %XMONITOR: 1,"Verizon Wireless","VZW","311480","2F02",7,13,"00B7F901",282,5230,37,25,"","11100000","11100000","01011110"
 //
 int otdoa_nordic_at_parse_xmonitor_response(
-        const char* const psz_resp, size_t u_resp_len, 
-        uint32_t * pu32_ecgi, uint32_t * pu32_dlearfcn);
+        const char* const psz_resp, size_t u_resp_len,
+        uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn,
+        uint16_t* pu16_mcc, uint16_t* pu16_mnc);
 
 
 /// @brief Use AT%%XMONITOR command to get the current ECGI and DLEARFCN from the modem
-/// @param pu32_ecgi [out]       A pointer to where the returned ECGI will be written
-/// @param pu32_dlearfcn [out]   A pointer to where the returned DLEARFCN will be written
+/// @param pu32_ecgi[out]       ECGI   
+/// @param pu32_dlearfcn[out]   DLEARFCN
+/// @param pu16_mcc[out]        MCC
+/// @param pu16_mnc[out]        MNC
 /// @return  0 on success
 ///          values from otdoa_api_error_codes_t (in phywi_otdoa_api.h) on any failure
-int otdoa_nordic_at_get_ecgi_and_dlearfcn(uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn);
+int otdoa_nordic_at_get_ecgi_and_dlearfcn( uint32_t* pu32_ecgi, uint32_t* pu32_dlearfcn, uint16_t* pu16_mcc, uint16_t* pu16_mnc);
 
 
 
