@@ -384,6 +384,12 @@ int otdoa_api_provision(const char* key_string);
 const char* const otdoa_api_get_version();
 
 /**
+ * @brief Returns a constant string containing a shortened form of the OTDOA library version,
+ * without any whitespace or special characters. Suitable for use in HTTP parameters.
+ */
+const char* const otdoa_api_get_short_version();
+
+/**
  * @brief Sets the path used for the config file
  */
 void otdoa_api_cfg_set_file_path(const char * psz_path);
