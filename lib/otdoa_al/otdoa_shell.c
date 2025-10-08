@@ -212,6 +212,8 @@ static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc,
     dl_req.dlearfcn = u32Dlearfcn;
     dl_req.ubsa_radius_meters = u32Radius;
     dl_req.max_cells = u32NumCells;
+    dl_req.mcc = u16MCC;
+    dl_req.mnc = u16MNC;
     int err = otdoa_api_ubsa_download(&dl_req, CONFIG_OTDOA_DEFAULT_UBSA_PATH, true);
     if (err != OTDOA_API_SUCCESS) {
         shell_error(shell, "uBSA download failed with return %d\n", err);
