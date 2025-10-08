@@ -1,6 +1,6 @@
 .. otdoa api
 OTDOA Application Programming Interface (API)
-=======================================
+=============================================
 
 The OTDOA library API provides a clear and consistent interface between the user's application
 and the PhyWi OTDOA library.  It may also be accessed by Nordic's Location Library if that

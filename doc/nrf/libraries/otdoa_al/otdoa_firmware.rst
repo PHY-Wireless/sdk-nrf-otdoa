@@ -1,4 +1,5 @@
 .. otdoa firmware architecture
+
 OTDOA Firmware Architecture
 ===========================
 
