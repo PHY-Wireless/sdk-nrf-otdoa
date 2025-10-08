@@ -130,6 +130,8 @@ void otdoa_http_h1_copy_ubsa_params(tOTDOA_HTTP_MEMBERS *pG, const tOTDOA_HTTP_M
     pG->uDlearfcn = pM->http_get_ubsa.uDlearfcn;
     pG->uRadius = pM->http_get_ubsa.uRadius;
     pG->uNumCells = pM->http_get_ubsa.uNumCells;
+    pG->uMCC = pM->http_get_ubsa.u16MCC;
+    pG->uMNC = pM->http_get_ubsa.u16MNC;
 }
 
 /**
@@ -243,6 +245,13 @@ int otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS *pG) {
     unsigned uBufferLen = pG->bDisableTLS ? HTTP_BUF_SIZE : HTTPS_BUF_SIZE;
     memset(pG->csBuffer, 0, uBufferLen);
 
+    // get the modem version
+    char modem_ver[30];
+    iRC = otdoa_nordic_at_get_modem_version(modem_ver, sizeof modem_ver);
+    if (iRC) {
+        OTDOA_LOG_ERR("http_h1_format_request: failed to get modem version: %d", iRC);
+    }
+
     // Build an Auth request
     iRC = snprintf(pG->csBuffer, uBufferLen,
                     //"GET /v1/uBSA"
@@ -254,6 +263,10 @@ int otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS *pG) {
                     //"&ecgi=%d"
                     "&dlearfcn=%d"
                     "&radius=%d"
+                    "&mcc=%"PRIu16
+                    "&mnc=%"PRIu16
+                    "&otdoa_fwv=%s"
+                    "&mfwv=%s"
                     "&num_cells=%d"
                     "&compress_window=%d"
                     " HTTP/1.1\r\n"
@@ -265,8 +278,11 @@ int otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS *pG) {
                     "\r\n",
                     pG->uEcgi,
                     (pG->bDisableEncryption ? 0 : 1),
-                    pG->uDlearfcn, pG->uRadius, pG->uNumCells,
-                    LOG2_COMPRESS_WINDOW,
+                    pG->uDlearfcn, pG->uRadius,
+                    pG->uMCC, pG->uMNC,
+                    otdoa_api_get_short_version(),
+                    modem_ver,
+                    pG->uNumCells, LOG2_COMPRESS_WINDOW,
                     otdoa_http_get_download_url(),
                     jwt_token);
 
