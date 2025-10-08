@@ -201,7 +201,7 @@ int otdoa_http_send_message(tOTDOA_HTTP_MESSAGE*pMsg) {
 }
 
 int otdoa_http_send_ubsa_req(const char *const pURL, uint32_t u32ECGI, uint32_t u32DLEARFCN, uint32_t u32Radius,
-                             uint32_t u32NumCells, const bool reset_blacklist) {
+                             uint32_t u32NumCells, uint16_t u16MCC, uint16_t u16MNC, const bool reset_blacklist) {
     tOTDOA_MSG_HTTP_GET_UBSA msg;
     msg.u32MsgId = OTDOA_HTTP_MSG_GET_H1_UBSA;
     OTDOA_LOG_INF("Sending uBSA req for ECGI %u", u32ECGI);
@@ -212,6 +212,8 @@ int otdoa_http_send_ubsa_req(const char *const pURL, uint32_t u32ECGI, uint32_t 
     msg.uRadius = u32Radius;
     msg.uNumCells = u32NumCells;
     msg.uNumRepeatCount = 0;
+    msg.u16MCC = u16MCC;
+    msg.u16MNC = u16MNC;
     msg.bResetBlacklist = reset_blacklist;
     return otdoa_http_send_message((tOTDOA_HTTP_MESSAGE*)&msg);
 }
