@@ -38,42 +38,43 @@ static int otdoa_shell_info_handler(const struct shell *shell,
     char        iccid[256];
     int         rc;
 
-    printk("Nordic OTDOA Application\n");
+    shell_print(shell, "Nordic OTDOA Application\n");
     /* get the ECGI */
     rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, NULL);
     if (rc)
-        printk("Failed to get ECGI: %d\n", rc);
+        shell_error(shell, "Failed to get ECGI: %d\n", rc);
     else
-        printk("          ECGI: %u\n", ecgi);
+        shell_print(shell, "          ECGI: %u\n", ecgi);
 
     /* get the software version */
     version = otdoa_api_get_version();
-    printk("       Version: %s\n", version);
+    shell_print(shell, "       Version: %s\n", version);
 #ifdef APP_MODEM_TRACE_ENABLED
-    printk("         Trace: ENABLED\n");
+    shell_print(shell, "         Trace: ENABLED\n");
 #else
-    printk("         Trace: DISABLED\n");
+    shell_print(shell, "         Trace: DISABLED\n");
 #endif
 
     rc = otdoa_nordic_at_get_modem_version(iccid, sizeof(iccid));
-    if (rc) printk("Failed to get Modem Version\n");
-    else {
-        printk("   MFW Version: %s\n", iccid);
+    if (rc) {
+        shell_error(shell, "Failed to get Modem Version\n");
+    } else {
+        shell_print(shell, "   MFW Version: %s\n", iccid);
     }
 
     const char* pszIMEI = otdoa_get_imei_string();
     if (NULL == pszIMEI)
         pszIMEI = "unknown";
-    printk("          IMEI: %s\n", pszIMEI);
+    shell_print(shell, "          IMEI: %s\n", pszIMEI);
 
     /* get the ICCID */
     rc = nrf_modem_at_cmd(iccid, sizeof iccid, "AT%%XICCID");
     if (rc)
-        printk("Failed to get ICCID: %d\n", rc);
+        shell_error(shell, "Failed to get ICCID: %d\n", rc);
     else {
         /* find the end of the ICCID and end the string there */
         *strchr(iccid, '\n') = 0;
-        printk("       %s\n", iccid);
+        shell_print(shell, "       %s\n", iccid);
     }
 
     return 0;
@@ -102,15 +103,43 @@ static void otdoa_shell_jwt_handler(const struct shell *shell, size_t argc, char
     otdoa_http_send_test_jwt();
 }
 
+//  Override the Serving Cell & DLEARFCN
+extern uint32_t u32OverrideServCellECGI;
+extern uint32_t u32OverrideDLEARFCN;
+static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, char **argv)
+{
+    uint32_t u32Ecgi = 0;
+    uint32_t u32DlearFcn = 5230;
+    otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32DlearFcn);
+    shell_print(shell, "Current : INFO ECGI=%u, DLEARFCN=%u\n", u32Ecgi, u32DlearFcn);
+
+    uint32_t u32ServCellECGI = 0;   // Zero means don't override
+    if (argc >= 2)
+    {
+        u32ServCellECGI = strtoul(argv[1], NULL, 0);    // Zero means don't override
+        u32OverrideServCellECGI = u32ServCellECGI;
+        if (u32ServCellECGI)
+        {
+            u32OverrideDLEARFCN = u32DlearFcn;
+        }
+    }
+    if (argc > 2)
+    {
+        u32OverrideDLEARFCN = strtoul(argv[2], NULL, 0);
+    }
+
+    shell_print(shell, "Serving Cell Override ECGI=%u DLEARFCN=%u\n", u32OverrideServCellECGI, u32OverrideDLEARFCN);
+    return 0;
+}
+
 /*
- * cmd_get_ubsa_handler() - Handler for get_ubsa command.
+ * otdoa_shell_get_ubsa_handler() - Handler for get_ubsa command.
  *
  *  This command has the following (optional) string parameters:
  *  1. Serving cell ECGI
  *  2. Radius
  *  3. NumCells
  */
-extern uint32_t u32OverrideDLEARFCN;
 static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc,
                              char **argv)
 {
@@ -168,7 +197,7 @@ static void otdoa_shell_provision_handler(const struct shell *shell, size_t argc
 }
 
 /*
- * cmd_reset_handler() - Soft reset the device
+ * otdoa_shell_reset_handler() - Soft reset the device
  */
 static int otdoa_shell_reset_handler(const struct shell *shell, size_t argc,
                              char **argv)
@@ -180,12 +209,53 @@ static int otdoa_shell_reset_handler(const struct shell *shell, size_t argc,
     return 0;
 }
 
-SHELL_SUBCMD_ADD((phywi), info,       &otdoa_cmds, "Show current OTDOA info", otdoa_shell_info_handler, 0, 0);
-SHELL_SUBCMD_ADD((phywi), get_config, &otdoa_cmds, "Download a config file",  otdoa_shell_get_config_handler, 0, 0);
-SHELL_SUBCMD_ADD((phywi), jwt,        &otdoa_cmds, "Test generate JWT token", otdoa_shell_jwt_handler, 0, 0);
-SHELL_SUBCMD_ADD((phywi), get_ubsa,   &otdoa_cmds, "Download a uBSA (ECGI, Radius, NumCells)", otdoa_shell_get_ubsa_handler, 0, 4);
-SHELL_SUBCMD_ADD((phywi), provision,  &otdoa_cmds, "Provision a key to use for JWT generation", otdoa_shell_provision_handler, 0, 1);
-SHELL_SUBCMD_ADD((phywi), reset,      &otdoa_cmds, "Soft reset the device", otdoa_shell_reset_handler, 0, 0);
+/*
+ * otdoa_shell_loc_handler() - Handler for "loc" command.
+ *
+ * This command has the following string parameters:
+ *  1. Num PRS occasions
+ *  2. Capture Flags
+ */
+static int otdoa_shell_loc_handler(const struct shell *shell, size_t argc,
+                             char **argv)
+{
+    uint32_t u32Length = 32;
+    uint32_t u32CaptureFlags = 0;
+
+    // NB: The first arg is the "test" subcommand
+    // so argv[0] = "test", argv[1] = report interval, ...
+    if (argc < 1)
+        return -1;
+
+    if (argc >= 2)
+    {
+        u32Length = strtoul(argv[1], NULL, 0);
+    }
+    if (argc >= 3) { u32CaptureFlags = strtoul(argv[2], NULL, 0); }
+
+    uint32_t timeout_msec = CONFIG_OTDOA_DEFAULT_TIMEOUT_MS;
+    //otdoa_sample_start(u32Length, u32CaptureFlags, timeout_msec);
+    otdoa_api_session_params_t params = { 0 };
+    params.session_length = u32Length;
+    params.capture_flags = u32CaptureFlags;
+    params.timeout = timeout_msec;
+
+    int err = otdoa_api_start_session(&params);
+    if (err != OTDOA_API_SUCCESS) {
+        shell_error(shell, "otdoa_api_start_session() failed with return %d\n", err);
+    }
+
+    return 0;
+}
+
+SHELL_SUBCMD_ADD((phywi), info,       &otdoa_cmds, " Show current OTDOA info", otdoa_shell_info_handler, 0, 0);
+SHELL_SUBCMD_ADD((phywi), get_config, &otdoa_cmds, " Download a config file",  otdoa_shell_get_config_handler, 0, 0);
+SHELL_SUBCMD_ADD((phywi), jwt,        &otdoa_cmds, " Test generate JWT token", otdoa_shell_jwt_handler, 0, 0);
+SHELL_SUBCMD_ADD((phywi), get_ubsa,   &otdoa_cmds, " Download a uBSA (ECGI, Radius, NumCells)", otdoa_shell_get_ubsa_handler, 0, 4);
+SHELL_SUBCMD_ADD((phywi), loc,        &otdoa_cmds, " Perform a location estimate (length,flags)", otdoa_shell_loc_handler, 0, 2);
+SHELL_SUBCMD_ADD((phywi), provision,  &otdoa_cmds, " Provision a key to use for JWT generation", otdoa_shell_provision_handler, 0, 1);
+SHELL_SUBCMD_ADD((phywi), reset,      &otdoa_cmds, " Soft reset the device", otdoa_shell_reset_handler, 0, 0);
+SHELL_SUBCMD_ADD((phywi), ecgi,       &otdoa_cmds, " Override the serving cell ECGI - 0 to reset, empty to display", otdoa_shell_override_handler, 0, 2);
 
 SHELL_CMD_REGISTER(phywi, &otdoa_cmds, "PHY Wireless OTDOA Commands", NULL);
 
