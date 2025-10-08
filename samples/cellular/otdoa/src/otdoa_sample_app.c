@@ -281,13 +281,15 @@ void otdoa_sample_cancel()
     pos_est_timer_stop();
 }
 
-void otdoa_sample_ubsa_dl_test(uint32_t ecgi, uint32_t dlearfcn, uint32_t radius, uint32_t max_cells)
+void otdoa_sample_ubsa_dl_test(uint32_t ecgi, uint32_t dlearfcn, uint32_t radius, uint32_t max_cells, uint16_t mcc, uint16_t mnc)
 {
     otdoa_api_ubsa_dl_req_t dl_req = { 0 };
     dl_req.ecgi = ecgi;
     dl_req.dlearfcn = dlearfcn;
     dl_req.ubsa_radius_meters = radius;
     dl_req.max_cells = max_cells;
+    dl_req.mcc = mcc;
+    dl_req.mnc = mnc;
     set_blink_download();
     LOG_INF("Getting uBSA (ECGI: %u (0x%08x) DLEARFCN: %u  Radius: %u  Num Cells: %u)",
             ecgi, ecgi, dlearfcn, radius, max_cells); 
