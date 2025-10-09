@@ -18,7 +18,6 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/shell/shell.h>
 
-#include "otdoa_al/otdoa_shell.h"
 #include "otdoa_al/phywi_otdoa_api.h"
 #include "otdoa_al/otdoa_nordic_at_h1.h"
 #include "nrf_modem_at.h"
@@ -276,6 +275,8 @@ static int otdoa_shell_loc_handler(const struct shell *shell, size_t argc,
 
     return 0;
 }
+
+SHELL_SUBCMD_SET_CREATE(otdoa_cmds, (phywi));
 
 SHELL_SUBCMD_ADD((phywi), info,       &otdoa_cmds, " Show current OTDOA info", otdoa_shell_info_handler, 0, 0);
 SHELL_SUBCMD_ADD((phywi), get_config, &otdoa_cmds, " Download a config file",  otdoa_shell_get_config_handler, 0, 0);
