@@ -4,9 +4,9 @@ OTDOA Data Flow
 ===============
 
 As described in :ref:`otodoa overview`, the OTDOA firmware subsystem consists of an OTDOA binary library
-(delivered in binary object code format), and the OTDOA Adaption Layer (delivered as source code as part 
-of the nRF Connect SDK).  This section describes the flow of data through these components, including 
-download of the uBSA, estimate of the time of arrival for signals from multiple cells, and formulation 
+(delivered in binary object code format), and the OTDOA Adaption Layer (delivered as source code as part
+of the nRF Connect SDK).  This section describes the flow of data through these components, including
+download of the uBSA, estimate of the time of arrival for signals from multiple cells, and formulation
 of the position estimate.
 
 When the OTDOA library is requested to make a position estimate, it retrieves the current uBSA
@@ -17,10 +17,10 @@ The OTDOA library then uses the nrfxlib RS Capture API to receive Positioning Re
 (PRS) transmitted by cells in the assistance data. The RS capture API typically provides a block
 of samples for processing every 160 ms.  These samples are written into application processor buffers
 (a Zephyr memory slab) and forwarded to the OTDOA thread for processing.  The OTDOA
-thread wakes up, processes the samples through the OTDOA library, and then frees the 
+thread wakes up, processes the samples through the OTDOA library, and then frees the
 sample buffer, making it available for the next batch of samples.
 
-Once it has detected a sufficient number of cells, the OTDOA library estimates the time of 
+Once it has detected a sufficient number of cells, the OTDOA library estimates the time of
 arrival for the PRS signal from each detected cell.  It then selects the best receive cell
 as its reference cell, and calculates the time-difference of arrival for each cell by subtracting
 the reference cell time of arrival from each other cell's time of arrival.  The OTDOA library
@@ -43,9 +43,9 @@ the uBSA.
 Real-Time Constraints
 ---------------------
 
-The OTDOA binary libary is designed to process the PRS from the modem as they are received.  Typically 
+The OTDOA binary libary is designed to process the PRS from the modem as they are received.  Typically
 a new block of samples is received every 160 ms.  The OTDOA binary libary processing for a block typically
-requires only 15% to 20% of this 160 ms. interval.  This leaves plenty of processing time for other 
+requires only 15% to 20% of this 160 ms. interval.  This leaves plenty of processing time for other
 application functions, even while the OTDOA positioning system is active.
 
 If the OTDOA library is not able to keep up with the processing of the PRS
@@ -53,10 +53,10 @@ signals, some blocks of samples will be dropped as they are received from the RS
 API.  This loss of data may result in a slight decrease in the performance of the
 OTDOA algorithms, but otherwise it is not harmful.
 
-The buffering of the PRS samples is done using a memory slab in the OTDOA adaption layer.  
+The buffering of the PRS samples is done using a memory slab in the OTDOA adaption layer.
 Typically, this buffer is sized to hold a single block of samples.  This requires that
 the OTDOA library complete processing of one block of samples before the next block
 of samples is received from the nrfxlib RS Capture API.  If the application processor
 loading is particularly high, the size of the memory slab can be increased to allow
-additional time for the OTDOA library to complete its processing.  However, this is 
+additional time for the OTDOA library to complete its processing.  However, this is
 not typically required.
