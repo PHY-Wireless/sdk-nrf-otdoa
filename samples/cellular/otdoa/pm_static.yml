@@ -3,4 +3,3 @@ external_flash:
   end_address: 0x400000
   region: external_flash
   size: 0x400000
-
