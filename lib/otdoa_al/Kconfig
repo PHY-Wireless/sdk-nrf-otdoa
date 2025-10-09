@@ -1,3 +1,9 @@
+#
+#  Copyright (c) 2025 PHY Wireless, Inc.
+#
+#  SPDX-License-Identifier: LicenseRef-PHYW
+#
+
 menuconfig OTDOA_AL_LIB
  bool "OTDOA library"
  help
@@ -10,8 +16,7 @@ module-str = OTDOA AL library
 
 config OTDOA_DEBUG_LOGS
     bool "Link with debug logging version of OTDOA library for verbose logging"
-    default false
-
+    default n
 
 config OTDOA_CFG_DL_INTERVAL
     int "Interval between uBSA downloads to trigger a config download"
@@ -63,7 +68,7 @@ config OTDOA_HTTP_PORT
 
 config OTDOA_ENABLE_RESULTS_UPLOAD
     bool "Enable uploading of OTDOA results to a server"
-    default false
+    default n
 
 config OTDOA_RESULTS_UPLOAD_PW
     string "Password to use for Phywi API authentication when uploading OTDOA results"
