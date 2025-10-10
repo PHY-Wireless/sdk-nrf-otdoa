@@ -47,7 +47,7 @@ config OTDOA_RS_THREAD_PRIORITY
     default 5
 
 config OTDOA_API_TLS_CERT_INSTALL
-    bool "Enable otdoa_api_install_tls_cert() to install a TLS certificate through the OTDOA library"
+    bool "Install a TLS certificate through the OTDOA library using otdoa_api_install_tls_cert()"
     default y
 
 config OTDOA_TLS_SEC_TAG
@@ -67,7 +67,7 @@ config OTDOA_HTTP_PORT
     default 80
 
 config OTDOA_ENABLE_RESULTS_UPLOAD
-    bool "Enable uploading of OTDOA results to a server"
+    bool "Upload of OTDOA results to a server"
     default n
 
 config OTDOA_RESULTS_UPLOAD_PW
