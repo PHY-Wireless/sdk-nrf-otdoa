@@ -221,7 +221,12 @@ static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc,
 }
 
 static void otdoa_shell_provision_handler(const struct shell *shell, size_t argc, char **argv) {
-    otdoa_api_provision(argv[1]);
+    if (argc >= 2) {
+        otdoa_api_provision(argv[1]);
+    }
+    else {
+        shell_error(shell, "Key not provided.");
+    }
 }
 
 /*
