@@ -123,7 +123,7 @@ static void button_cb(uint32_t button_state, uint32_t has_changed)
             LOG_INF("Button low");
             // start a test for 32 PRS occasions.  Timeout = 120 seconds
             otdoa_sample_start(32, 0, OTDOA_SAMPLE_DEFAULT_TIMEOUT_MS);
-        }        
+        }
     }
 }
 

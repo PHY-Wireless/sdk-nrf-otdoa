@@ -10,6 +10,7 @@ zephyr_library_sources(otdoa_nordic_at_h1.c)
 zephyr_library_sources(otdoa_fs.c)
 zephyr_library_sources(otdoa_log.c)
 zephyr_library_sources(otdoa_timers.c)
+zephyr_library_sources(otdoa_shell.c)
 
 zephyr_library_compile_definitions(OTDOA_LITTLE_FS=1)
 zephyr_library_compile_definitions(ZEPHYR_FS_API=1)

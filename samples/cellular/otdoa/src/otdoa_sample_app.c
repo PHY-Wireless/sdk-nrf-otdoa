@@ -257,7 +257,7 @@ void otdoa_sample_start(uint32_t session_length, uint32_t capture_flags, uint32_
     
     dl_in_session = 0;
 
-    int err = otdoa_api_start_session(&params, otdoa_event_handler);
+    int err = otdoa_api_start_session(&params);
     if (err != OTDOA_API_SUCCESS)
     {
         set_blink_error();
