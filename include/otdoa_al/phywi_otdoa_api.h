@@ -299,14 +299,9 @@ int32_t otdoa_api_init(const char* const ubsa_file_path, otdoa_api_callback_t ca
  * @brief Initiates an OTDOA positioning session
  * @param[in] params Parameters of the session, including
  *                   session length, timeout, etc.
- * @param[in] callback Callback function used by the library
- *                     to return results and status to the client
  * @retval 0 on success
  */
-int32_t otdoa_api_start_session(
-    const otdoa_api_session_params_t* params,
-    otdoa_api_callback_t callback
-);
+int32_t otdoa_api_start_session(const otdoa_api_session_params_t* params);
 
 /**
  * @brief Cancels an on-going OTDOA session

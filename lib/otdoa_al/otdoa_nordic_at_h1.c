@@ -85,6 +85,8 @@ int otdoa_nordic_at_parse_xmonitor_response(
     uint32_t u32_dlearfcn = 0;
     uint32_t u32_reg_status = REG_STATUS_NONE;
     uint32_t u32_AcT = 0;   // AcT value, 9=>NBIot, 7=>LTE
+    uint16_t u16_mcc = 0;
+    uint16_t u16_mnc = 0;
 
     if (!psz_resp)
     {
@@ -145,13 +147,13 @@ int otdoa_nordic_at_parse_xmonitor_response(
                 i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
                 break;
             }
-            int i_scn_rv = sscanf(token, "\"%3"SCNu16, pu16_mcc);
+            int i_scn_rv = sscanf(token, "\"%3"SCNu16, &u16_mcc);
             if (i_scn_rv != 1)
             {
                 i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
                 break;
             }
-            i_scn_rv = sscanf(token + 4, "%"SCNu16, pu16_mnc); // add 4 for 3 digits of MCC plus leading "
+            i_scn_rv = sscanf(token + 4, "%"SCNu16, &u16_mnc); // add 4 for 3 digits of MCC plus leading "
             if (i_scn_rv != 1)
             {
                 i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
@@ -215,6 +217,8 @@ error_exit:
         {
             if (pu32_ecgi) *pu32_ecgi = u32_egci;
             if (pu32_dlearfcn) *pu32_dlearfcn = u32_dlearfcn;
+            if (pu16_mcc) *pu16_mcc = u16_mcc;
+            if (pu16_mnc) *pu16_mnc = u16_mnc;
         }
     }
     else if (OTDOA_EVENT_FAIL_NO_DLEARFCN == i_ret && u32_egci != 0)
@@ -222,6 +226,8 @@ error_exit:
         // return the ECGI and default DLEARFCN, and error code indicating no DLEARFCN
         if (pu32_ecgi) *pu32_ecgi = u32_egci;
         if (pu32_dlearfcn) *pu32_dlearfcn = DEFAULT_UBSA_DLEARFCN;
+        if (pu16_mcc) *pu16_mcc = u16_mcc;
+        if (pu16_mnc) *pu16_mnc = u16_mnc;
     }
 
     if (i_ret != 0 && i_ret != OTDOA_EVENT_FAIL_NO_DLEARFCN)
