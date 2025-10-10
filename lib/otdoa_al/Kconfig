@@ -17,6 +17,17 @@ module-str = OTDOA AL library
 config OTDOA_DEBUG_LOGS
     bool "Link with debug logging version of OTDOA library for verbose logging"
     default n
+config OTDOA_DEFAULT_TIMEOUT_MS
+    int "Default timeout to use for OTDOA operations, in milliseconds"
+    default 120000
+
+config OTDOA_DEFAULT_UBSA_PATH
+    string "Default path to download a uBSA to"
+    default "/lfs/ubsa.csv"
+
+config OTDOA_SHELL_COMMANDS
+    bool "Enable PHYWI shell commands"
+    default n
 
 config OTDOA_CFG_DL_INTERVAL
     int "Interval between uBSA downloads to trigger a config download"
