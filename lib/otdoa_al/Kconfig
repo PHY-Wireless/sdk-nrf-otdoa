@@ -1,3 +1,9 @@
+#
+#  Copyright (c) 2025 PHY Wireless, Inc.
+#
+#  SPDX-License-Identifier: LicenseRef-PHYW
+#
+
 menuconfig OTDOA_AL_LIB
  bool "OTDOA library"
  help
@@ -10,8 +16,7 @@ module-str = OTDOA AL library
 
 config OTDOA_DEBUG_LOGS
     bool "Link with debug logging version of OTDOA library for verbose logging"
-    default false
-
+    default n
 config OTDOA_DEFAULT_TIMEOUT_MS
     int "Default timeout to use for OTDOA operations, in milliseconds"
     default 120000
@@ -22,7 +27,7 @@ config OTDOA_DEFAULT_UBSA_PATH
 
 config OTDOA_SHELL_COMMANDS
     bool "Enable PHYWI shell commands"
-    default false
+    default n
 
 config OTDOA_CFG_DL_INTERVAL
     int "Interval between uBSA downloads to trigger a config download"
@@ -53,7 +58,7 @@ config OTDOA_RS_THREAD_PRIORITY
     default 5
 
 config OTDOA_API_TLS_CERT_INSTALL
-    bool "Enable otdoa_api_install_tls_cert() to install a TLS certificate through the OTDOA library"
+    bool "Install a TLS certificate through the OTDOA library using otdoa_api_install_tls_cert()"
     default y
 
 config OTDOA_TLS_SEC_TAG
@@ -73,8 +78,8 @@ config OTDOA_HTTP_PORT
     default 80
 
 config OTDOA_ENABLE_RESULTS_UPLOAD
-    bool "Enable uploading of OTDOA results to a server"
-    default false
+    bool "Upload of OTDOA results to a server"
+    default n
 
 config OTDOA_RESULTS_UPLOAD_PW
     string "Password to use for Phywi API authentication when uploading OTDOA results"
