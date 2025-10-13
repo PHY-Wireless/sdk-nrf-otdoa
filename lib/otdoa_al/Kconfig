@@ -14,9 +14,6 @@ if OTDOA_AL_LIB
 module = OTDOA_AL_LIB
 module-str = OTDOA AL library
 
-config OTDOA_DEBUG_LOGS
-	bool "Link with debug logging version of OTDOA library for verbose logging"
-	default n
 config OTDOA_DEFAULT_TIMEOUT_MS
 	int "Default timeout to use for OTDOA operations, in milliseconds"
 	default 120000
@@ -28,6 +25,19 @@ config OTDOA_DEFAULT_UBSA_PATH
 config OTDOA_SHELL_COMMANDS
 	bool "PHYWI shell commands for testing OTDOA"
 	default n
+
+choice OTDOA_LIB_TYPE
+	prompt "Build Type"
+	default OTDOA_LIB_PROD
+	help
+		Select the OTDOA library build to link
+	config OTDOA_LIB_PROD
+		bool "Standard production release"
+	config OTDOA_LIB_DBG
+		bool "Debug release with verbose logging"
+	config OTODA_LIB_DEV
+		bool "Developer release with capture functions"
+	endchoice
 
 config OTDOA_CFG_DL_INTERVAL
 	int "Interval between uBSA downloads to trigger a config download"
