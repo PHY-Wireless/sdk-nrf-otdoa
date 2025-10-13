@@ -10,20 +10,6 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(otdoa)
 
-# get settings from sysbuild
-zephyr_get(otdoa_FS_EXT_STORAGE    SYSBUILD GLOBAL)
-message("otdoa_FS_EXT_STORAGE : ${otdoa_FS_EXT_STORAGE}")
-
-# include littlefs if specified, disable otherwise
-add_compile_definitions(OTDOA_LITTLE_FS=1)
-add_compile_definitions(ZEPHYR_FS_API)
-# determine whether File System mounted on internal/external flash
-if ("${otdoa_FS_EXT_STORAGE}" STREQUAL "ON")
-  add_compile_definitions(FS_EXT_STORAGE=1)
-else()
-  add_compile_definitions(FS_EXT_STORAGE=0)
-endif()
-
 target_compile_options(app PRIVATE -flto -fdata-sections -ffunction-sections)
 target_link_options(app PRIVATE --gc-sections)
 
@@ -36,8 +22,6 @@ generate_inc_file_for_target(
   cert/hellaphy.pem
   ${CMAKE_CURRENT_BINARY_DIR}/hellaphy.pem.inc
 )
-
-option(ENABLE_CAPTURE "Enable capture support" OFF)
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/otdoa_sample_app.c)

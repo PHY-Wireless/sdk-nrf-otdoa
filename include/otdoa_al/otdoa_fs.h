@@ -8,7 +8,7 @@
 #define _OTDOA_FS_H_
 
 /* NORDIC uses Zephyr RTOS FS abstraction layer */
-#if defined(ZEPHYR_FS_API)
+#if CONFIG_OTDOA_LITTLE_FS
 
 #include "zephyr/fs/fs.h"
 typedef struct fs_file_t tOFS_FILE;

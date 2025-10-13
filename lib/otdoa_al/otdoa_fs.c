@@ -20,7 +20,7 @@
 #include <string.h>
 #include <otdoa_al/otdoa_fs.h>
 
-#ifndef OTDOA_LITTLE_FS
+#if !CONFIG_OTDOA_LITTLE_FS
 #error "OTDOA_LITTLE_FS must be defined"
 #endif
 
