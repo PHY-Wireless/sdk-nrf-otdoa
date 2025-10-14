@@ -43,8 +43,8 @@ the uBSA.
 Real-Time Constraints
 ---------------------
 
-The OTDOA binary libary is designed to process the PRS from the modem as they are received.  Typically
-a new block of samples is received every 160 ms.  The OTDOA binary libary processing for a block typically
+The OTDOA binary library is designed to process the PRS from the modem as they are received.  Typically
+a new block of samples is received every 160 ms.  The OTDOA binary library processing for a block typically
 requires only 15% to 20% of this 160 ms. interval.  This leaves plenty of processing time for other
 application functions, even while the OTDOA positioning system is active.
 
