@@ -28,14 +28,14 @@ config OTDOA_SHELL_COMMANDS
 
 choice OTDOA_LIB_TYPE
 	prompt "Build Type"
-	default OTDOA_LIB_PROD
+	default OTDOA_LIB_TYPE_PROD
 	help
 		Select the OTDOA library build to link
-	config OTDOA_LIB_PROD
+	config OTDOA_LIB_TYPE_PROD
 		bool "Standard production release"
-	config OTDOA_LIB_DBG
+	config OTDOA_LIB_TYPE_DBG
 		bool "Debug release with verbose logging"
-	config OTODA_LIB_DEV
+	config OTDOA_LIB_TYPE_DEV
 		bool "Developer release with capture functions"
 	endchoice
 
