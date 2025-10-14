@@ -1,9 +1,15 @@
 .. otdoa overview:
 
-OTDOA Overview
-##############
+hellaPHY OTDOA Overview
+#######################
 
-Observed Time-Difference of Arrival (OTDOA) is a technique for estimating a UE's position.  It involves estimating time differences between signals broadcast by the terrestrial LTE cellular network.  These time difference estimates can then be used to triangulate the UE's position based upon known cellular base station positions, in much the same way as GNSS systems triangulate a position based upon know satellite positions.  The OTDOA implementation in this library is *UE-based*, meaning that the position estimate is calculated by the UE application processor, rather than by a network server.
+hellaPHY Observed Time-Difference of Arrival (hellaPHY OTDOA) is a technique for estimating a UE's position.
+It involves estimating time differences between signals broadcast by the terrestrial LTE cellular
+network.  These time difference estimates can then be used to triangulate the UE's position based
+upon known cellular base station positions, in much the same way as GNSS systems triangulate
+a position based upon know satellite positions.  The hellaPHY OTDOA implementation in this library is
+*UE-based*, meaning that the position estimate is calculated by the UE application processor,
+rather than by a network server.
 
 Cells in the LTE network broadcast Positioning Reference Signals (PRS) signals
 that may be used to estimate the time difference of arrival at the UE.  The PRS
@@ -25,7 +31,7 @@ performed by n the UE application processor.  This includes collection of the PR
 signals, estimation of time differences of arrival, and triangulation
 calculations necessary to estimate the UE position.
 
-UE-based OTDOA for has the following advantages:
+hellaPHY OTDOA has the following advantages:
 
 * Very low power consumption
 * Excellent privacy, since position estimates are calculated by the UE without network involvement.
@@ -34,7 +40,10 @@ UE-based OTDOA for has the following advantages:
 Implementation
 **************
 
-The OTDOA firmware subsystem consists of an OTDOA binary library (delivered in binary object code format), and the OTDOA Adaption Layer (delivered as source code as part of the nRF Connect SDK).  The diagram below shows an overview of the OTDOA firmware subsystem in a typical application.
+The hellaPHY OTDOA firmware subsystem consists of a binary library (delivered in binary
+object code format), and the adaption layer (delivered as source code as part of
+the nRF Connect SDK).  The diagram below shows an overview of the hellaPHY OTDOA firmware subsystem
+in a typical application.
 
 .. image:: images/otdoa-fw-arch.drawio.png
    :alt: Firmware Architecture
@@ -44,13 +53,13 @@ See :doc:`otdoa_firmware` and :doc:`otdoa_data_flow` for more information.
 
 Supported Features
 ******************
-The OTDOA adaption layer supports the following features:
+The hellaPHY OTDOA adaption layer supports the following features:
 
 * uBSA download via an HTTP REST interface
 * Configuration file download via an HTTP REST interface
 * Optional position estimate results upload to a server via an HTTP REST interface
 
-The OTDOA binary library supports the following features:
+The hellaPHY OTDOA binary library supports the following features:
 
 * OTDOA position estimate
 * Enhanced Cell ID (ECID) position estimation algorithm providing a fallback estimate when the OTDOA position estimate is not available.
@@ -63,9 +72,9 @@ Not applicable
 Requirements
 ************
 
-OTDOA Binary Library
-====================
-The OTDOA adaption layer requires the OTDOA binary library to be separately
+hellaPHY OTDOA Binary Library
+=============================
+The hellaPHY OTDOA adaption layer requires the hellaPHY OTDOA binary library to be separately
 downloaded and integrated into the nRF Connect SDK by the developer.
 
 Security Requirements
@@ -131,7 +140,7 @@ Usage
 
 Samples using the library
 *************************
-The following |NCS| samples use the OTDOA library and adaption layer:
+The following |NCS| samples use the hellaPHY OTDOA library and adaption layer:
 
 * :ref:`otdoa_sample`
 
@@ -148,7 +157,7 @@ Limitations
 
 Dependencies
 ************
-This OTDOA library uses the following nRF Connect SDK libraries:
+This hellaPHY OTDOA library uses the following nRF Connect SDK libraries:
 
 * LTE Link Control
 * AT Command Library
@@ -171,7 +180,9 @@ It uses the following Zephyr libraries and services:
 FLASH File System
 =================
 
-The OTDOA library uses a FLASH file system for storage of uBSA information.  Typically this makes use of the Zephyr Little FS file system, mounted on either an external serial FLASH or using the NRF SoC internal FLASH.
+The OTDOA library uses a FLASH file system for storage of uBSA information.  Typically
+this makes use of the Zephyr Little FS file system, mounted on either an external serial
+FLASH or using the NRF SoC internal FLASH.
 
 Approximately 25KB of storage are used in this file system.
 

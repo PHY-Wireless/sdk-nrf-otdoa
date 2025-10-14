@@ -21,13 +21,9 @@
  * LTE_ACTIVE_SYMBOLS_PER_SUBFRAME_1PBCH*LTE_NUM_CARRIERS_PER_RB*8*sizeof(tRSTD_COMPLEX);
  */
 #define PRS_SAMPLES_BUFFER_SIZE (8 * 12 * 8 * sizeof(uint16_t) * 2)
-#ifdef OTDOA_CONFIG_TARGET_NRF_DEV
-#define PRS_SAMPLES_BUFFER_COUNT 2 /* two buffers since we hold on to samples longer for icapture  \
-				    */
-#else
-#define PRS_SAMPLES_BUFFER_COUNT CONFIG_OTDOA_PRS_SAMPLES_BUFFER_COUNT
-#endif
-K_MEM_SLAB_DEFINE(nordic_prs_samples_slab, PRS_SAMPLES_BUFFER_SIZE, PRS_SAMPLES_BUFFER_COUNT, 4);
+
+K_MEM_SLAB_DEFINE(nordic_prs_samples_slab, PRS_SAMPLES_BUFFER_SIZE,
+		  CONFIG_OTDOA_PRS_SAMPLES_BUFFER_COUNT, 4);
 
 /*
  * Alloc / Free of PRS sample buffers
@@ -51,7 +47,7 @@ int otdoa_free_samples(void *pBuffer)
 {
 	/* check if the buffer to be freed is in the slab */
 	if (((char *)pBuffer < _k_mem_slab_buf_nordic_prs_samples_slab) ||
-	    ((char *)pBuffer >= (_k_mem_slab_buf_nordic_prs_samples_slab +
+		((char *)pBuffer >= (_k_mem_slab_buf_nordic_prs_samples_slab +
 				 sizeof(_k_mem_slab_buf_nordic_prs_samples_slab)))) {
 		printk("Attempting to free sample buffer %p that is not in the slab\n", pBuffer);
 		return -1;
