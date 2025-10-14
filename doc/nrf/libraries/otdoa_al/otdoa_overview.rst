@@ -12,11 +12,11 @@ every 160 msec.), and they are multiplexed in a way that allows the UE to detect
 PRS broadcast by multiple base stations at the same time.
 
 Information about the cellular base stations, including their positions,
-is contained in micro-Base Station Almanac (uBSA) file that is downloaded 
-by the UE from a network server.  This uBSA is stored in a file system on 
+is contained in micro-Base Station Almanac (uBSA) file that is downloaded
+by the UE from a network server.  This uBSA is stored in a file system on
 the UE, and it typically covers a large geographic area.  The UE uses this
 uBSA for many position estimates; if it moves outside the geographic coverage
-area a new uBSA is automatically downloaded.  An important function of the 
+area a new uBSA is automatically downloaded.  An important function of the
 OTDOA Adaption Layer is to download the uBSA from a network server, and store
 it in the UE file system for access by the OTDOA binary library.
 
@@ -65,7 +65,7 @@ Requirements
 
 OTDOA Binary Library
 ====================
-The OTDOA adaption layer requires the OTDOA binary library to be separately 
+The OTDOA adaption layer requires the OTDOA binary library to be separately
 downloaded and integrated into the nRF Connect SDK by the developer.
 
 Security Requirements
@@ -73,8 +73,8 @@ Security Requirements
 
 TLS Certificate
 ---------------
-The UE requires a TLS certificate to authenticate with the network server 
-when downloading the uBSA or configuration information.  This certificate 
+The UE requires a TLS certificate to authenticate with the network server
+when downloading the uBSA or configuration information.  This certificate
 may be installed by the application using the :ref:`otdoa_api_install_tls_cert`
 API.  Alternatively, the certificate may be installed by the adaption layer
 using the :kconfig:option:`CONFIG_OTDOA_API_TLS_CERT_INSTALL` configuration
