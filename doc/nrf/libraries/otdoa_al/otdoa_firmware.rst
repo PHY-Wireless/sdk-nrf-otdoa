@@ -1,23 +1,23 @@
 .. otdoa firmware architecture
 
-OTDOA Firmware Architecture
-===========================
+hellaPHY OTDOA Firmware Architecture
+====================================
 
-The OTDOA subsystem consists of an OTDOA library (delivered in binary object code format),
-and the OTDOA Adaption Layer (delivered as source code as part of the nRF Connect SDK).
+The hellaPHY OTDOA subsystem consists of a hellaPHY OTDOA binary library (delivered in binary object code format),
+and the hellaPHY OTDOA Adaption Layer (delivered as source code as part of the nRF Connect SDK).
 
-The figure below presents an overview of the OTDOA firmware subsystem.  Functions that are implemented
-in the OTDOA binary library are shown in red, while those that are implemented in the OTDOA Adaption
-Layer are shown in blue.  Functions that are part of the nRF Connect SDK / Zephyr environment are shown
+The figure below presents an overview of the hellaPHY OTDOA firmware subsystem.  Functions that are implemented
+in the binary library are shown in red, while those that are implemented in the adaption
+layer are shown in blue.  Functions that are part of the nRF Connect SDK / Zephyr environment are shown
 in green, and functions implemented by the user application are shown in orange.
 
 .. image:: images/otdoa-fw-arch.drawio.png
    :alt: OTDOA Firmware Architecture
 
-OTDOA Binary Library
---------------------
+hellaPHY OTDOA Binary Library
+-----------------------------
 
-The OTDOA binary library implements the following functions:
+The hellaPHY OTDOA binary library implements the following functions:
 
 * OTDOA algorithms, including PRS signal time difference estimation and position estimation
 * Assistance Data Generation that selects a set of cells for measurement
@@ -48,22 +48,22 @@ cell.
 OTDOA API
 ~~~~~~~~~
 
-The OTDOA binary includes a C-callable API that allows user application code to control
+The hellaPHY OTDOA binary includes a C-callable API that allows user application code to control
 and configure the OTDOA system.  With the exception of initialization functions, these
 APIs are thread-safe.
 
 OTDOA Callback
 ~~~~~~~~~~~~~~
 
-The OTDOA binary library includes a callback that implements the transfer of PRS samples
+The hellaPHY OTDOA binary library includes a callback that implements the transfer of PRS samples
 from the nrfxlib Reference Signal (RS) Capture API to the OTDOA algorithm.  This callback
 allocates a buffer, fills the buffer with PRS sample data, and sends a message to the OTDOA
 algorithm indicating that the data is available for processing.
 
-OTDOA Adaption Layer
---------------------
+hellaPHY OTDOA Adaption Layer
+-----------------------------
 
-The OTDOA adaption layer implements these functions:
+The hellaPHY OTDOA adaption layer implements these functions:
 
 * HTTP REST interface to a cloud server to download the uBSA
 * Optional HTTP REST interface for uploading of position estimate results to a server
@@ -74,7 +74,7 @@ The OTDOA adaption layer implements these functions:
 HTTP REST Interface
 ~~~~~~~~~~~~~~~~~~~
 
-The OTDOA adaption layer includes the HTTP REST interface function that allows it to
+The adaption layer includes the HTTP REST interface function that allows it to
 download the uBSA and configuration information from a cloud server.  The adaption
 layer uses the Zephyr TLS secure socket functions to communicate with the server.
 
