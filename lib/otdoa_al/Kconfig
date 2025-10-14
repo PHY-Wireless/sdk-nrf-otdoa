@@ -40,12 +40,12 @@ choice OTDOA_LIB_TYPE
 	endchoice
 
 config OTDOA_LITTLE_FS
-    bool "Enable the LittleFS filesystem"
-    default y
+	bool "Use the LittleFS filesystem"
+	default y
 
 config OTDOA_EXTERNAL_STORAGE
-    bool "Use external flash filesystem for OTDOA files"
-    default y
+	bool "Use external flash filesystem for OTDOA files"
+	default y
 
 config OTDOA_CFG_DL_INTERVAL
 	int "Interval between uBSA downloads to trigger a config download"
