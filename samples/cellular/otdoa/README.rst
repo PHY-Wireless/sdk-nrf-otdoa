@@ -68,7 +68,7 @@ To provision the device, follow these steps:
 #. Program the private key into the device using the ``pkey`` script (provided with the OTDOA binary library).
 
 .. code-block:: bash
-    
+
    # provision the DK with new key
    # Assumes device is connected with CLI on /dev/ttyACM0
    ./pkey <file name>.pem /dev/ttyACM0
