@@ -1,9 +1,9 @@
 .. otdoa api
-OTDOA Application Programming Interface (API)
-=============================================
+hellaPHY OTDOA Application Programming Interface (API)
+======================================================
 
-The OTDOA library API provides a clear and consistent interface between the user's application
-and the PhyWi OTDOA library.  It may also be accessed by Nordic's Location Library if that
+The hellaPHY OTDOA library API provides a clear and consistent interface between the user's application
+and the hellaPHY OTDOA library.  It may also be accessed by Nordic's Location Library if that
 feature is enabled by the developer.
 
 The sections below provide message sequences for a variety of normal case and failure scenarios.
@@ -19,10 +19,10 @@ is sent to the OTDOA thread for processing.  These messages are shown in the seq
 below (e.g. the ``otdoa_api_start_session()`` API call gets converted to an ``OTDOA_CTRL_TEST``
 message sent to the OTDOA thread).
 
-OTDOA Initialization
---------------------
+Initialization
+--------------
 
-The OTDOA subsystem is initialized by the user application as shown in the message sequence
+The hellaPHY OTDOA subsystem is initialized by the user application as shown in the message sequence
 chart below.  The call to ``otdoa_api_install_tls_cert()`` is optional, the user application
 can manage the TLS certificate itself.
 
@@ -46,11 +46,11 @@ cell.  So the OTDOA library can generate the assistance data, and no uBSA downlo
 The user application manages the connection to the LTE network.  In order to perform an
 OTDOA position estimate, the UE must be connected to the live LTE network.
 
-The user application initiates the OTDOA position estimation by calling ``otdoa_api_start_session()``.
+The user application initiates the hellaPHY OTDOA position estimation by calling ``otdoa_api_start_session()``.
 The application can specify the duration of the position estimate in 160 ms. PRS occasions, as
 well as a timeout (in milliseconds) for the position estimate complettion.
 
-The OTDOA library directly accesses the nrfxlib RS Capture API to perform the position estimate.
+The hellaPHY OTDOA library directly accesses the nrfxlib RS Capture API to perform the position estimate.
 It determines that the current serving cell is in the uBSA, and thus it can begin the position
 estimate process (labelled "PRS Session" in the diagram)
 
@@ -63,16 +63,16 @@ Once the position estimate is complete, the results are returned to the user app
 PRS Session Normal Case with uBSA Download
 ------------------------------------------
 
-In this sequence, a new uBSA must be downloaded before the position estimate can be done.  The OTDOA
-library detects that a new uBSA is required, and signals this to the user application in the
-OTDOA_EVENT_UBSA_DL_REQ event.
+In this sequence, a new uBSA must be downloaded before the position estimate can be done.  The
+hellaPHY OTDOA library detects that a new uBSA is required, and signals this to the user application
+in the OTDOA_EVENT_UBSA_DL_REQ event.
 
 The user application then requests that the OTDOA library download a new uBSA using the
 ``otdoa_api_ubsa_download()`` API call.  This is done to allow the user application to "approve" the download.
 
-When the download completes, the OTDOA library notifies the location library / app using the
+When the download completes, the hellaPHY OTDOA library notifies the location library / app using the
 ``OTDOA_EVENT_UBSA_DL_COMPL`` event.  The location library / app then signals that the new uBSA
-is ready by calling the ``otdoa_api_ubsa_available()`` API.  The OTDOA library then executes the
+is ready by calling the ``otdoa_api_ubsa_available()`` API.  The library then executes the
 position estimate as described above, and returns the result to the user application in the
 OTDOA_EVENT_RESULTS event.
 
@@ -91,8 +91,8 @@ failure, including:
 * Failure to authenticate with the server
 
 In this case, the user application should then cancel the position estimate by calling the
-``otdoa_api_cancel_session()`` API.  The OTDOA library will the return OTDOA_EVENT_FAIL event with a
-cancelled error status.
+``otdoa_api_cancel_session()`` API.  The hellaPHY OTDOA library will the return OTDOA_EVENT_FAIL
+event with a cancelled error status.
 
 .. image:: images/ubsa_dl_fail_msc.drawio.png
    :alt: uBSA DL Failure

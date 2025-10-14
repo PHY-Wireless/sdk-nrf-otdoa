@@ -1,14 +1,16 @@
 .. _otdoa_sample:
 
-Cellular: OTDOA Positioning
+Cellular: hellaPHY OTDOA Positioning
 ###########################
 
 .. contents::
    :local:
    :depth: 2
 
-This sample demonstrates how to use the OTDOA library and adaptation layer
-to estimate the position of your device.
+hellaPHY OTDOA is a new positioning technology that uses signals broadcast by the
+terrestrial cellular network to estimate the position of the UE.  This sample
+demonstrates how to use the hellaPHY OTDOA library and adaptation layer to
+estimate the position of your device.
 
 Requirements
 ************
@@ -20,7 +22,8 @@ This sample supports the following development kits:
 Overview
 ********
 
-The OTDOA sample initializes the OTDOA AL library and provides shell commands to run tests and display metadata to demonstrate the basic use of the OTDOA API.
+The hellaPHY OTDOA sample initializes the hellaPHY OTDOA AL library and provides shell commands
+to run tests and display metadata to demonstrate the basic use of the OTDOA API.
 
 Configuration
 *************
