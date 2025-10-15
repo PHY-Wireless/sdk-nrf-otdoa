@@ -77,29 +77,38 @@ int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t *p_dl_request,
 {
 	int32_t rc = 0;
 
-	/* if input ECGI is 0, get current serving cell ECGI & DLEARFCN */
 	uint32_t ecgi = p_dl_request->ecgi;
 	uint32_t dlearfcn = p_dl_request->dlearfcn;
 	uint16_t mcc = p_dl_request->mcc;
 	uint16_t mnc = p_dl_request->mnc;
+	uint16_t pci = 0;
 
 	if (ecgi == 0) {
-		rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, &dlearfcn, &mcc, &mnc);
+		/* if input ECGI is 0, get current serving cell ECGI & DLEARFCN */
+		rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, &dlearfcn, &mcc, &mnc, &pci);
 		OTDOA_LOG_INF("otdoa_nordic_at_get_ecgi_and_dlearfcn() returned %d.  ECGI: %u", rc,
 			      ecgi);
 		if (rc == OTDOA_EVENT_FAIL_NO_DLEARFCN && ecgi != 0) {
 			/* got the ECGI OK but we miss the DLEARFCN. So default to 5230 */
 			dlearfcn = DEFAULT_UBSA_DLEARFCN;
-			rc = 0;
-		} else if (rc != 0) {
+			rc = OTDOA_API_SUCCESS;
+		} else if (rc != OTDOA_API_SUCCESS) {
 			/* other failures */
+			return rc;
+		}
+	} else {
+		/* otherwise, just get the PCI */
+		rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(NULL, NULL, NULL, NULL, &pci);
+		OTDOA_LOG_INF("otdoa_nordic_at_get_ecgi_and_dlearfcn() returned %d.  ECGI: %u", rc,
+				  ecgi);
+		if (rc != OTDOA_API_SUCCESS) {
 			return rc;
 		}
 	}
 
 	rc = otdoa_http_send_ubsa_req(BSA_DL_SERVER_URL, ecgi, dlearfcn,
 				      p_dl_request->ubsa_radius_meters, p_dl_request->max_cells,
-				      mcc, mnc, reset_blacklist);
+				      mcc, mnc, pci, reset_blacklist);
 	return rc;
 }
 

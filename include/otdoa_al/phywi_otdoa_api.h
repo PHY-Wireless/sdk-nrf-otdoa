@@ -216,6 +216,8 @@ typedef struct {
 	uint16_t mcc;
 	/** Mobile Network Code. Range: 0...999. */
 	uint16_t mnc;
+	/** Cell PCI. Range: 0...503. */
+	uint16_t pci;
 
 	/** Cell DLEARFCN */
 	uint32_t dlearfcn;

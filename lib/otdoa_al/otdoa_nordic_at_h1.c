@@ -82,7 +82,8 @@ char *otdoa_nordic_at_strtok_r(char *s, char delim, char **save_ptr)
 /* Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN */
 int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u_resp_len,
 					    uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn,
-					    uint16_t *pu16_mcc, uint16_t *pu16_mnc)
+					    uint16_t *pu16_mcc, uint16_t *pu16_mnc,
+					    uint16_t *pu16_pci)
 {
 	int i_ret = 0;
 	int n_token = 0;
@@ -94,6 +95,7 @@ int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u
 	uint32_t u32_AcT = 0; /* AcT value, 9=>NBIot, 7=>LTE */
 	uint16_t u16_mcc = 0;
 	uint16_t u16_mnc = 0;
+	uint16_t u16_pci = 0;
 
 	if (!psz_resp) {
 		OTDOA_LOG_ERR("otdoa_nordic_at_parse_xmonitor_response(): NULL pointer\n");
@@ -174,6 +176,16 @@ int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u
 			}
 			break;
 		}
+		case 8: /* PCI */
+		{
+			int i_scn_rv = sscanf(token, "%" SCNu16, &u16_pci);
+
+			if (i_scn_rv != 1) {
+				i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
+				break;
+			}
+			break;
+		}
 		case 9: /* DLEARFCN */
 		{
 			int i_scn_rv = sscanf(token, "%" SCNu32 "", &u32_dlearfcn);
@@ -215,6 +227,9 @@ error_exit:
 			if (pu16_mnc) {
 				*pu16_mnc = u16_mnc;
 			}
+			if (pu16_pci) {
+				*pu16_pci = u16_pci;
+			}
 		}
 	} else if (OTDOA_EVENT_FAIL_NO_DLEARFCN == i_ret && u32_egci != 0) {
 		/* return the ECGI and default DLEARFCN, and error code indicating no DLEARFCN */
@@ -229,6 +244,9 @@ error_exit:
 		}
 		if (pu16_mnc) {
 			*pu16_mnc = u16_mnc;
+		}
+		if (pu16_pci) {
+			*pu16_pci = u16_pci;
 		}
 	}
 
@@ -248,7 +266,7 @@ error_exit:
 
 /* Use AT%%XMONITOR command to get the current ECGI and DLEARFCN from the modem */
 int otdoa_nordic_at_get_ecgi_and_dlearfcn(uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn,
-					  uint16_t *pu16_mcc, uint16_t *pu16_mnc)
+					  uint16_t *pu16_mcc, uint16_t *pu16_mnc, uint16_t *pu16_pci)
 {
 	int i_ret = 0;
 	static char monitor_buf[256] = {0};
@@ -263,7 +281,7 @@ int otdoa_nordic_at_get_ecgi_and_dlearfcn(uint32_t *pu32_ecgi, uint32_t *pu32_dl
 	} else {
 		i_ret = otdoa_nordic_at_parse_xmonitor_response(monitor_buf, strlen(monitor_buf),
 								pu32_ecgi, pu32_dlearfcn, pu16_mcc,
-								pu16_mnc);
+								pu16_mnc, pu16_pci);
 	}
 	return i_ret;
 }

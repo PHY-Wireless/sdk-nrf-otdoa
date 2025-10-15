@@ -42,7 +42,7 @@ static int otdoa_shell_info_handler(const struct shell *shell, size_t argc, char
 
 	shell_print(shell, "Nordic OTDOA Application");
 	/* get the ECGI */
-	rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, NULL, NULL, NULL);
+	rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, NULL, NULL, NULL, NULL);
 	if (rc) {
 		shell_error(shell, "Failed to get ECGI: %d", rc);
 	} else {
@@ -118,7 +118,7 @@ static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, 
 	uint32_t u32Ecgi = 0;
 	uint32_t u32DlearFcn = 5230;
 
-	otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32DlearFcn, NULL, NULL);
+	otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32DlearFcn, NULL, NULL, NULL);
 	shell_print(shell, "Current : INFO ECGI=%u, DLEARFCN=%u\n", u32Ecgi, u32DlearFcn);
 
 	uint32_t u32ServCellECGI = 0; /* Zero means don't override */
@@ -153,9 +153,10 @@ static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc, 
 	uint32_t u32Dlearfcn;
 	uint16_t u16MCC;
 	uint16_t u16MNC;
+	uint16_t u16PCI;
 
 	/* use the real values as defaults */
-	otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32Dlearfcn, &u16MCC, &u16MNC);
+	otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32Dlearfcn, &u16MCC, &u16MNC, &u16PCI);
 
 	/* Default to 100000 since v0.2 of server interprets this as meters */
 	uint32_t u32Radius = 100000;
@@ -209,6 +210,7 @@ static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc, 
 	dl_req.max_cells = u32NumCells;
 	dl_req.mcc = u16MCC;
 	dl_req.mnc = u16MNC;
+	dl_req.pci = u16PCI;
 	int err = otdoa_api_ubsa_download(&dl_req, CONFIG_OTDOA_DEFAULT_UBSA_PATH, true);
 
 	if (err != OTDOA_API_SUCCESS) {

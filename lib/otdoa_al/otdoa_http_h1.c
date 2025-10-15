@@ -145,6 +145,7 @@ void otdoa_http_h1_copy_ubsa_params(tOTDOA_HTTP_MEMBERS *pG, const tOTDOA_HTTP_M
 	pG->uNumCells = pM->http_get_ubsa.uNumCells;
 	pG->uMCC = pM->http_get_ubsa.u16MCC;
 	pG->uMNC = pM->http_get_ubsa.u16MNC;
+	pG->uPCI = pM->http_get_ubsa.u16PCI;
 }
 
 /**
@@ -327,6 +328,7 @@ int otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS *pG)
 			   "&encrypt=%u"
 			   "&dlearfcn=%d"
 			   "&radius=%d"
+			   "&pci=%" PRIu16
 			   "&mcc=%" PRIu16 "&mnc=%" PRIu16 "&otdoa_fwv=%s"
 			   "&mfwv=%s"
 			   "&num_cells=%d"
@@ -339,7 +341,7 @@ int otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS *pG)
 			   "authorization: Bearer %s\r\n"
 			   "\r\n",
 			   pG->uEcgi, (pG->bDisableEncryption ? 0 : 1), pG->uDlearfcn, pG->uRadius,
-			   pG->uMCC, pG->uMNC,
+			   pG->uPCI, pG->uMCC, pG->uMNC,
 			   otdoa_api_get_short_version(),
 			   modem_ver, pG->uNumCells,
 			   LOG2_COMPRESS_WINDOW, otdoa_http_get_download_url(), jwt_token);

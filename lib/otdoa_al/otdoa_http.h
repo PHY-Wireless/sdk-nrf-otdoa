@@ -100,6 +100,7 @@ typedef struct {
 	unsigned int uNumRepeatCount;
 	uint16_t u16MCC;
 	uint16_t u16MNC;
+	uint16_t u16PCI;
 } tOTDOA_MSG_HTTP_GET_UBSA;
 
 /* message for http module to download config file */
@@ -227,6 +228,7 @@ typedef struct OTDOA_HTTP_MEMBERS {
 	long prsID;
 	uint16_t uMCC;
 	uint16_t uMNC;
+	uint16_t uPCI;
 
 	tOTDOA_HTTP_BLACKLIST blacklist[BLACKLIST_SIZE];
 } tOTDOA_HTTP_MEMBERS;
@@ -255,7 +257,7 @@ int otdoa_http_get_override_auth_resp(void);
 
 int otdoa_http_send_ubsa_req(const char *const pURL, uint32_t u32ECGI, uint32_t u32DLEARFCN,
 			     uint32_t u32Radius, uint32_t u32NumCells, uint16_t u16MCC,
-			     uint16_t u16MNC, bool reset_blacklist);
+			     uint16_t u16MNC, uint16_t u16PCI, bool reset_blacklist);
 int otdoa_http_send_log_upload(const char *vf, uint32_t repeat);
 int otdoa_http_send_vector_upload(const char *vf, uint32_t repeat);
 int otdoa_http_send_results_upload(const char *pURL, otdoa_api_results_t *pResults,
