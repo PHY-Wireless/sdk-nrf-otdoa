@@ -8,15 +8,13 @@
 #define SRC_INCLUDE_OTDOA_FILE_H_
 
 #if CONFIG_OTDOA_LITTLE_FS
-int mount_fat_fs(void);
-int test_fs_raw(void);
-int test_fs(void);
-
-#else
 int mount_little_fs(void);
 int unmount_little_fs(void);
 int test_little_fs(void);
-
+#else
+int mount_fat_fs(void);
+int test_fs_raw(void);
+int test_fs(void);
 #endif
 
 #endif /* SRC_INCLUDE_OTDOA_FILE_H_ */
