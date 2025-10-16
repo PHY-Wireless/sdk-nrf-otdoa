@@ -7,8 +7,9 @@
 #ifndef OTDOA_HTTP_H1_H
 #define OTDOA_HTTP_H1_H
 
-#include <otdoa_al/phywi_otdoa_api.h>
+#include <otdoa_al/otdoa_api.h>
 
+/* These are made public for support of unit tests */
 int otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS *p_http);
 int otdoa_http_h1_format_range_request(tOTDOA_HTTP_MEMBERS *p_http);
 int otdoa_http_h1_handle_message(tOTDOA_HTTP_MESSAGE *p_http);
@@ -41,7 +42,6 @@ int otdoa_http_h1_blacklist_init(tOTDOA_HTTP_MEMBERS *p_http);
 int otdoa_http_h1_blacklist_tick(tOTDOA_HTTP_MEMBERS *p_http);
 int otdoa_http_h1_test_jwt(tOTDOA_HTTP_MEMBERS *p_http);
 
-/* These are made public for support of unit tests */
 int otdoa_http_h1_free_cs_buffer(void);
 int otdoa_http_h1_get_cs_buffer(void);
 

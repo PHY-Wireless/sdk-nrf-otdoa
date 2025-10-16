@@ -6,10 +6,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <otdoa_al/phywi_otdoa_api.h>
-#include <otdoa_al/otdoa_nordic_at_h1.h>
+#include <otdoa_al/otdoa_api.h>
+#include <otdoa_al/otdoa_nordic_at.h>
 #include "otdoa_http.h"
 #include "otdoa_al_log.h"
+
+LOG_MODULE_DECLARE(otdoa_al, LOG_LEVEL_INF);
+
 
 static otdoa_api_callback_t al_event_callback;
 /**
@@ -29,13 +32,13 @@ int32_t otdoa_al_init(otdoa_api_callback_t event_callback)
 	int rc = modem_key_mgmt_exists(CONFIG_OTDOA_TLS_SEC_TAG, OTDOA_TLS_CERT_TYPE, &exists);
 
 	if (rc) {
-		OTDOA_LOG_ERR("otdoa_al_init: failed to check for TLS certificate in tag %d: %d",
+		LOG_ERR("otdoa_al_init: failed to check for TLS certificate in tag %d: %d",
 			      CONFIG_OTDOA_TLS_SEC_TAG, rc);
 		return OTDOA_API_INTERNAL_ERROR;
 	}
 
 	if (!exists) {
-		OTDOA_LOG_ERR("otdoa_al_init: TLS certificate not found in tag %d",
+		LOG_ERR("otdoa_al_init: TLS certificate not found in tag %d",
 			      CONFIG_OTDOA_TLS_SEC_TAG);
 		return OTDOA_API_INTERNAL_ERROR;
 	}
@@ -47,7 +50,7 @@ int32_t otdoa_al_init(otdoa_api_callback_t event_callback)
 void otdoa_http_invoke_callback_dl_compl(int status)
 {
 	if (!al_event_callback) {
-		otdoa_log_err("No registered callback");
+		LOG_ERR("No registered callback");
 		return;
 	}
 
@@ -61,7 +64,7 @@ void otdoa_http_invoke_callback_dl_compl(int status)
 void otdoa_http_invoke_callback_ul_compl(int status)
 {
 	if (!al_event_callback) {
-		otdoa_log_err("No registered callback");
+		LOG_ERR("No registered callback");
 		return;
 	}
 
@@ -73,34 +76,58 @@ void otdoa_http_invoke_callback_ul_compl(int status)
 }
 
 int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t *p_dl_request,
-				const char *const ubsa_file_path, const bool reset_blacklist)
+				const bool reset_blacklist)
 {
 	int32_t rc = 0;
 
-	/* if input ECGI is 0, get current serving cell ECGI & DLEARFCN */
 	uint32_t ecgi = p_dl_request->ecgi;
 	uint32_t dlearfcn = p_dl_request->dlearfcn;
 	uint16_t mcc = p_dl_request->mcc;
 	uint16_t mnc = p_dl_request->mnc;
+	uint16_t pci = p_dl_request->pci;
 
 	if (ecgi == 0) {
-		rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, &dlearfcn, &mcc, &mnc);
-		OTDOA_LOG_INF("otdoa_nordic_at_get_ecgi_and_dlearfcn() returned %d.  ECGI: %u", rc,
-			      ecgi);
-		if (rc == OTDOA_EVENT_FAIL_NO_DLEARFCN && ecgi != 0) {
+		/* if input ECGI is 0, get current serving cell parameters */
+		otdoa_xmonitor_params_t params;
+
+		rc = otdoa_nordic_at_get_xmonitor(&params);
+		LOG_INF("otdoa_nordic_at_get_xmonitor() returned %d.  ECGI: %u", rc,
+			      params.ecgi);
+		ecgi = params.ecgi;
+		dlearfcn = params.dlearfcn;
+		mcc = params.mcc;
+		mnc = params.mnc;
+		pci = params.pci;
+		if (rc == OTDOA_EVENT_FAIL_NO_DLEARFCN) {
 			/* got the ECGI OK but we miss the DLEARFCN. So default to 5230 */
-			dlearfcn = DEFAULT_UBSA_DLEARFCN;
-			rc = 0;
-		} else if (rc != 0) {
+			dlearfcn = UNKNOWN_UBSA_DLEARFCN;
+			rc = OTDOA_API_SUCCESS;
+		}
+		if (rc == OTDOA_EVENT_FAIL_NO_PCI) {
+			pci = UNKNOWN_UBSA_PCI;
+			rc = OTDOA_API_SUCCESS;
+		}
+		if (rc != OTDOA_API_SUCCESS) {
 			/* other failures */
 			return rc;
 		}
 	}
+	/* Send the request message */
+	tOTDOA_MSG_HTTP_GET_UBSA msg = { 0 };
 
-	rc = otdoa_http_send_ubsa_req(BSA_DL_SERVER_URL, ecgi, dlearfcn,
-				      p_dl_request->ubsa_radius_meters, p_dl_request->max_cells,
-				      mcc, mnc, reset_blacklist);
-	return rc;
+	msg.u32MsgId = OTDOA_HTTP_MSG_GET_H1_UBSA;
+	LOG_INF("Sending uBSA req for ECGI %u PCI %u DLEARFCN %u",
+		ecgi, pci, dlearfcn);
+	msg.u32MsgLen = sizeof(msg);
+	msg.uEcgi = ecgi;
+	msg.uDlearfcn = dlearfcn;
+	msg.uRadius = p_dl_request->ubsa_radius_meters;
+	msg.uNumCells = p_dl_request->max_cells;
+	msg.u16MCC = mcc;
+	msg.u16MNC = mnc;
+	msg.u16PCI = pci;
+	msg.bResetBlacklist = reset_blacklist;
+	return otdoa_http_send_message((tOTDOA_HTTP_MESSAGE *)&msg, msg.u32MsgLen);
 }
 
 int otdoa_api_cfg_download(void)
@@ -110,7 +137,7 @@ int otdoa_api_cfg_download(void)
 	msg.u32MsgId = OTDOA_HTTP_MSG_GET_H1_CONFIG_FILE;
 	msg.u32MsgLen = sizeof(msg);
 
-	return otdoa_http_send_message((tOTDOA_HTTP_MESSAGE *)&msg);
+	return otdoa_http_send_message((tOTDOA_HTTP_MESSAGE *)&msg, msg.u32MsgLen);
 }
 
 #ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
