@@ -7,7 +7,7 @@
 #include <zephyr/kernel.h>
 
 #include <stdint.h>
-#include <otdoa_al/phywi_al2otdoa_api.h>
+#include <otdoa_al/otdoa_al2otdoa_api.h>
 
 struct k_timer otdoa_timers[OTDOA_MAX_TIMERS];
 

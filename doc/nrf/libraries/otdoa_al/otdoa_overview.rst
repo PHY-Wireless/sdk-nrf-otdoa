@@ -1,33 +1,33 @@
-.. otdoa overview:
+.. _otdoa_overview:
 
 hellaPHY OTDOA Overview
 #######################
 
 hellaPHY Observed Time-Difference of Arrival (hellaPHY OTDOA) is a technique for estimating a UE's position.
 It involves estimating time differences between signals broadcast by the terrestrial LTE cellular
-network.  These time difference estimates can then be used to triangulate the UE's position based
+network. These time difference estimates can then be used to triangulate the UE's position based
 upon known cellular base station positions, in much the same way as GNSS systems triangulate
-a position based upon know satellite positions.  The hellaPHY OTDOA implementation in this library is
+a position based upon know satellite positions. The hellaPHY OTDOA implementation in this library is
 *UE-based*, meaning that the position estimate is calculated by the UE application processor,
 rather than by a network server.
 
 Cells in the LTE network broadcast Positioning Reference Signals (PRS) signals
-that may be used to estimate the time difference of arrival at the UE.  The PRS
+that may be used to estimate the time difference of arrival at the UE. The PRS
 signals are periodically broadcast by the LTE network (typically for 1 msec.
 every 160 msec.), and they are multiplexed in a way that allows the UE to detect
 PRS broadcast by multiple base stations at the same time.
 
 Information about the cellular base stations, including their positions,
 is contained in micro-Base Station Almanac (uBSA) file that is downloaded
-by the UE from a network server.  This uBSA is stored in a file system on
-the UE, and it typically covers a large geographic area.  The UE uses this
+by the UE from a network server. This uBSA is stored in a file system on
+the UE, and it typically covers a large geographic area. The UE uses this
 uBSA for many position estimates; if it moves outside the geographic coverage
-area a new uBSA is automatically downloaded.  An important function of the
-OTDOA Adaption Layer is to download the uBSA from a network server, and store
+area a new uBSA is automatically downloaded. An important function of the
+OTDOA Adaptation Layer is to download the uBSA from a network server, and store
 it in the UE file system for access by the OTDOA binary library.
 
 Once the uBSA has been downloaded, all position estimate calculations are
-performed by n the UE application processor.  This includes collection of the PRS
+performed by n the UE application processor. This includes collection of the PRS
 signals, estimation of time differences of arrival, and triangulation
 calculations necessary to estimate the UE position.
 
@@ -41,8 +41,8 @@ Implementation
 **************
 
 The hellaPHY OTDOA firmware subsystem consists of a binary library (delivered in binary
-object code format), and the adaption layer (delivered as source code as part of
-the nRF Connect SDK).  The diagram below shows an overview of the hellaPHY OTDOA firmware subsystem
+object code format), and the adaptation layer (delivered as source code as part of
+the nRF Connect SDK). The diagram below shows an overview of the hellaPHY OTDOA firmware subsystem
 in a typical application.
 
 .. image:: images/otdoa-fw-arch.drawio.png
@@ -53,7 +53,7 @@ See :doc:`otdoa_firmware` and :doc:`otdoa_data_flow` for more information.
 
 Supported Features
 ******************
-The hellaPHY OTDOA adaption layer supports the following features:
+The hellaPHY OTDOA adaptation layer supports the following features:
 
 * uBSA download via an HTTP REST interface
 * Configuration file download via an HTTP REST interface
@@ -74,7 +74,7 @@ Requirements
 
 hellaPHY OTDOA Binary Library
 =============================
-The hellaPHY OTDOA adaption layer requires the hellaPHY OTDOA binary library to be separately
+The hellaPHY OTDOA adaptation layer requires the hellaPHY OTDOA binary library to be separately
 downloaded and integrated into the nRF Connect SDK by the developer.
 
 Security Requirements
@@ -83,17 +83,17 @@ Security Requirements
 TLS Certificate
 ---------------
 The UE requires a TLS certificate to authenticate with the network server
-when downloading the uBSA or configuration information.  This certificate
-may be installed by the application using the :ref:`otdoa_api_install_tls_cert`
-API.  Alternatively, the certificate may be installed by the adaption layer
+when downloading the uBSA or configuration information. This certificate
+may be installed by the application using the :c:func:`otdoa_api_install_tls_cert`
+API. Alternatively, the certificate may be installed by the adaptation layer
 using the :kconfig:option:`CONFIG_OTDOA_API_TLS_CERT_INSTALL` configuration
 option.
 
 Network Server Keys
 -------------------
 The UE requires a public/private key pair to authenticate with the network server
-when downloading the uBSA or configuration information.  The private key is
-loaded into the UE using the :ref:`otdoa_api_provision` API.   The public key
+when downloading the uBSA or configuration information. The private key is
+loaded into the UE using the :c:func:`otdoa_api_provision` API. The public key
 is sent to the network server where it is used to authenticate the UE.
 
 Instructions for generating the public/private key pair are provided along with
@@ -102,9 +102,9 @@ the OTDOA binary library.
 
 Configuration
 *************
-To use the OTDOA adaption layer, enable the :kconfig:option:`CONFIG_OTDOA_AL_LIB` configuration option.
+To use the OTDOA adaptation layer, enable the :kconfig:option:`CONFIG_OTDOA_AL_LIB` configuration option.
 
-You can also configure the following options in the adaption layer:
+You can also configure the following options in the adaptation layer:
 
 * :kconfig:option:`CONFIG_OTDOA_CFG_DL_INTERVAL` to configure the interval between config downloads.
 * :kconfig:option:`CONFIG_OTDOA_PRS_SAMPLES_BUFFER_COUNT` to configure the number of buffer slabs for PRS samples.
@@ -145,7 +145,7 @@ Usage
 
 Samples using the library
 *************************
-The following |NCS| samples use the hellaPHY OTDOA library and adaption layer:
+The following |NCS| samples use the hellaPHY OTDOA library and adaptation layer:
 
 * :ref:`otdoa_sample`
 
@@ -185,7 +185,7 @@ It uses the following Zephyr libraries and services:
 FLASH File System
 =================
 
-The OTDOA library uses a FLASH file system for storage of uBSA information.  Typically
+The OTDOA library uses a FLASH file system for storage of uBSA information. Typically
 this makes use of the Zephyr Little FS file system, mounted on either an external serial
 FLASH or using the NRF SoC internal FLASH.
 
@@ -194,7 +194,7 @@ Approximately 25KB of storage are used in this file system.
 API documentation
 *****************
 
-| Header file: :file:`include/otdoa_al/phywi_otdoa_api.h`
+| Header file: :file:`include/otdoa_al/otdoa_api.h`
 | Source files: :file:`lib/otdoa_al/*.c`
 
 .. doxygengroup:: phywi_otdoa_api
