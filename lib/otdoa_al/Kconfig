@@ -18,10 +18,6 @@ config OTDOA_DEFAULT_TIMEOUT_MS
 	int "Default timeout to use for OTDOA operations, in milliseconds"
 	default 120000
 
-config OTDOA_DEFAULT_UBSA_PATH
-	string "Default path to download a uBSA to"
-	default "/lfs/ubsa.csv"
-
 config OTDOA_SHELL_COMMANDS
 	bool "PHYWI shell commands for testing OTDOA"
 	default n

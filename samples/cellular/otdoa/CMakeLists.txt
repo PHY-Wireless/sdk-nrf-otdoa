@@ -13,8 +13,6 @@ project(otdoa)
 target_compile_options(app PRIVATE -flto -fdata-sections -ffunction-sections)
 target_link_options(app PRIVATE --gc-sections)
 
-# NORDIC SDK APP START
-
 # Prep the TLS certificate for including
 zephyr_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 generate_inc_file_for_target(
@@ -29,11 +27,8 @@ target_sources(app PRIVATE src/otdoa_gpio.c)
 
 target_include_directories(app PRIVATE ./include)
 
-target_link_libraries(app PUBLIC otdoa)
 target_link_libraries(app PUBLIC m)
 
 # GCC 11 by default emits DWARF version 5 which cannot be parsed by
 # pyelftools. Can be removed once pyelftools supports v5.
 add_link_options(-gdwarf-4)
-
-# NORDIC SDK APP END

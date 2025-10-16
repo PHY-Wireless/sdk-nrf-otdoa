@@ -9,13 +9,15 @@
 
 #include <stdbool.h>
 
-#include <otdoa_al/otdoa_log.h>
-#include <otdoa_al/phywi_otdoa_api.h>
+#include <otdoa_al/otdoa_api.h>
 #include "autoconf.h"
 #include "modem/modem_key_mgmt.h"
 
 /* Default DLEARFCN if not available from modem */
-#define DEFAULT_UBSA_DLEARFCN 5230
+#define DEFAULT_UBSA_DLEARFCN 5230u
+#define DEFAULT_UBSA_PCI      289u
+#define UNKNOWN_UBSA_DLEARFCN UINT16_MAX
+#define UNKNOWN_UBSA_PCI      UINT16_MAX
 
 /* collect our Kconfig values */
 #define BSA_DL_SERVER_URL   CONFIG_OTDOA_BSA_DL_SERVER_URL
@@ -77,21 +79,20 @@
  * are sent through Zephyr FIFOs (as opposed to e.g. workqueues) need this field.  Currently
  * that includes messages sent to the capture thread.
  */
-#define RESERVED       void *fifo_reserved;
+#define OTDOA_MSG_RESERVED       void *fifo_reserved;
 #define HTTPS_URL_LMAX 32
 
 typedef struct {
-	RESERVED;
+	OTDOA_MSG_RESERVED;
 	uint32_t u32MsgId;
 	uint32_t u32MsgLen;
 } tOTDOA_MSG_HTTP_HEADER;
 
 /* message for http module to download uBSA*/
 typedef struct {
-	RESERVED;
+	OTDOA_MSG_RESERVED;
 	uint32_t u32MsgId;
 	uint32_t u32MsgLen;
-	char pURL[HTTPS_URL_LMAX];
 	bool bResetBlacklist;
 	unsigned int uEcgi;
 	unsigned int uDlearfcn;
@@ -100,18 +101,19 @@ typedef struct {
 	unsigned int uNumRepeatCount;
 	uint16_t u16MCC;
 	uint16_t u16MNC;
+	uint16_t u16PCI;
 } tOTDOA_MSG_HTTP_GET_UBSA;
 
 /* message for http module to download config file */
 typedef struct {
-	RESERVED;
+	OTDOA_MSG_RESERVED;
 	uint32_t u32MsgId;
 	uint32_t u32MsgLen;
 } tOTDOA_MSG_HTTP_GET_CFG;
 
 /* message for http module to upload the vector */
 typedef struct {
-	RESERVED;
+	OTDOA_MSG_RESERVED;
 	uint32_t u32MsgId;
 	uint32_t u32MsgLen;
 	char vf[HTTPS_URL_LMAX];
@@ -120,7 +122,7 @@ typedef struct {
 
 /* message for http module to upload log files */
 typedef struct {
-	RESERVED;
+	OTDOA_MSG_RESERVED;
 	uint32_t u32MsgId;
 	uint32_t u32MsgLen;
 	char vf[HTTPS_URL_LMAX];
@@ -129,7 +131,7 @@ typedef struct {
 
 /* message for http module to upload otdoa results */
 typedef struct {
-	RESERVED;
+	OTDOA_MSG_RESERVED;
 	uint32_t u32MsgId;
 	uint32_t u32MsgLen;
 	char pURL[HTTPS_URL_LMAX];
@@ -141,14 +143,14 @@ typedef struct {
 
 /* message for http module to test the JWT generation */
 typedef struct {
-	RESERVED;
+	OTDOA_MSG_RESERVED;
 	uint32_t u32MsgId;
 	uint32_t u32MsgLen;
 } tOTDOA_MSG_HTTP_TEST_JWT;
 
 /* message for http module to rebind the socket */
 typedef struct {
-	RESERVED;
+	OTDOA_MSG_RESERVED;
 	uint32_t u32MsgId;
 	uint32_t u32MsgLen;
 } tOTDOA_MSG_HTTP_REBIND;
@@ -178,6 +180,17 @@ typedef struct OTDOA_HTTP_BLACKLIST {
 	int age;
 } tOTDOA_HTTP_BLACKLIST;
 
+typedef struct OTDOA_HTTP_REQ {
+	unsigned int uRecommendedDelay;
+	unsigned int uEcgi;
+	unsigned int uDlearfcn;
+	uint16_t uMCC;
+	uint16_t uMNC;
+	uint16_t uPCI;
+	unsigned int uRadius;
+	unsigned int uNumCells;
+} tOTDOA_HTTP_REQ;
+
 typedef union {
 	tOTDOA_MSG_HTTP_HEADER header;
 	tOTDOA_MSG_HTTP_GET_UBSA http_get_ubsa;
@@ -191,7 +204,6 @@ typedef union {
 
 /* HTTPS Thread Members */
 typedef struct OTDOA_HTTP_MEMBERS {
-	bool bReady;
 	bool bDownloadComplete;
 	int nRange;	            /* Start offset for current request */
 	int nRangeSegmentEnd;   /* end of current segment */
@@ -199,12 +211,8 @@ typedef struct OTDOA_HTTP_MEMBERS {
 	int nHeaderLength;      /* Length of header */
 	int nContentLength;     /* Length of content (body) */
 	int nBSARequests;       /* Number of BSA downloads this session */
-	int iHttpResponseCode;
 	bool bDisableTLS;       /* true to disable TLS and use HTTP (for uBSA DL only) */
-	bool bSkipConfigDL;     /* true to skip config file DL when DL the uBSA */
 	bool bSkipAuth;         /* true to skip authentication when DL the uBSA */
-	bool bDisableEncryption;
-	int nOverrideAuthResp;  /* non-zero value overrides initial auth. response (for testing) */
 	uint8_t pubkey[PUBKEY_LMAX];
 	uint8_t iv[IV_LMAX];
 
@@ -213,20 +221,12 @@ typedef struct OTDOA_HTTP_MEMBERS {
 	char *szSend;
 	size_t nOff;
 	int fdSocket;
-	int fdFile;
 	struct addrinfo *res;
 	char szModemAddress[HELLAPHY_IP_ADDR_LMAX];
 	char szServerAddress[HELLAPHY_IP_ADDR_LMAX];
 	char ubsa_token[UBSA_TOKEN_LMAX];
-	unsigned int uRecommendedDelay;
-	unsigned int uEcgi;
-	unsigned int uDlearfcn;
-	unsigned int uRadius;
-	unsigned int uNumCells;
-	unsigned int uNumRepeatCount;
+	tOTDOA_HTTP_REQ req;
 	long prsID;
-	uint16_t uMCC;
-	uint16_t uMNC;
 
 	tOTDOA_HTTP_BLACKLIST blacklist[BLACKLIST_SIZE];
 } tOTDOA_HTTP_MEMBERS;
@@ -253,9 +253,6 @@ bool otdao_http_get_encryption_disable(void);
 void otdoa_http_override_auth_resp(int override);
 int otdoa_http_get_override_auth_resp(void);
 
-int otdoa_http_send_ubsa_req(const char *const pURL, uint32_t u32ECGI, uint32_t u32DLEARFCN,
-			     uint32_t u32Radius, uint32_t u32NumCells, uint16_t u16MCC,
-			     uint16_t u16MNC, bool reset_blacklist);
 int otdoa_http_send_log_upload(const char *vf, uint32_t repeat);
 int otdoa_http_send_vector_upload(const char *vf, uint32_t repeat);
 int otdoa_http_send_results_upload(const char *pURL, otdoa_api_results_t *pResults,
@@ -263,7 +260,7 @@ int otdoa_http_send_results_upload(const char *pURL, otdoa_api_results_t *pResul
 				   const char *p_true_lon);
 int otdoa_http_send_test_jwt(void);
 int otdoa_http_send_rebind_socket(void);
-int otdoa_http_send_message(tOTDOA_HTTP_MESSAGE *pMsg);
+int otdoa_http_send_message(tOTDOA_HTTP_MESSAGE *pMsg, uint32_t len);
 int http_write_to_file(const char *path, void *data, size_t len);
 
 bool otdoa_http_check_pending_stop(void);
