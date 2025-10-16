@@ -1,5 +1,8 @@
 zephyr_library()
 
+# lfs.h is not in the include path, so add it explicitly here
+zephyr_library_include_directories(${ZEPHYR_BASE}/../modules/fs/littlefs)
+
 zephyr_library_sources(otdoa_thread.c)
 zephyr_library_sources(otdoa_thread_http.c)
 zephyr_library_sources(otdoa_thread_nordic_at.c)
