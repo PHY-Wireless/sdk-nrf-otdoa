@@ -34,7 +34,7 @@ static struct fs_mount_t lfs_storage_mnt = {
 };
 
 /*
- * Mount the LittlFS file system
+ * Mount the LittleFS file system
  */
 int mount_little_fs(void)
 {

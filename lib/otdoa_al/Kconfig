@@ -40,7 +40,7 @@ choice OTDOA_LIB_TYPE
 	endchoice
 
 config OTDOA_LITTLE_FS
-	bool "Use the LittleFS filesystem"
+	bool "Use an OTDOA-provided LittleFS filesystem"
 	default y
 
 config OTDOA_EXTERNAL_STORAGE

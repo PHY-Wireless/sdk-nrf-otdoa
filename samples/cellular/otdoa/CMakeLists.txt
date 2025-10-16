@@ -26,7 +26,6 @@ generate_inc_file_for_target(
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/otdoa_sample_app.c)
 target_sources(app PRIVATE src/otdoa_gpio.c)
-target_sources(app PRIVATE src/otdoa_little_fs.c)
 
 target_include_directories(app PRIVATE ./include)
 
