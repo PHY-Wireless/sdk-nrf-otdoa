@@ -266,7 +266,8 @@ error_exit:
 
 /* Use AT%%XMONITOR command to get the current ECGI and DLEARFCN from the modem */
 int otdoa_nordic_at_get_ecgi_and_dlearfcn(uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn,
-					  uint16_t *pu16_mcc, uint16_t *pu16_mnc, uint16_t *pu16_pci)
+					  uint16_t *pu16_mcc, uint16_t *pu16_mnc,
+					  uint16_t *pu16_pci)
 {
 	int i_ret = 0;
 	static char monitor_buf[256] = {0};

@@ -38,7 +38,8 @@
  */
 int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u_resp_len,
 					    uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn,
-					    uint16_t *pu16_mcc, uint16_t *pu16_mnc, uint16_t *pu16_pci);
+					    uint16_t *pu16_mcc, uint16_t *pu16_mnc,
+					    uint16_t *pu16_pci);
 
 /**
  * @brief Use AT%%XMONITOR command to get the current ECGI and DLEARFCN from the modem
@@ -52,7 +53,8 @@ int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u
  *
  */
 int otdoa_nordic_at_get_ecgi_and_dlearfcn(uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn,
-					  uint16_t *pu16_mcc, uint16_t *pu16_mnc, uint16_t *pu16_pci);
+					  uint16_t *pu16_mcc, uint16_t *pu16_mnc,
+					  uint16_t *pu16_pci);
 
 /**
  * @brief Gets the IMEI from the modem
