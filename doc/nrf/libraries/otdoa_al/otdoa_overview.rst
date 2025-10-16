@@ -106,7 +106,6 @@ To use the OTDOA adaption layer, enable the :kconfig:option:`CONFIG_OTDOA_AL_LIB
 
 You can also configure the following options in the adaption layer:
 
-* :kconfig:option:`CONFIG_OTDOA_DEBUG_LOGS` to link with a version of the OTDOA binary library that includes verbose debug logging.
 * :kconfig:option:`CONFIG_OTDOA_CFG_DL_INTERVAL` to configure the interval between config downloads.
 * :kconfig:option:`CONFIG_OTDOA_PRS_SAMPLES_BUFFER_COUNT` to configure the number of buffer slabs for PRS samples.
 * :kconfig:option:`CONFIG_OTDOA_HTTP_BLACKLIST_TIMEOUT` to configure the number of uBSA requests to make before removing an SC ECGI from the DL blacklist.
@@ -131,6 +130,12 @@ Security options:
 
 * :kconfig:option:`CONFIG_OTDOA_API_TLS_CERT_INSTALL` to enable installing a TLS certificate through the OTDOA library.
 * :kconfig:option:`OTDOA_TLS_SEC_TAG` to configure the TLS security tag slot to install PhyWi TLS certificate to.
+
+OTDOA Library Types:
+
+* :kconfig:option:`CONFIG_OTDOA_LIB_TYPE_PROD` to link with the standard production release version of the OTDOA binary library.
+* :kconfig:option:`CONFIG_OTDOA_LIB_TYPE_DBG` to link with a version of the OTDOA binary library that includes verbose debug logging.
+* :kconfig:option:`CONFIG_OTDOA_LIB_TYPE_DEV` to link with a version of the OTDOA binary library that includes modem capture support
 
 Shell commands list
 *******************
