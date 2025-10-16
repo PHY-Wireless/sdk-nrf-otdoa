@@ -83,7 +83,9 @@ void otdoa_crypto_abort(void);
 void otdoa_ubsa_proc_close_file(void);
 void otdoa_ubsa_proc_remove_file(const char *pszFile);
 
-const char *OTDOA_pxlGetBSAPath(void);
+const char * const OTDOA_pxlGetBSAPath(void);
+void OTDOA_pxlSetBSAPath(const char *pszPath);
+
 /**
  * otdoa_rs_handle_msg() - Handle main thread messages (Nordic RS API)
  */

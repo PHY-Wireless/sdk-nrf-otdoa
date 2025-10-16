@@ -6,9 +6,9 @@
 
 menu "OTDOA Sample Application config"
 
-config ENABLE_PERIODIC_POS_EST
-	bool "Perform an OTDOA position estimate every 20 minutes"
-	default n
+config PERIODIC_EST_INTERVAL
+	int "Interval in minutes for periodic OTDOA estimates,  0 to disable."
+	default 0
 
 endmenu # OTDOA Sample Application
 

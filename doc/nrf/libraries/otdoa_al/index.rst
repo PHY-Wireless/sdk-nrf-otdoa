@@ -3,8 +3,8 @@
 hellaPHY OTDOA Adaptation Layer
 ###############################
 
-The hellaPHY OTDOA Adaption Layer library enables applications to perform position estimates on
-cellular LTE signals using the hellaPHY OTDOA binary library.  It adapts the binary library for
+The hellaPHY OTDOA Adaptation Layer library enables applications to perform position estimates on
+cellular LTE signals using the hellaPHY OTDOA binary library. It adapts the binary library for
 use in the nRF cellular environment.
 
 .. toctree::
