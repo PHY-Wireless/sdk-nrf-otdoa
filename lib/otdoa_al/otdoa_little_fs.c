@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-PHYW
  */
 
-#if OTDOA_LITTLE_FS != 0
+#if CONFIG_OTDOA_LITTLE_FS
 
 #include <stdio.h>
 #include <stdint.h>
@@ -25,7 +25,7 @@ FS_LITTLEFS_DECLARE_DEFAULT_CONFIG(storage);
 static struct fs_mount_t lfs_storage_mnt = {
 	.type = FS_LITTLEFS,
 	.fs_data = &storage,
-#if FS_EXT_STORAGE == 1
+#if CONFIG_OTDOA_EXTERNAL_STORAGE
 	.storage_dev = (void *)FLASH_AREA_ID(external_flash),
 #else
 	.storage_dev = (void *)FLASH_AREA_ID(littlefs_storage),
@@ -34,7 +34,7 @@ static struct fs_mount_t lfs_storage_mnt = {
 };
 
 /*
- * Mount the LittlFS file system
+ * Mount the LittleFS file system
  */
 int mount_little_fs(void)
 {
