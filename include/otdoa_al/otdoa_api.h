@@ -16,11 +16,11 @@ extern "C" {
 #endif
 
 /**
- * @file phywi_otdoa_api.h
+ * @file otdoa_api.h
  *
- * @defgroup phywi_otdoa_api PHY Wireless OTDOA module
+ * @defgroup phywi_otdoa_api hellaPHY OTDOA module
  * @{
- * @brief API Definitions for the PHY Wireless OTDOA module.
+ * @brief API Definitions for the hellaPHY OTDOA module.
  */
 
 #define OTDOA_API_MAX_CELLS	  75
@@ -96,6 +96,9 @@ typedef enum {
 
 	/** The requested ECGI has been blacklisted */
 	OTDOA_EVENT_FAIL_BLACKLISTED = 16,
+
+	/** Failed to get PCI from Modem */
+	OTDOA_EVENT_FAIL_NO_PCI = 17,
 
 	/** The uBSA is still being generated */
 	OTDOA_EVENT_HTTP_NOT_READY = 202,
@@ -216,6 +219,8 @@ typedef struct {
 	uint16_t mcc;
 	/** Mobile Network Code. Range: 0...999. */
 	uint16_t mnc;
+	/** Cell PCI. Range: 0...503. */
+	uint16_t pci;
 
 	/** Cell DLEARFCN */
 	uint32_t dlearfcn;
@@ -312,13 +317,11 @@ int32_t otdoa_api_cancel_session(void);
 /**
  * @brief Requests that the OTDOA library initiate download of a new uBSA file.
  * @param[in] dl_request Structure containing the parameters of the requested uBSA
- * @param[in] ubsa_file_path Points to a string containing the full path to where
- *                           the uBSA file should be written
  * @param[in] reset_blacklist If OTDOA should reset the list of blocked ECGIs
  * @retval Error codes as defined in otdoa_api_error_codes_t
  */
 int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t *dl_request,
-				const char *const ubsa_file_path, bool reset_blacklist);
+				bool reset_blacklist);
 
 /**
  * @brief Requests that the OTDOA library initiate download of a new configuration file.
@@ -330,11 +333,9 @@ int otdoa_api_cfg_download(void);
 /*
  * @brief Indicates that an updated uBSA is available to the OTDOA library
  * @param[in] status A non-zero value indicates failure to update the uBSA.
- * @param ubsa_file_path Pointer to a null-terminated string containing the
- *                       full path to the updated uBSA file.
  * @retval Error codes as defined in otdoa_api_error_codes_t
  */
-int32_t otdoa_api_ubsa_available(int32_t status, const char *const ubsa_file_path);
+int32_t otdoa_api_ubsa_available(int32_t status);
 
 /**
  * @brief Upload the OTDOA results to the PhyWi Server

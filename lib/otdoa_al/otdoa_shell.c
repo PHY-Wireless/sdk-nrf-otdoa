@@ -5,12 +5,7 @@
  */
 
 #if CONFIG_OTDOA_SHELL_COMMANDS
-#include "otdoa_al/otdoa_nordic_at_h1.h"
-#include "otdoa_al/otdoa_nordic_at_h1.h"
-#include "stdint.h"
-#include "stdint.h"
-#include "stdint.h"
-
+#include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -18,9 +13,10 @@
 #include <zephyr/sys/printk.h>
 #include <zephyr/shell/shell.h>
 
-#include "otdoa_al/phywi_otdoa_api.h"
-#include "otdoa_al/otdoa_nordic_at_h1.h"
+#include "otdoa_al/otdoa_api.h"
+#include "otdoa_al/otdoa_nordic_at.h"
 #include "nrf_modem_at.h"
+#include "otdoa_http.h"
 
 /**
  *
@@ -35,18 +31,31 @@
  */
 static int otdoa_shell_info_handler(const struct shell *shell, size_t argc, char **argv)
 {
-	unsigned int ecgi;
 	const char *version;
 	char iccid[256];
 	int rc;
+	otdoa_xmonitor_params_t params;
 
 	shell_print(shell, "Nordic OTDOA Application");
 	/* get the ECGI */
-	rc = otdoa_nordic_at_get_ecgi_and_dlearfcn(&ecgi, NULL, NULL, NULL);
-	if (rc) {
+	rc = otdoa_nordic_at_get_xmonitor(&params);
+	if (rc != OTDOA_API_SUCCESS
+		&& rc != OTDOA_EVENT_FAIL_NO_DLEARFCN && rc != OTDOA_EVENT_FAIL_NO_PCI) {
 		shell_error(shell, "Failed to get ECGI: %d", rc);
 	} else {
-		shell_print(shell, "          ECGI: %u", ecgi);
+		shell_print(shell, "          ECGI: %"PRIu32, params.ecgi);
+		shell_print(shell, "           MCC: %"PRIu16, params.mcc);
+		shell_print(shell, "           MNC: %"PRIu16, params.mnc);
+		if (params.dlearfcn == UNKNOWN_UBSA_DLEARFCN) {
+			shell_print(shell, "      DLEARFCN: N/A");
+		} else {
+			shell_print(shell, "      DLEARFCN: %"PRIu32, params.dlearfcn);
+		}
+		if (params.pci == UNKNOWN_UBSA_PCI) {
+			shell_print(shell, "           PCI: N/A");
+		} else {
+			shell_print(shell, "           PCI: %"PRIu16, params.pci);
+		}
 	}
 
 	/* get the software version */
@@ -115,11 +124,10 @@ extern uint32_t u32OverrideServCellECGI;
 extern uint32_t u32OverrideDLEARFCN;
 static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, char **argv)
 {
-	uint32_t u32Ecgi = 0;
-	uint32_t u32DlearFcn = 5230;
+	otdoa_xmonitor_params_t params;
 
-	otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32DlearFcn, NULL, NULL);
-	shell_print(shell, "Current : INFO ECGI=%u, DLEARFCN=%u\n", u32Ecgi, u32DlearFcn);
+	otdoa_nordic_at_get_xmonitor(&params);
+	shell_print(shell, "Current : INFO ECGI=%u, DLEARFCN=%u\n", params.ecgi, params.dlearfcn);
 
 	uint32_t u32ServCellECGI = 0; /* Zero means don't override */
 
@@ -127,7 +135,7 @@ static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, 
 		u32ServCellECGI = strtoul(argv[1], NULL, 0);
 		u32OverrideServCellECGI = u32ServCellECGI;
 		if (u32ServCellECGI) {
-			u32OverrideDLEARFCN = u32DlearFcn;
+			u32OverrideDLEARFCN = params.dlearfcn;
 		}
 	}
 	if (argc > 2) {
@@ -149,67 +157,66 @@ static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, 
  */
 static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc, char **argv)
 {
-	uint32_t u32Ecgi;
-	uint32_t u32Dlearfcn;
-	uint16_t u16MCC;
-	uint16_t u16MNC;
+	otdoa_xmonitor_params_t params;
 
 	/* use the real values as defaults */
-	otdoa_nordic_at_get_ecgi_and_dlearfcn(&u32Ecgi, &u32Dlearfcn, &u16MCC, &u16MNC);
+	otdoa_nordic_at_get_xmonitor(&params);
 
 	/* Default to 100000 since v0.2 of server interprets this as meters */
 	uint32_t u32Radius = 100000;
 	uint32_t u32NumCells = 1000;
 
 	if (u32OverrideDLEARFCN > 0) {
-		u32Dlearfcn = u32OverrideDLEARFCN;
+		params.dlearfcn = u32OverrideDLEARFCN;
 	}
 
 	if (argc >= 2) {
-		u32Ecgi = strtoul(argv[1], NULL, 0);
+		params.ecgi = strtoul(argv[1], NULL, 0);
 	}
 
 	if (argc >= 3) {
 		u32Radius = strtoul(argv[2], NULL, 0);
-		if (0 == u32Radius) {
+		if (u32Radius == 0) {
 			shell_error(shell, "Failed to convert radius (%s)\n", argv[2]);
 		}
 	}
 
 	if (argc >= 4) {
 		u32NumCells = strtoul(argv[3], NULL, 0);
-		if (0 == u32NumCells) {
+		if (u32NumCells == 0) {
 			shell_error(shell, "Failed to convert number of cells (%s)\n", argv[3]);
 		}
 	}
 
 	if (argc >= 5) {
-		u16MCC = strtoul(argv[4], NULL, 0);
-		if (0 == u16MCC) {
+		params.mcc = strtoul(argv[4], NULL, 0);
+		if (params.mcc == 0) {
 			shell_error(shell, "Failed to convert MCC (%s)\n", argv[4]);
 		}
 	}
 
 	if (argc >= 6) {
-		u16MNC = strtoul(argv[5], NULL, 0);
-		if (0 == u16MNC) {
+		params.mnc = strtoul(argv[5], NULL, 0);
+		if (params.mnc == 0) {
 			shell_error(shell, "Failed to convert MNC (%s)\n", argv[5]);
 		}
 	}
 
 	shell_print(shell,
 		    "Getting uBSA (ECGI: %u (0x%08x) DLEARFCN: %u  Radius: %u  Num Cells: %u)\n",
-		    u32Ecgi, u32Ecgi, u32Dlearfcn, u32Radius, u32NumCells);
+		    params.ecgi, params.ecgi, params.dlearfcn, u32Radius, u32NumCells);
 
 	otdoa_api_ubsa_dl_req_t dl_req = {0};
 
-	dl_req.ecgi = u32Ecgi;
-	dl_req.dlearfcn = u32Dlearfcn;
+	dl_req.ecgi = params.ecgi;
+	dl_req.dlearfcn = params.dlearfcn;
 	dl_req.ubsa_radius_meters = u32Radius;
 	dl_req.max_cells = u32NumCells;
-	dl_req.mcc = u16MCC;
-	dl_req.mnc = u16MNC;
-	int err = otdoa_api_ubsa_download(&dl_req, CONFIG_OTDOA_DEFAULT_UBSA_PATH, true);
+	dl_req.mcc = params.mcc;
+	dl_req.mnc = params.mnc;
+	dl_req.pci = params.pci;
+	/* Note: we reset the cell blacklist when user requests a uBSA DL */
+	int err = otdoa_api_ubsa_download(&dl_req, true);
 
 	if (err != OTDOA_API_SUCCESS) {
 		shell_error(shell, "uBSA download failed with return %d\n", err);

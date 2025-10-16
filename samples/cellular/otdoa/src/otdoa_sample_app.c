@@ -10,20 +10,20 @@
 #include <nrf_modem_at.h>
 #include <modem/lte_lc.h>
 #include <modem/nrf_modem_lib.h>
-#include <otdoa_al/phywi_otdoa_api.h>
-#include <otdoa_al/phywi_otdoa2al_api.h>
+#include <otdoa_al/otdoa_api.h>
+#include <otdoa_al/otdoa_otdoa2al_api.h>
 #include "otdoa_gpio.h"
 #include "otdoa_sample_app.h"
 
 #define UBSA_FILE_PATH "/lfs/ubsa.csv"
 
-LOG_MODULE_REGISTER(otdoa_sample, LOG_LEVEL_DBG);
+LOG_MODULE_DECLARE(otdoa_sample, LOG_LEVEL_INF);
 
 static K_SEM_DEFINE(lte_connected, 0, 1);
 
 /* Timer for periodic position estimates */
 struct k_timer pos_est_timer;
-#define POS_EST_TIMER_DURATION K_MSEC(20 * 60 * 1000)
+#define POS_EST_TIMER_DURATION K_MSEC(CONFIG_PERIODIC_EST_INTERVAL * 60 * 1000)
 
 /* Flag to distinguish between DL requests initiated during an OTDOA
  * session, and those that are not part of a session (e.g. those for testing uBDA DL)
@@ -43,16 +43,12 @@ void otdoa_sample_start(uint32_t session_length, uint32_t capture_flags, uint32_
 
 static void lte_event_handler(const struct lte_lc_evt *const evt)
 {
-	switch (evt->type) {
-	case LTE_LC_EVT_NW_REG_STATUS:
+	if (evt->type == LTE_LC_EVT_NW_REG_STATUS) {
 		if ((evt->nw_reg_status == LTE_LC_NW_REG_REGISTERED_HOME) ||
-		    (evt->nw_reg_status == LTE_LC_NW_REG_REGISTERED_ROAMING)) {
+			(evt->nw_reg_status == LTE_LC_NW_REG_REGISTERED_ROAMING)) {
 			printk("Connected to LTE");
 			k_sem_give(&lte_connected);
 		}
-		break;
-	default:
-		break;
 	}
 }
 
@@ -98,10 +94,8 @@ int otdoa_sample_main(void)
 
 	set_blink_sleep();
 
-#if CONFIG_ENABLE_PERIODIC_POS_EST
-	LOG_INF("Enabling periodic position estimates");
+	/* Optionally enable periodic estimates */
 	pos_est_timer_restart();
-#endif
 
 	return 0;
 }
@@ -162,7 +156,7 @@ static void otdoa_event_handler(const otdoa_api_event_data_t *p_event_data)
 		LOG_INF("  max cells: %u  radius: %u", p_event_data->dl_request.max_cells,
 			p_event_data->dl_request.ubsa_radius_meters);
 
-		int err = otdoa_api_ubsa_download(&p_event_data->dl_request, UBSA_FILE_PATH, false);
+		int err = otdoa_api_ubsa_download(&p_event_data->dl_request, false);
 
 		if (err != OTDOA_API_SUCCESS) {
 			LOG_ERR("otdoa_api_ubsa_download() failed with return %d", err);
@@ -186,8 +180,8 @@ static void otdoa_event_handler(const otdoa_api_event_data_t *p_event_data)
 		if (dl_in_session) {
 			dl_in_session = 0;
 			set_blink_prs();
-			int err = otdoa_api_ubsa_available(p_event_data->dl_compl.status,
-							   UBSA_FILE_PATH);
+			int err = otdoa_api_ubsa_available(p_event_data->dl_compl.status);
+
 			if (err != OTDOA_API_SUCCESS) {
 				LOG_ERR("otdoa_api_ubsa_available() failed with return %d", err);
 				err = otdoa_api_cancel_session();
@@ -196,9 +190,15 @@ static void otdoa_event_handler(const otdoa_api_event_data_t *p_event_data)
 						err);
 				}
 			}
-		} else if (p_event_data->dl_compl.status == OTDOA_API_SUCCESS) {
-			set_blink_sleep();
-			LOG_INF("OTDOA uBSA DL SUCCESS");
+		} else {
+			/* DL request was not part of a session, so just handle the result */
+			if (p_event_data->dl_compl.status == OTDOA_API_SUCCESS) {
+				set_blink_sleep();
+				LOG_INF("OTDOA uBSA DL SUCCESS");
+			} else {
+				LOG_ERR("OTDOA uBSA DL FAILED");
+				set_blink_error();
+			}
 			pos_est_timer_restart();
 		}
 		break;
@@ -221,7 +221,7 @@ static void pos_est_timer_cb(struct k_timer *timer)
 
 static void pos_est_timer_restart(void)
 {
-#if CONFIG_ENABLE_PERIODIC_POS_EST
+#if CONFIG_PERIODIC_EST_INTERVAL > 0
 	k_timer_start(&pos_est_timer, POS_EST_TIMER_DURATION, K_NO_WAIT);
 #endif
 }
@@ -281,7 +281,7 @@ void otdoa_sample_ubsa_dl_test(uint32_t ecgi, uint32_t dlearfcn, uint32_t radius
 	LOG_INF("Getting uBSA (ECGI: %u (0x%08x) DLEARFCN: %u  Radius: %u  Num Cells: %u)", ecgi,
 		ecgi, dlearfcn, radius, max_cells);
 
-	int err = otdoa_api_ubsa_download(&dl_req, UBSA_FILE_PATH, true);
+	int err = otdoa_api_ubsa_download(&dl_req, true);
 
 	if (err != OTDOA_API_SUCCESS) {
 		LOG_ERR("otdoa_api_ubsa_download() failed with return %d", err);
