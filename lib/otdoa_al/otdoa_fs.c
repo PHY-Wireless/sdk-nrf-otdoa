@@ -20,10 +20,6 @@
 #include <string.h>
 #include <otdoa_al/otdoa_fs.h>
 
-#ifndef OTDOA_LITTLE_FS
-#error "OTDOA_LITTLE_FS must be defined"
-#endif
-
 K_MUTEX_DEFINE(otdoa_fs_mutex);
 
 #define FS_LOCK_WAIT (K_MSEC(1000))

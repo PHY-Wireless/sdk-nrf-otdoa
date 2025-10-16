@@ -6,9 +6,9 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <otdoa_al/otdoa_little_fs.h>
 
 #include "otdoa_gpio.h"
-#include "otdoa_little_fs.h"
 #include "otdoa_sample_app.h"
 
 LOG_MODULE_REGISTER(main, LOG_LEVEL_DBG);
