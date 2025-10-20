@@ -71,7 +71,7 @@ typedef struct {
  *             282,5230,37,25,"","11100000","11100000","01011110"
  */
 int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u_resp_len,
-	                                    otdoa_xmonitor_params_t *params);
+						otdoa_xmonitor_params_t *params);
 
 /**
  * @brief Use AT%%XMONITOR command to get the current ECGI and DLEARFCN from the modem

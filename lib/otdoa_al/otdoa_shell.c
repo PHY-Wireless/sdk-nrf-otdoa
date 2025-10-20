@@ -166,28 +166,28 @@ static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc, 
 
 	if (argc >= 3) {
 		u32Radius = strtoul(argv[2], NULL, 0);
-		if (0 == u32Radius) {
+		if (u32Radius == 0) {
 			shell_error(shell, "Failed to convert radius (%s)\n", argv[2]);
 		}
 	}
 
 	if (argc >= 4) {
 		u32NumCells = strtoul(argv[3], NULL, 0);
-		if (0 == u32NumCells) {
+		if (u32NumCells == 0) {
 			shell_error(shell, "Failed to convert number of cells (%s)\n", argv[3]);
 		}
 	}
 
 	if (argc >= 5) {
 		params.mcc = strtoul(argv[4], NULL, 0);
-		if (0 == params.mcc) {
+		if (params.mcc == 0) {
 			shell_error(shell, "Failed to convert MCC (%s)\n", argv[4]);
 		}
 	}
 
 	if (argc >= 6) {
 		params.mnc = strtoul(argv[5], NULL, 0);
-		if (0 == params.mnc) {
+		if (params.mnc == 0) {
 			shell_error(shell, "Failed to convert MNC (%s)\n", argv[5]);
 		}
 	}

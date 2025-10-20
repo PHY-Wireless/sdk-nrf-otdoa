@@ -86,6 +86,7 @@ int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t *p_dl_request,
 	if (ecgi == 0) {
 		/* if input ECGI is 0, get current serving cell parameters */
 		otdoa_xmonitor_params_t params;
+
 		rc = otdoa_nordic_at_get_xmonitor(&params);
 		OTDOA_LOG_INF("otdoa_nordic_at_get_ecgi_and_dlearfcn() returned %d.  ECGI: %u", rc,
 			      ecgi);

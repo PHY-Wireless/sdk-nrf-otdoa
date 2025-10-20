@@ -87,7 +87,7 @@ char *otdoa_nordic_at_strtok_r(char *s, char delim, char **save_ptr)
 
 /* Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN */
 int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u_resp_len,
-	                                    otdoa_xmonitor_params_t *params)
+					    otdoa_xmonitor_params_t *params)
 {
 	int i_ret = 0;
 	int n_token = 0;
@@ -266,8 +266,8 @@ int otdoa_nordic_at_get_xmonitor(otdoa_xmonitor_params_t *params)
 			      i_ret);
 		i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
 	} else {
-		i_ret = otdoa_nordic_at_parse_xmonitor_response(monitor_buf, strlen(monitor_buf),
-			                                        params);
+		i_ret = otdoa_nordic_at_parse_xmonitor_response(monitor_buf,
+						       strlen(monitor_buf), params);
 	}
 	return i_ret;
 }
