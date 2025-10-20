@@ -18,14 +18,48 @@
  * @brief AT Command utilities for Nordic-Based "H1" product
  */
 
+/**
+ * @brief AT%XMONITOR parameters
+ * This structure contains supported XMONITOR response fields
+ */
+typedef struct {
+	/** Registration Status:
+	 * 0: Not Registered
+	 * 1: Registered, home network
+	 * 2: Not registered, but searching
+	 * 3: Registration denied
+	 * 4: Unknown
+	 * 5: Registered, roaming
+	 * 90: Not registered due to UICC failure
+	 */
+	uint32_t reg_status;
+
+	/** 4-byte E-UTRAN cell ID */
+	uint32_t ecgi;
+
+	/** EARFCN */
+	uint32_t dlearfcn;
+
+	/** Mobile Country Code */
+	uint16_t mcc;
+
+	/** Mobile Network Code */
+	uint16_t mnc;
+
+	/** Physical Cell ID */
+	uint16_t pci;
+
+	/** AcT:
+	 * 7: E-UTRAN
+	 * 9: E-UTRAN NB-S1
+	 */
+	uint16_t act;
+} otdoa_xmonitor_params_t;
+
 /** @brief Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN
  * @param psz_resp      [in]   response string returned by the modem
  * @param u_resp_len    [in]   Length of the response string
- * @param pu32_ecgi     [out]  A pointer to where the returned ECGI will be written
- * @param pu32_dlearfcn [out]  A pointer to where the returned DLEARFCN will be written
- * @param pu16_mcc      [out]  A pointer to where the returned MCC will be written
- * @param pu16_mnc      [out]  A pointer to where the returned MNC will be written
- * @param pu16_pci      [out]  A pointer to where the returned PCI will be written
+ * @param params        [out]  Pointer to parameters struct to store response in
  * @return     0               Success
  *
  * @note response is documented in "nRF91 AT Commands Command Reference Guide" v2.0
@@ -37,24 +71,16 @@
  *             282,5230,37,25,"","11100000","11100000","01011110"
  */
 int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u_resp_len,
-					    uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn,
-					    uint16_t *pu16_mcc, uint16_t *pu16_mnc,
-					    uint16_t *pu16_pci);
+	                                    otdoa_xmonitor_params_t *params);
 
 /**
  * @brief Use AT%%XMONITOR command to get the current ECGI and DLEARFCN from the modem
- * @param pu32_ecgi[out]       ECGI
- * @param pu32_dlearfcn[out]   DLEARFCN
- * @param pu16_mcc[out]        MCC
- * @param pu16_mnc[out]        MNC
- * @param pu16_pci[out]        PCI
+ * @param params        [out]  Pointer to parameters struct to store response in
  * @return  0 on success
  *          values from otdoa_api_error_codes_t (in phywi_otdoa_api.h) on any failure
  *
  */
-int otdoa_nordic_at_get_ecgi_and_dlearfcn(uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn,
-					  uint16_t *pu16_mcc, uint16_t *pu16_mnc,
-					  uint16_t *pu16_pci);
+int otdoa_nordic_at_get_xmonitor(otdoa_xmonitor_params_t *params);
 
 /**
  * @brief Gets the IMEI from the modem

@@ -97,6 +97,9 @@ typedef enum {
 	/** The requested ECGI has been blacklisted */
 	OTDOA_EVENT_FAIL_BLACKLISTED = 16,
 
+	/** Failed to get PCI from Modem */
+	OTDOA_EVENT_FAIL_NO_PCI = 17,
+
 	/** The uBSA is still being generated */
 	OTDOA_EVENT_HTTP_NOT_READY = 202,
 

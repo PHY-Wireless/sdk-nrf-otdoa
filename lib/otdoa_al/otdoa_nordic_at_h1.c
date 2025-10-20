@@ -78,24 +78,28 @@ char *otdoa_nordic_at_strtok_r(char *s, char delim, char **save_ptr)
 /* Maximum number of tokens we will parse in the AT%%XMONITOR response */
 #define XMONITOR_RESP_MAX_TOKENS   16
 #define XMONITOR_RESP_MIN_PLMN_LEN 5 /* three digits for MCC, two or three for MNC */
+#define XMONITOR_UNKNOWN_ECGI     0xFFFFFFFF
+#define XMONITOR_UNKNOWN_DLEARFCN 0xFFFFFFFF
+#define XMONITOR_UNKNOWN_ACT      0xFFFFFFFF
+#define XMONITOR_UNKNOWN_MCC      0xFFFF
+#define XMONITOR_UNKNOWN_MNC      0xFFFF
+#define XMONITOR_UNKNOWN_PCI      0xFFFF
 
 /* Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN */
 int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u_resp_len,
-					    uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn,
-					    uint16_t *pu16_mcc, uint16_t *pu16_mnc,
-					    uint16_t *pu16_pci)
+	                                    otdoa_xmonitor_params_t *params)
 {
 	int i_ret = 0;
 	int n_token = 0;
 
 	/* these values are populated from the modem response */
-	uint32_t u32_egci = 0;
-	uint32_t u32_dlearfcn = 0;
+	uint32_t u32_egci = XMONITOR_UNKNOWN_ECGI;
+	uint32_t u32_dlearfcn = XMONITOR_UNKNOWN_DLEARFCN;
 	uint32_t u32_reg_status = REG_STATUS_NONE;
-	uint32_t u32_AcT = 0; /* AcT value, 9=>NBIot, 7=>LTE */
-	uint16_t u16_mcc = 0;
-	uint16_t u16_mnc = 0;
-	uint16_t u16_pci = 0;
+	uint32_t u32_AcT = XMONITOR_UNKNOWN_ACT;
+	uint16_t u16_mcc = XMONITOR_UNKNOWN_MCC;
+	uint16_t u16_mnc = XMONITOR_UNKNOWN_MNC;
+	uint16_t u16_pci = XMONITOR_UNKNOWN_PCI;
 
 	if (!psz_resp) {
 		OTDOA_LOG_ERR("otdoa_nordic_at_parse_xmonitor_response(): NULL pointer\n");
@@ -181,7 +185,7 @@ int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u
 			int i_scn_rv = sscanf(token, "%" SCNu16, &u16_pci);
 
 			if (i_scn_rv != 1) {
-				i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
+				i_ret = OTDOA_EVENT_FAIL_NO_PCI;
 				break;
 			}
 			break;
@@ -215,39 +219,23 @@ error_exit:
 		if (u32_egci == 0 || u32_dlearfcn == 0) {
 			i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
 		} else {
-			if (pu32_ecgi) {
-				*pu32_ecgi = u32_egci;
-			}
-			if (pu32_dlearfcn) {
-				*pu32_dlearfcn = u32_dlearfcn;
-			}
-			if (pu16_mcc) {
-				*pu16_mcc = u16_mcc;
-			}
-			if (pu16_mnc) {
-				*pu16_mnc = u16_mnc;
-			}
-			if (pu16_pci) {
-				*pu16_pci = u16_pci;
-			}
+			params->ecgi = u32_egci;
+			params->dlearfcn = u32_dlearfcn;
+			params->act = u32_AcT;
+			params->mcc = u16_mcc;
+			params->mnc = u16_mnc;
+			params->pci = u16_pci;
+			params->reg_status = u32_reg_status;
 		}
 	} else if (OTDOA_EVENT_FAIL_NO_DLEARFCN == i_ret && u32_egci != 0) {
 		/* return the ECGI and default DLEARFCN, and error code indicating no DLEARFCN */
-		if (pu32_ecgi) {
-			*pu32_ecgi = u32_egci;
-		}
-		if (pu32_dlearfcn) {
-			*pu32_dlearfcn = DEFAULT_UBSA_DLEARFCN;
-		}
-		if (pu16_mcc) {
-			*pu16_mcc = u16_mcc;
-		}
-		if (pu16_mnc) {
-			*pu16_mnc = u16_mnc;
-		}
-		if (pu16_pci) {
-			*pu16_pci = u16_pci;
-		}
+		params->ecgi = u32_egci;
+		params->dlearfcn = DEFAULT_UBSA_DLEARFCN;
+		params->act = u32_AcT;
+		params->mcc = u16_mcc;
+		params->mnc = u16_mnc;
+		params->pci = u16_pci;
+		params->reg_status = u32_reg_status;
 	}
 
 	if (i_ret != 0 && i_ret != OTDOA_EVENT_FAIL_NO_DLEARFCN) {
@@ -265,9 +253,7 @@ error_exit:
 }
 
 /* Use AT%%XMONITOR command to get the current ECGI and DLEARFCN from the modem */
-int otdoa_nordic_at_get_ecgi_and_dlearfcn(uint32_t *pu32_ecgi, uint32_t *pu32_dlearfcn,
-					  uint16_t *pu16_mcc, uint16_t *pu16_mnc,
-					  uint16_t *pu16_pci)
+int otdoa_nordic_at_get_xmonitor(otdoa_xmonitor_params_t *params)
 {
 	int i_ret = 0;
 	static char monitor_buf[256] = {0};
@@ -275,14 +261,13 @@ int otdoa_nordic_at_get_ecgi_and_dlearfcn(uint32_t *pu32_ecgi, uint32_t *pu32_dl
 	memset(monitor_buf, 0, sizeof(monitor_buf));
 	i_ret = nrf_modem_at_cmd(monitor_buf, sizeof(monitor_buf), "AT%%XMONITOR");
 	if (i_ret) {
-		OTDOA_LOG_ERR("otdoa_nordic_at_get_ecgi_and_dlearfcn: ERROR (%d) Failed to get "
+		OTDOA_LOG_ERR("otdoa_nordic_at_get_xmonitor: ERROR (%d) Failed to get "
 			      "MODEM Status\n",
 			      i_ret);
 		i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
 	} else {
 		i_ret = otdoa_nordic_at_parse_xmonitor_response(monitor_buf, strlen(monitor_buf),
-								pu32_ecgi, pu32_dlearfcn, pu16_mcc,
-								pu16_mnc, pu16_pci);
+			                                        params);
 	}
 	return i_ret;
 }
