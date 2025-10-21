@@ -38,7 +38,8 @@ static int otdoa_shell_info_handler(const struct shell *shell, size_t argc, char
 	shell_print(shell, "Nordic OTDOA Application");
 	/* get the ECGI */
 	rc = otdoa_nordic_at_get_xmonitor(&params);
-	if (rc) {
+	if (rc != OTDOA_API_SUCCESS
+		&& rc != OTDOA_EVENT_FAIL_NO_DLEARFCN && rc != OTDOA_EVENT_FAIL_NO_PCI) {
 		shell_error(shell, "Failed to get ECGI: %d", rc);
 	} else {
 		shell_print(shell, "          ECGI: %u", params.ecgi);

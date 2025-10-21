@@ -16,6 +16,7 @@
 
 /* Default DLEARFCN if not available from modem */
 #define DEFAULT_UBSA_DLEARFCN 5230
+#define DEFAULT_UBSA_PCI      0xFFFF
 
 /* collect our Kconfig values */
 #define BSA_DL_SERVER_URL   CONFIG_OTDOA_BSA_DL_SERVER_URL
