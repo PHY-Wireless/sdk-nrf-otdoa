@@ -16,6 +16,7 @@
 #include "otdoa_al/phywi_otdoa_api.h"
 #include "otdoa_al/otdoa_nordic_at_h1.h"
 #include "nrf_modem_at.h"
+#include "otdoa_http.h"
 
 /**
  *
@@ -42,11 +43,19 @@ static int otdoa_shell_info_handler(const struct shell *shell, size_t argc, char
 		&& rc != OTDOA_EVENT_FAIL_NO_DLEARFCN && rc != OTDOA_EVENT_FAIL_NO_PCI) {
 		shell_error(shell, "Failed to get ECGI: %d", rc);
 	} else {
-		shell_print(shell, "          ECGI: %u", params.ecgi);
-		shell_print(shell, "      DLEARFCN: %u", params.dlearfcn);
-		shell_print(shell, "           MCC: %u", params.mcc);
-		shell_print(shell, "           MNC: %u", params.mnc);
-		shell_print(shell, "           PCI: %u", params.pci);
+		shell_print(shell, "          ECGI: %"PRIu32, params.ecgi);
+		shell_print(shell, "           MCC: %"PRIu16, params.mcc);
+		shell_print(shell, "           MNC: %"PRIu16, params.mnc);
+		if (params.dlearfcn == UNKNOWN_UBSA_DLEARFCN) {
+			shell_print(shell, "      DLEARFCN: N/A");
+		} else {
+			shell_print(shell, "      DLEARFCN: %"PRIu32, params.dlearfcn);
+		}
+		if (params.pci == UNKNOWN_UBSA_PCI) {
+			shell_print(shell, "           PCI: N/A");
+		} else {
+			shell_print(shell, "           PCI: %"PRIu16, params.pci);
+		}
 	}
 
 	/* get the software version */

@@ -13,9 +13,8 @@
 
 #include <otdoa_al/phywi_otdoa_api.h>
 #include <otdoa_al/otdoa_nordic_at_h1.h>
+#include "otdoa_http.h"
 #include "otdoa_al_log.h"
-
-#define DEFAULT_UBSA_DLEARFCN 5230
 
 /*
  * Our own version of str_tok_r that stops on the first token found.
@@ -79,11 +78,9 @@ char *otdoa_nordic_at_strtok_r(char *s, char delim, char **save_ptr)
 #define XMONITOR_RESP_MAX_TOKENS   16
 #define XMONITOR_RESP_MIN_PLMN_LEN 5 /* three digits for MCC, two or three for MNC */
 #define XMONITOR_UNKNOWN_ECGI     0xFFFFFFFF
-#define XMONITOR_UNKNOWN_DLEARFCN 0xFFFFFFFF
 #define XMONITOR_UNKNOWN_ACT      0xFFFFFFFF
 #define XMONITOR_UNKNOWN_MCC      0xFFFF
 #define XMONITOR_UNKNOWN_MNC      0xFFFF
-#define XMONITOR_UNKNOWN_PCI      0xFFFF
 
 /* Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN */
 int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u_resp_len,
@@ -94,12 +91,12 @@ int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u
 
 	/* these values are populated from the modem response */
 	uint32_t u32_egci = XMONITOR_UNKNOWN_ECGI;
-	uint32_t u32_dlearfcn = XMONITOR_UNKNOWN_DLEARFCN;
+	uint32_t u32_dlearfcn = UNKNOWN_UBSA_DLEARFCN;
 	uint32_t u32_reg_status = REG_STATUS_NONE;
 	uint32_t u32_AcT = XMONITOR_UNKNOWN_ACT;
 	uint16_t u16_mcc = XMONITOR_UNKNOWN_MCC;
 	uint16_t u16_mnc = XMONITOR_UNKNOWN_MNC;
-	uint16_t u16_pci = XMONITOR_UNKNOWN_PCI;
+	uint16_t u16_pci = UNKNOWN_UBSA_PCI;
 
 	if (!psz_resp) {
 		OTDOA_LOG_ERR("otdoa_nordic_at_parse_xmonitor_response(): NULL pointer\n");
@@ -230,15 +227,26 @@ error_exit:
 	} else if (OTDOA_EVENT_FAIL_NO_DLEARFCN == i_ret && u32_egci != 0) {
 		/* return the ECGI and default DLEARFCN, and error code indicating no DLEARFCN */
 		params->ecgi = u32_egci;
-		params->dlearfcn = DEFAULT_UBSA_DLEARFCN;
+		params->dlearfcn = UNKNOWN_UBSA_DLEARFCN;
 		params->act = u32_AcT;
 		params->mcc = u16_mcc;
 		params->mnc = u16_mnc;
 		params->pci = u16_pci;
 		params->reg_status = u32_reg_status;
+	} else if (OTDOA_EVENT_FAIL_NO_PCI == i_ret && u32_egci != 0) {
+		/* return the ECGI and default DLEARFCN, and error code indicating no DLEARFCN */
+		params->ecgi = u32_egci;
+		params->dlearfcn = u32_dlearfcn;
+		params->act = u32_AcT;
+		params->mcc = u16_mcc;
+		params->mnc = u16_mnc;
+		params->pci = UNKNOWN_UBSA_PCI;
+		params->reg_status = u32_reg_status;
 	}
 
-	if (i_ret != 0 && i_ret != OTDOA_EVENT_FAIL_NO_DLEARFCN) {
+	if (i_ret != 0
+		&& i_ret != OTDOA_EVENT_FAIL_NO_DLEARFCN && i_ret != OTDOA_EVENT_FAIL_NO_PCI)
+	{
 		if (psz_resp) {
 			OTDOA_LOG_ERR("AT%%XMONITOR response %s", psz_resp);
 		}

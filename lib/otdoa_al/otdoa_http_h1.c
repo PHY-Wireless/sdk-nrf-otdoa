@@ -323,28 +323,32 @@ int otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS *pG)
 
 	/* Build an Auth request */
 	iRC = snprintf(pG->csBuffer, uBufferLen,
-			   "GET /v1/ubsa.php"
-			   "?ecgi=%u"
-			   "&encrypt=%u"
-			   "&dlearfcn=%d"
-			   "&radius=%d"
-			   "&pci=%" PRIu16
-			   "&mcc=%" PRIu16 "&mnc=%" PRIu16 "&otdoa_fwv=%s"
-			   "&mfwv=%s"
-			   "&num_cells=%d"
-			   "&compress_window=%d"
-			   " HTTP/1.1\r\n"
-			   "Host: %s:443\r\n"
-			   "User-agent: https_client/2.2.3\r\n"
-			   "Accept: */*\r\n"
-			   "Connection: keep-alive\r\n"
-			   "authorization: Bearer %s\r\n"
-			   "\r\n",
-			   pG->uEcgi, (pG->bDisableEncryption ? 0 : 1), pG->uDlearfcn, pG->uRadius,
-			   pG->uPCI, pG->uMCC, pG->uMNC,
-			   otdoa_api_get_short_version(),
-			   modem_ver, pG->uNumCells,
-			   LOG2_COMPRESS_WINDOW, otdoa_http_get_download_url(), jwt_token);
+		   "GET /v1/ubsa.php"
+		   "?ecgi=%" PRIu32
+		   "&encrypt=%u"
+		   "&dlearfcn=%" PRIu32
+		   "&radius=%d"
+		   "&pci=%" PRIu16
+		   "&mcc=%" PRIu16 "&mnc=%" PRIu16 "&otdoa_fwv=%s"
+		   "&mfwv=%s"
+		   "&num_cells=%d"
+		   "&compress_window=%d"
+		   " HTTP/1.1\r\n"
+		   "Host: %s:443\r\n"
+		   "User-agent: https_client/2.2.3\r\n"
+		   "Accept: */*\r\n"
+		   "Connection: keep-alive\r\n"
+		   "authorization: Bearer %s\r\n"
+		   "\r\n",
+		   pG->uEcgi,
+		   pG->bDisableEncryption ? 0 : 1,
+		   pG->uDlearfcn == UNKNOWN_UBSA_DLEARFCN ? DEFAULT_UBSA_DLEARFCN : pG->uDlearfcn,
+		   pG->uRadius,
+		   pG->uPCI == UNKNOWN_UBSA_PCI ? DEFAULT_UBSA_PCI : pG->uPCI,
+		   pG->uMCC, pG->uMNC,
+		   otdoa_api_get_short_version(),
+		   modem_ver, pG->uNumCells,
+		   LOG2_COMPRESS_WINDOW, otdoa_http_get_download_url(), jwt_token);
 
 	/* check that we didn't overflow the buffer */
 	if (iRC >= uBufferLen) {

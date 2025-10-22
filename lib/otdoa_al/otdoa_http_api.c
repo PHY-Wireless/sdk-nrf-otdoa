@@ -92,10 +92,10 @@ int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t *p_dl_request,
 			      ecgi);
 		if (rc == OTDOA_EVENT_FAIL_NO_DLEARFCN) {
 			/* got the ECGI OK but we miss the DLEARFCN. So default to 5230 */
-			dlearfcn = DEFAULT_UBSA_DLEARFCN;
+			dlearfcn = UNKNOWN_UBSA_DLEARFCN;
 			rc = OTDOA_API_SUCCESS;
 		} else if (rc == OTDOA_EVENT_FAIL_NO_PCI) {
-			pci = DEFAULT_UBSA_PCI;
+			pci = UNKNOWN_UBSA_PCI;
 			rc = OTDOA_API_SUCCESS;
 		} else if (rc != OTDOA_API_SUCCESS) {
 			/* other failures */
