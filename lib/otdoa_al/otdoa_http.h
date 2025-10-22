@@ -15,7 +15,7 @@
 #include "modem/modem_key_mgmt.h"
 
 /* Default DLEARFCN if not available from modem */
-#define DEFAULT_UBSA_DLEARFCN 5255u
+#define DEFAULT_UBSA_DLEARFCN 5230u
 #define DEFAULT_UBSA_PCI      289u
 #define UNKNOWN_UBSA_DLEARFCN UINT16_MAX
 #define UNKNOWN_UBSA_PCI      UINT16_MAX

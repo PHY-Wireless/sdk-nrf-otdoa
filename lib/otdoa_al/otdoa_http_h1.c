@@ -322,17 +322,86 @@ int otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS *pG)
 	}
 
 	/* Build an Auth request */
-	iRC = snprintf(pG->csBuffer, uBufferLen,
-		   "GET /v1/ubsa.php"
-		   "?ecgi=%" PRIu32
-		   "&encrypt=%u"
-		   "&dlearfcn=%" PRIu32
-		   "&radius=%d"
-		   "&pci=%" PRIu16
-		   "&mcc=%" PRIu16 "&mnc=%" PRIu16 "&otdoa_fwv=%s"
-		   "&mfwv=%s"
-		   "&num_cells=%d"
-		   "&compress_window=%d"
+	char* cursor = pG->csBuffer;
+	size_t req_len = 0;
+
+	/* start with the parameters we know we always have */
+	iRC = snprintf(cursor, uBufferLen - req_len,
+		"GET /v1/ubsa.php"
+		"?ecgi=%" PRIu32
+		"&encrypt=%u"
+		"&radius=%d"
+		"&mcc=%" PRIu16
+		"&mnc=%" PRIu16
+		"&otdoa_fwv=%s"
+		"&mfwv=%s"
+		"&num_cells=%d"
+		"&compress_window=%d",
+		pG->uEcgi,
+		pG->bDisableEncryption ? 0 : 1,
+		pG->uRadius, pG->uMCC, pG->uMNC,
+		otdoa_api_get_short_version(),
+		modem_ver, pG->uNumCells,
+		LOG2_COMPRESS_WINDOW);
+
+	if (iRC < 0 || iRC > uBufferLen - req_len) {
+		OTDOA_LOG_ERR("uBSA request overflowed HTTPS buffer");
+		iRC = 0; /* 0 indicates error */
+		goto exit;
+	}
+
+	cursor += iRC;
+	req_len += iRC;
+
+	/* append the DLEARFCN if we have it */
+	if (pG->uDlearfcn != UNKNOWN_UBSA_DLEARFCN) {
+		iRC = snprintf(cursor, uBufferLen - req_len,
+			"&dlearfcn=%" PRIu32,
+			pG->uDlearfcn);
+
+		if (iRC < 0 || iRC > uBufferLen - req_len) {
+			OTDOA_LOG_ERR("uBSA request overflowed HTTPS buffer");
+			iRC = 0; /* 0 indicates error */
+			goto exit;
+		}
+
+		cursor += iRC;
+		req_len += iRC;
+	}
+	/* temporary hack until optional dlearfcn is supported */
+	else {
+		iRC = snprintf(cursor, uBufferLen - req_len,
+			"&dlearfcn=%" PRIu32,
+			DEFAULT_UBSA_DLEARFCN);
+
+		if (iRC < 0 || iRC > uBufferLen - req_len) {
+			OTDOA_LOG_ERR("uBSA request overflowed HTTPS buffer");
+			iRC = 0; /* 0 indicates error */
+			goto exit;
+		}
+
+		cursor += iRC;
+		req_len += iRC;
+	}
+
+	/* append the PCI if we have it */
+	if (pG->uPCI != UNKNOWN_UBSA_PCI) {
+		iRC = snprintf(cursor, uBufferLen - req_len,
+			"&pci=%" PRIu16,
+			pG->uPCI);
+
+		if (iRC < 0 || iRC > uBufferLen - req_len) {
+			OTDOA_LOG_ERR("uBSA request overflowed HTTPS buffer");
+			iRC = 0; /* 0 indicates error */
+			goto exit;
+		}
+
+		cursor += iRC;
+		req_len += iRC;
+	}
+
+	/* append the request body */
+	iRC = snprintf(cursor, uBufferLen - req_len,
 		   " HTTP/1.1\r\n"
 		   "Host: %s:443\r\n"
 		   "User-agent: https_client/2.2.3\r\n"
@@ -340,18 +409,10 @@ int otdoa_http_h1_format_auth_request(tOTDOA_HTTP_MEMBERS *pG)
 		   "Connection: keep-alive\r\n"
 		   "authorization: Bearer %s\r\n"
 		   "\r\n",
-		   pG->uEcgi,
-		   pG->bDisableEncryption ? 0 : 1,
-		   pG->uDlearfcn == UNKNOWN_UBSA_DLEARFCN ? DEFAULT_UBSA_DLEARFCN : pG->uDlearfcn,
-		   pG->uRadius,
-		   pG->uPCI == UNKNOWN_UBSA_PCI ? DEFAULT_UBSA_PCI : pG->uPCI,
-		   pG->uMCC, pG->uMNC,
-		   otdoa_api_get_short_version(),
-		   modem_ver, pG->uNumCells,
-		   LOG2_COMPRESS_WINDOW, otdoa_http_get_download_url(), jwt_token);
+		   otdoa_http_get_download_url(), jwt_token);
 
 	/* check that we didn't overflow the buffer */
-	if (iRC >= uBufferLen) {
+	if (iRC < 0 || iRC > uBufferLen - req_len) {
 		OTDOA_LOG_ERR("uBSA request overflowed HTTPS buffer");
 		iRC = 0; /* 0 indicates error */
 		goto exit;
