@@ -585,7 +585,7 @@ exit:
 /**
  * Rebind and start a config file download
  */
-static int trigger_cfg_download()
+static int trigger_cfg_download(void)
 {
 	if (bSkipConfigDL) {
 		LOG_INF("Skipping config file download");
@@ -617,7 +617,7 @@ static int handle_get_ubsa_message(tOTDOA_HTTP_MESSAGE *pMsg)
 
 	if (pMsg->http_get_ubsa.bForceConfigDL) {
 		LOG_INF("Forcing config DL.");
-		// reset automatic counter
+		/* reset automatic counter */
 		gHTTP.nBSARequests = 0;
 		rc = trigger_cfg_download();
 		if (rc != 0) {
