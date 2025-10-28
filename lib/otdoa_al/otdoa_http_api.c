@@ -113,14 +113,6 @@ int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t *p_dl_request,
 		}
 	}
 
-	/* if a config file download is being forced, get that first */
-	if (p_dl_request->config_dl) {
-		rc = otdoa_api_cfg_download();
-		if (rc != OTDOA_API_SUCCESS) {
-			return rc;
-		}
-	}
-
 	/* Send the request message */
 	tOTDOA_MSG_HTTP_GET_UBSA msg = { 0 };
 
@@ -136,6 +128,7 @@ int32_t otdoa_api_ubsa_download(const otdoa_api_ubsa_dl_req_t *p_dl_request,
 	msg.u16MNC = mnc;
 	msg.u16PCI = pci;
 	msg.bResetBlacklist = reset_blacklist;
+	msg.bForceConfigDL = p_dl_request->config_dl;
 	return otdoa_http_send_message((tOTDOA_HTTP_MESSAGE *)&msg, msg.u32MsgLen);
 }
 
