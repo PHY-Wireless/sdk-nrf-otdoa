@@ -583,6 +583,30 @@ exit:
 }
 
 /**
+ * Rebind and start a config file download
+ */
+static int trigger_cfg_download(void)
+{
+	if (bSkipConfigDL) {
+		LOG_INF("Skipping config file download");
+		return OTDOA_API_SUCCESS;
+	}
+
+	int rc;
+	bool save_tls = gHTTP.bDisableTLS;
+
+	gHTTP.bDisableTLS = false;
+	rc = otdoa_http_h1_rebind(NULL);
+	if (rc != 0) {
+		LOG_WRN("Failed to bind socket (for cfg dl). rc = %d", rc);
+		return rc;
+	}
+	rc = otdoa_http_h1_handle_get_cfg(&gHTTP);
+	gHTTP.bDisableTLS = save_tls;
+	return rc;
+}
+
+/**
  * Handle OTDOA_HTTP_MSG_GET_H1_UBSA message
  */
 static int handle_get_ubsa_message(tOTDOA_HTTP_MESSAGE *pMsg)
@@ -590,30 +614,25 @@ static int handle_get_ubsa_message(tOTDOA_HTTP_MESSAGE *pMsg)
 	int rc = 0;
 
 	LOG_INF("HTTP H1 received OTDOA_HTTP_MSG_GET_H1_UBSA");
-	if (bSkipConfigDL) {
-		LOG_WRN("Skipping config DL.");
-	} else if (gHTTP.nBSARequests++ % CFG_DL_INTERVAL == 0) {
-		/* Always get config file first
-		 * needs to have TLS enabled for the config endpoint.
-		 */
-		bool save_tls = gHTTP.bDisableTLS;
 
-		gHTTP.bDisableTLS = false;
-		rc = otdoa_http_h1_rebind(NULL);
-		if (rc != 0) {
-			LOG_WRN("Failed to bind socket (for cfg dl). rc = %d", rc);
-			otdoa_http_invoke_callback_dl_compl(OTDOA_EVENT_FAIL_NO_CELL);
-			return rc;
-		}
-		rc = otdoa_http_h1_handle_get_cfg(&gHTTP);
-		gHTTP.bDisableTLS = save_tls;
+	if (pMsg->http_get_ubsa.bForceConfigDL) {
+		LOG_INF("Forcing config DL.");
+		/* reset automatic counter */
+		gHTTP.nBSARequests = 0;
+		rc = trigger_cfg_download();
 		if (rc != 0) {
 			LOG_WRN("Failed to get config file. API Status Result = %d", rc);
 			otdoa_http_invoke_callback_dl_compl(rc);
 			return rc;
 		}
-	} else {
-		LOG_INF("Skipping config DL.");
+	} else if (gHTTP.nBSARequests % CFG_DL_INTERVAL == 0) {
+		LOG_INF("Automatic config file download triggered");
+		rc = trigger_cfg_download();
+		if (rc != 0) {
+			LOG_WRN("Failed to get config file. API Status Result = %d", rc);
+			otdoa_http_invoke_callback_dl_compl(rc);
+			return rc;
+		}
 	}
 
 	if (pMsg->http_get_ubsa.bResetBlacklist) {
@@ -625,6 +644,7 @@ static int handle_get_ubsa_message(tOTDOA_HTTP_MESSAGE *pMsg)
 	/* send result back to the OTDOA API */
 	LOG_INF("API Status Result = %d", rc);
 	otdoa_http_invoke_callback_dl_compl(rc);
+	gHTTP.nBSARequests++;
 
 	return rc;
 }
@@ -637,18 +657,7 @@ static int handle_get_config_message(tOTDOA_HTTP_MESSAGE *pMsg)
 	int rc = 0;
 
 	LOG_INF("HTTP_H1 received OTDOA_HTTP_MSG_GET_H1_CONFIG");
-	/* force to use TLS */
-	bool save_tls = gHTTP.bDisableTLS;
-
-	gHTTP.bDisableTLS = false;
-	rc = otdoa_http_h1_rebind(NULL);
-	if (rc != 0) {
-		LOG_WRN("Failed to bind socket (for cfg dl). rc = %d", rc);
-		otdoa_http_invoke_callback_dl_compl(OTDOA_EVENT_FAIL_NO_CELL);
-		return rc;
-	}
-	rc = otdoa_http_h1_handle_get_cfg(&gHTTP);
-	gHTTP.bDisableTLS = save_tls;
+	rc = trigger_cfg_download();
 	LOG_INF("Config DL Result = %d", rc);
 	otdoa_http_h1_free_cs_buffer();
 	/* NB: We don't send a result back to the OTDOA API in this case */

@@ -94,6 +94,7 @@ typedef struct {
 	uint32_t u32MsgId;
 	uint32_t u32MsgLen;
 	bool bResetBlacklist;
+	bool bForceConfigDL;
 	unsigned int uEcgi;
 	unsigned int uDlearfcn;
 	unsigned int uRadius;

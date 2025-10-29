@@ -207,18 +207,25 @@ typedef struct {
  * API call.
  */
 typedef struct {
+	/** 28bit cell id. */
+	uint32_t ecgi;
+
 	/** PLMN ID.
 	 *
 	 * Bytes encoded as follows:
 	 *     mcc2_mcc1, mnc3_mcc3, mnc2_mnc1
 	 */
 	uint8_t plmn[3];
-	/** 28bit cell id. */
-	uint32_t ecgi;
+
+	/** Force a download of a new config file along with the uBSA */
+	bool config_dl;
+
 	/** Mobile Country Code. Range: 0...999. */
 	uint16_t mcc;
+
 	/** Mobile Network Code. Range: 0...999. */
 	uint16_t mnc;
+
 	/** Cell PCI. Range: 0...503. */
 	uint16_t pci;
 
