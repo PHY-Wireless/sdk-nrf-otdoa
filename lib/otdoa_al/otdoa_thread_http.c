@@ -15,7 +15,7 @@
 
 #define CHECK_IP
 
-LOG_MODULE_DECLARE(otdoa_al, LOG_LEVEL_INF);
+LOG_MODULE_DECLARE(otdoa_al, CONFIG_OTDOA_AL_LOG_LEVEL);
 
 struct modem_param_info MPI = {0};
 bool bModemInfoInit;

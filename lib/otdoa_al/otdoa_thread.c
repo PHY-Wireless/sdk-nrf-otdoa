@@ -13,7 +13,7 @@
 #include "otdoa_al_log.h"
 #include "otdoa_http.h"
 
-LOG_MODULE_REGISTER(otdoa_al, LOG_LEVEL_INF);
+LOG_MODULE_REGISTER(otdoa_al, CONFIG_OTDOA_AL_LOG_LEVEL);
 
 struct http_work {
 	struct k_work work;

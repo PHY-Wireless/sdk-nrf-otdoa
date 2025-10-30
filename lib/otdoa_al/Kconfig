@@ -105,4 +105,8 @@ config OTDOA_UPLOAD_SERVER_URL
 	default "api.prod.hellaphy.cloud"
 	depends on OTDOA_ENABLE_RESULTS_UPLOAD
 
+module = OTDOA_AL
+module-str = OTDOA_AL
+source "$(ZEPHYR_BASE)/subsys/logging/Kconfig.template.log_config"
+
 endif # OTDOA_AL_LIB

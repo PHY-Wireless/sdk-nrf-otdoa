@@ -11,7 +11,7 @@
 #include "otdoa_http.h"
 #include "otdoa_al_log.h"
 
-LOG_MODULE_DECLARE(otdoa_al, LOG_LEVEL_INF);
+LOG_MODULE_DECLARE(otdoa_al, CONFIG_OTDOA_AL_LOG_LEVEL);
 
 
 static otdoa_api_callback_t al_event_callback;

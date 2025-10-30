@@ -19,7 +19,7 @@
 #include "otdoa_http.h"
 #include "otdoa_http_rest.h"
 
-LOG_MODULE_DECLARE(otdoa_al, LOG_LEVEL_INF);
+LOG_MODULE_DECLARE(otdoa_al, CONFIG_OTDOA_AL_LOG_LEVEL);
 
 /* forward declarations */
 tOTDOA_HTTP_MEMBERS gHTTP = {};

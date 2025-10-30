@@ -17,7 +17,7 @@
 #include "otdoa_http_rest.h"
 #include "otdoa_al_log.h"
 
-LOG_MODULE_DECLARE(otdoa_al, LOG_LEVEL_DBG);
+LOG_MODULE_DECLARE(otdoa_al, CONFIG_OTDOA_AL_LOG_LEVEL);
 
 
 #define NONBLOCK_RETRY_MILLISECONDS 100
