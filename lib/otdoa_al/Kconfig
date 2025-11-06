@@ -7,7 +7,7 @@
 menuconfig OTDOA_AL_LIB
 	bool "OTDOA library"
 	help
-		The OTDOA library can be used to do $(PHYWI MARKETING MATERIAL)
+		The OTDOA AL library enables the hellaPHY OTDOA positioning method
 
 if OTDOA_AL_LIB
 
@@ -104,5 +104,40 @@ config OTDOA_UPLOAD_SERVER_URL
 	string "URL to upload OTDOA results to"
 	default "api.prod.hellaphy.cloud"
 	depends on OTDOA_ENABLE_RESULTS_UPLOAD
+
+choice "OTDOA_AL_LOG_LEVEL_CHOICE"
+	prompt "Max compiled-in log level for $(module-str)"
+	default OTDOA_AL_LOG_LEVEL_DEFAULT
+	depends on LOG
+
+config OTDOA_AL_LOG_LEVEL_OFF
+	bool "Off"
+
+config OTDOA_AL_LOG_LEVEL_ERR
+	bool "Error"
+
+config OTDOA_AL_LOG_LEVEL_WRN
+	bool "Warning"
+
+config OTDOA_AL_LOG_LEVEL_INF
+	bool "Info"
+
+config OTDOA_AL_LOG_LEVEL_DBG
+	bool "Debug"
+
+config OTDOA_AL_LOG_LEVEL_DEFAULT
+	bool "Default"
+
+endchoice
+
+config OTDOA_AL_LOG_LEVEL
+	int
+	depends on LOG
+	default 0 if OTDOA_AL_LOG_LEVEL_OFF
+	default 1 if OTDOA_AL_LOG_LEVEL_ERR
+	default 2 if OTDOA_AL_LOG_LEVEL_WRN
+	default 3 if OTDOA_AL_LOG_LEVEL_INF
+	default 4 if OTDOA_AL_LOG_LEVEL_DBG
+	default 2 if OTDOA_AL_LOG_LEVEL_DEFAULT
 
 endif # OTDOA_AL_LIB
