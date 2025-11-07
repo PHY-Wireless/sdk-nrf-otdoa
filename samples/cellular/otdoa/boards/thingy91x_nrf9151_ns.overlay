@@ -2,8 +2,11 @@
  * Thingy91X board DTS Overlay
  */
 
-/* set console UART to 921600 baud */
+/* set console UART to 115200 baud
+ * works around an issue with input chars dropped at 921600
+ * see https://devzone.nordicsemi.com/f/nordic-q-a/125487/thingy91x-uart-shell-drops-characters-at-921600
+ */
 &uart0 {
 	status = "okay";
-	current-speed = <921600>;
+	current-speed = <115200>;
 };
