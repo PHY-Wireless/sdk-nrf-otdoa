@@ -343,7 +343,7 @@ int otdoa_nordic_at_get_imei_from_modem(void)
 		len = NRF_IMEI_LEN;
 	}
 	strncpy((char *)otdoa_nordic_at_imei, p_imei_token, len);
-	LOG_INF("Got IMEI %s\n", otdoa_nordic_at_imei);
+	LOG_INF("Got IMEI %s", otdoa_nordic_at_imei);
 
 	return 0;
 

@@ -141,7 +141,7 @@ int otdoa_http_h1_free_cs_buffer(void)
 int otdoa_http_h1_get_cs_buffer(void)
 {
 	if (gHTTP.csBuffer) {
-		LOG_WRN("CS Buffer %p already initialized", (void *)(gHTTP.csBuffer));
+		LOG_INF("CS Buffer %p already initialized", (void *)(gHTTP.csBuffer));
 		otdoa_http_h1_free_cs_buffer();
 	}
 
@@ -794,7 +794,7 @@ static int handle_ubsa_download_loop(tOTDOA_HTTP_MEMBERS *p_http)
 		}
 	}
 
-	LOG_INF("UBSA download complete\n");
+	LOG_INF("UBSA download complete");
 	return 0;
 }
 
@@ -1195,7 +1195,7 @@ int otdoa_http_h1_download_ubsa_internal(tOTDOA_HTTP_MEMBERS *p_http, tOTDOA_HTT
 		rc = OTDOA_EVENT_FAIL_NTWK_CONN;
 		goto cleanup;
 	}
-	LOG_INF("Successfully connected to server\n");
+	LOG_INF("Successfully connected to server");
 
 	rc = handle_ubsa_authentication(p_http);
 	if (rc != 0) {
@@ -2182,7 +2182,6 @@ int otdoa_http_h1_process_ubsa_data(tOTDOA_HTTP_MEMBERS *pG)
 	pG->nOff = 0;
 
 	if (pG->bDownloadComplete) {
-		LOG_INF("uBSA download complete.");
 		otdoa_ubsa_finish_data();
 	}
 
