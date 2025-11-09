@@ -88,14 +88,14 @@ int tls_setup(int fd, const char *host)
 
 	nErr = setsockopt(fd, SOL_TLS, TLS_PEER_VERIFY, &verify, sizeof(verify));
 	if (nErr) {
-		LOG_ERR("Failed to setup peer verification: %s", strerror(errno));
+		LOG_WRN("Failed to setup peer verification: %s", strerror(errno));
 		return nErr;
 	}
 
 	/* associate the socket with the security tag we have provisioned the certificate with */
 	nErr = setsockopt(fd, SOL_TLS, TLS_SEC_TAG_LIST, tls_sec_tag, sizeof(tls_sec_tag));
 	if (nErr) {
-		LOG_ERR("Failed to setup TLS sec tag: %s", strerror(errno));
+		LOG_WRN("Failed to setup TLS sec tag: %s", strerror(errno));
 		return nErr;
 	}
 
@@ -108,7 +108,7 @@ int tls_setup(int fd, const char *host)
 	LOG_INF("tls_setup(%d, %s)", fd, server);
 	nErr = setsockopt(fd, SOL_TLS, TLS_HOSTNAME, server, strlen(server) + 1);
 	if (nErr) {
-		LOG_ERR("Failed to setup TLS Hostname: %s", strerror(errno));
+		LOG_WRN("Failed to setup TLS Hostname: %s", strerror(errno));
 		return nErr;
 	}
 
@@ -153,7 +153,7 @@ int http_bind(tOTDOA_HTTP_MEMBERS *pG, const char *pURL)
 		k_sleep(K_SECONDS(1));
 	}
 	if (nRetry >= MAX_BIND_RETRIES) {
-		LOG_ERR("getaddrinfo() retry %d failed, err: %s", nRetry,
+		LOG_WRN("getaddrinfo() retry %d failed, err: %s", nRetry,
 			      rc == EAI_SYSTEM ? strerror(errno) : gai_strerror(rc));
 		return -1;
 	}
@@ -163,7 +163,7 @@ int http_bind(tOTDOA_HTTP_MEMBERS *pG, const char *pURL)
 		while (info) {
 			if (!inet_ntop(AF_INET, &((struct sockaddr_in *)pG->res->ai_addr)->sin_addr,
 				       pG->szServerAddress, sizeof(pG->szServerAddress))) {
-				LOG_ERR("Failed to convert address to text form: %d %s",
+				LOG_WRN("Failed to convert address to text form: %d %s",
 					      errno, strerror(errno));
 				return -1;
 			}
@@ -212,7 +212,7 @@ int http_connect(tOTDOA_HTTP_MEMBERS *pG, const char *tls_host)
 	LOG_INF("HTTP connect on protocol %d", proto);
 	pG->fdSocket = socket(AF_INET, SOCK_STREAM, proto);
 	if (pG->fdSocket == -1) {
-		LOG_ERR("failed to open socket");
+		LOG_WRN("failed to open socket");
 		return -1;
 	}
 
@@ -229,7 +229,7 @@ int http_connect(tOTDOA_HTTP_MEMBERS *pG, const char *tls_host)
 	if (bFound) {
 		LOG_DBG("nrf9161 IP address %s", pG->szModemAddress);
 	} else {
-		LOG_ERR("failed to get IP address\r\n");
+		LOG_WRN("failed to get IP address\r\n");
 		return -1;
 	}
 #endif
@@ -249,8 +249,8 @@ int http_connect(tOTDOA_HTTP_MEMBERS *pG, const char *tls_host)
 	LOG_DBG("connect() on socket %d", pG->fdSocket);
 	nErr = connect(pG->fdSocket, pG->res->ai_addr, sizeof(struct sockaddr_in));
 	if (nErr) {
-		LOG_ERR("connect failed: nErr = %d, %d -> %s", nErr, errno, strerror(errno));
-		LOG_ERR("connect failed: fdSocket = %d, ai_addr = %p", pG->fdSocket,
+		LOG_WRN("connect failed: nErr = %d, %d -> %s", nErr, errno, strerror(errno));
+		LOG_WRN("connect failed: fdSocket = %d, ai_addr = %p", pG->fdSocket,
 			      (void *)pG->res->ai_addr);
 		http_disconnect(pG);
 		return -3;
