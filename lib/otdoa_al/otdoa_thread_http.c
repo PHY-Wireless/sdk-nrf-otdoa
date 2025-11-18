@@ -10,8 +10,12 @@
 #include <zephyr/net/socket.h>
 #include <zephyr/net/tls_credentials.h>
 
-#include "otdoa_http.h"
+
+#include "otdoa_al/otdoa_http_api.h"
+#include "otdoa_al/otdoa_api.h"
 #include "otdoa_al_log.h"
+#include "otdoa_http.h"
+#include "arpa/inet.h"
 
 #define CHECK_IP
 
@@ -19,9 +23,6 @@ LOG_MODULE_DECLARE(otdoa_al, LOG_LEVEL_INF);
 
 struct modem_param_info MPI = {0};
 bool bModemInfoInit;
-
-/* Forward reference */
-void http_unbind(tOTDOA_HTTP_MEMBERS *pG);
 
 void http_modem_info_init(void)
 {
@@ -37,22 +38,21 @@ void http_modem_info_init(void)
  *
  * @return true or false
  */
-int is_ip_valid(tOTDOA_HTTP_MEMBERS *pG)
+int is_ip_valid(char *szModemAddress, size_t szModemAddressLen)
 {
-	memset(pG->szModemAddress, 0, sizeof(pG->szModemAddress));
+	memset(szModemAddress, 0, szModemAddressLen);
 	if (!bModemInfoInit) {
 		modem_info_init();
 		bModemInfoInit = true;
 	}
-	modem_info_string_get(MODEM_INFO_IP_ADDRESS, pG->szModemAddress,
-			      sizeof(pG->szModemAddress));
+	modem_info_string_get(MODEM_INFO_IP_ADDRESS, szModemAddress, szModemAddressLen);
 
 	struct addrinfo addr;
 	/**
 	 * inet_pton returns 1 if the network address was successfully converted,
 	 * 0 if not, and -1 if given an invalid address family
 	 */
-	return inet_pton(AF_INET, pG->szModemAddress, &addr) == 1;
+	return inet_pton(AF_INET, szModemAddress, &addr) == 1;
 }
 #endif
 
@@ -123,7 +123,8 @@ int tls_setup(int fd, const char *host)
  * @return 0 for success, otherwise error value
  */
 #define MAX_BIND_RETRIES 2 /* Retries take ~30 seconds so don't do too many!  (was 5) */
-int http_bind(tOTDOA_HTTP_MEMBERS *pG, const char *pURL)
+int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
+			char *pServerAddress, size_t server_address_len)
 {
 	int rc;
 
@@ -133,7 +134,7 @@ int http_bind(tOTDOA_HTTP_MEMBERS *pG, const char *pURL)
 	};
 
 	/* always unbind first */
-	http_unbind(pG);
+	otdoa_http_unbind(*res);
 
 	if (pURL == NULL) {
 		pURL = otdoa_http_get_download_url();
@@ -146,7 +147,7 @@ int http_bind(tOTDOA_HTTP_MEMBERS *pG, const char *pURL)
 
 	for (nRetry = 0; nRetry < MAX_BIND_RETRIES; nRetry++) {
 		LOG_DBG("Trying getaddrinfo() %d", nRetry);
-		rc = getaddrinfo(pURL, NULL, &hints, &pG->res);
+		rc = getaddrinfo(pURL, NULL, &hints, res);
 		if (rc == 0) {
 			break;
 		}
@@ -157,26 +158,26 @@ int http_bind(tOTDOA_HTTP_MEMBERS *pG, const char *pURL)
 			      rc == EAI_SYSTEM ? strerror(errno) : gai_strerror(rc));
 		return -1;
 	}
-	{
-		struct addrinfo *info = pG->res;
 
-		while (info) {
-			if (!inet_ntop(AF_INET, &((struct sockaddr_in *)pG->res->ai_addr)->sin_addr,
-				       pG->szServerAddress, sizeof(pG->szServerAddress))) {
-				LOG_ERR("Failed to convert address to text form: %d %s",
-					      errno, strerror(errno));
-				return -1;
-			}
-			LOG_DBG("Found address %s", pG->szServerAddress);
-			info = info->ai_next;
+	struct addrinfo *info = *res;
+	struct sockaddr_in *ai_addr = (struct sockaddr_in *)(*res)->ai_addr;
+
+	while (info) {
+		if (!inet_ntop(AF_INET, &ai_addr->sin_addr,
+			       pServerAddress, server_address_len)) {
+			LOG_ERR("Failed to convert address to text form: %d %s",
+				      errno, strerror(errno));
+			return -1;
 		}
+		LOG_DBG("Found address %s", pServerAddress);
+		info = info->ai_next;
 	}
-	LOG_INF("Server IP: %s", pG->szServerAddress);
+	LOG_INF("Server IP: %s", pServerAddress);
 
-	if (pG->bDisableTLS) {
-		((struct sockaddr_in *)pG->res->ai_addr)->sin_port = htons(HTTP_PORT);
+	if (bDisableTls) {
+		ai_addr->sin_port = htons(HTTP_PORT);
 	} else {
-		((struct sockaddr_in *)pG->res->ai_addr)->sin_port = htons(HTTPS_PORT);
+		ai_addr->sin_port = htons(HTTPS_PORT);
 	}
 	return 0;
 }
@@ -186,13 +187,14 @@ int http_bind(tOTDOA_HTTP_MEMBERS *pG, const char *pURL)
  *
  * @param pG Pointer to gHTTP containing socket to unbind
  */
-void http_unbind(tOTDOA_HTTP_MEMBERS *pG)
+int otdoa_http_unbind(struct addrinfo *res)
 {
-	if (pG->res) {
+	if (res) {
 		LOG_INF("http_unbind()");
-		freeaddrinfo(pG->res);
-		pG->res = NULL;
+		freeaddrinfo(res);
 	}
+
+	return 0;
 }
 
 /**
@@ -203,31 +205,37 @@ void http_unbind(tOTDOA_HTTP_MEMBERS *pG)
  * @return 0 for success, -1 for socket open failure, -2 for tls_setup failure, -3 for connect
  * failure
  */
-int http_connect(tOTDOA_HTTP_MEMBERS *pG, const char *tls_host)
+int otdoa_http_connect(int *fdSocket, struct sockaddr *res, char *szModemAddress,
+	size_t szModemAddressLen, const char *tls_host)
 {
 	int nErr = 0;
 	bool bFound = false;
-	int proto = pG->bDisableTLS ? IPPROTO_TCP : IPPROTO_TLS_1_2;
+	int proto = tls_host ? IPPROTO_TLS_1_2 : IPPROTO_TCP;
+
+	if (!fdSocket) {
+		LOG_ERR("fdSocket is NULL");
+		return -1;
+	}
 
 	LOG_INF("HTTP connect on protocol %d", proto);
-	pG->fdSocket = socket(AF_INET, SOCK_STREAM, proto);
-	if (pG->fdSocket == -1) {
+	*fdSocket = socket(AF_INET, SOCK_STREAM, proto);
+	if (*fdSocket == -1) {
 		LOG_ERR("failed to open socket");
 		return -1;
 	}
 
 #ifdef CHECK_IP /* check if our IP is set */
 	for (int nRetry = 0; nRetry < 10; nRetry++) {
-		if (is_ip_valid(pG)) {
+		if (is_ip_valid(szModemAddress, szModemAddressLen)) {
 			bFound = true;
 			break;
 		}
-		LOG_DBG("Waiting for IP address... %s", pG->szModemAddress);
+		LOG_DBG("Waiting for IP address... %s", szModemAddress);
 		k_sleep(K_SECONDS(1));
 	}
 
 	if (bFound) {
-		LOG_DBG("nrf9161 IP address %s", pG->szModemAddress);
+		LOG_DBG("nrf9161 IP address %s", szModemAddress);
 	} else {
 		LOG_ERR("failed to get IP address\r\n");
 		return -1;
@@ -235,24 +243,23 @@ int http_connect(tOTDOA_HTTP_MEMBERS *pG, const char *tls_host)
 #endif
 
 	/* setup TLS socket options */
-	if (pG->bDisableTLS) {
+	if (!tls_host) {
 		LOG_WRN("Skipping TLS");
 	} else {
-		nErr = tls_setup(pG->fdSocket, tls_host);
+		nErr = tls_setup(*fdSocket, tls_host);
 		if (nErr) {
-			http_disconnect(pG);
+			otdoa_http_disconnect(fdSocket);
 			LOG_ERR("tls_setup error %s", strerror(errno));
 			return -2;
 		}
 	}
 	/* connect */
-	LOG_DBG("connect() on socket %d", pG->fdSocket);
-	nErr = connect(pG->fdSocket, pG->res->ai_addr, sizeof(struct sockaddr_in));
+	LOG_DBG("connect() on socket %d", *fdSocket);
+	nErr = connect(*fdSocket, res, sizeof(struct sockaddr_in));
 	if (nErr) {
 		LOG_ERR("connect failed: nErr = %d, %d -> %s", nErr, errno, strerror(errno));
-		LOG_ERR("connect failed: fdSocket = %d, ai_addr = %p", pG->fdSocket,
-			      (void *)pG->res->ai_addr);
-		http_disconnect(pG);
+		LOG_ERR("connect failed: fdSocket = %d, ai_addr = %p", *fdSocket, (void *)res);
+		otdoa_http_disconnect(fdSocket);
 		return -3;
 	}
 	return nErr;
@@ -264,15 +271,15 @@ int http_connect(tOTDOA_HTTP_MEMBERS *pG, const char *tls_host)
  * @param pG Pointer to gHTTP containing socket info
  * @return 0 on success, -1 on failure
  */
-int http_disconnect(tOTDOA_HTTP_MEMBERS *pG)
+int otdoa_http_disconnect(int *fdSocket)
 {
 	int nReturn = -1;
 
-	if (pG->fdSocket >= 0) {
-		LOG_DBG("closing socket %d", pG->fdSocket);
-		nReturn = close(pG->fdSocket);
+	if (*fdSocket >= 0) {
+		LOG_DBG("closing socket %d", *fdSocket);
+		nReturn = close(*fdSocket);
+		*fdSocket = -1;
 	}
-	pG->fdSocket = -1;
 	return nReturn;
 }
 

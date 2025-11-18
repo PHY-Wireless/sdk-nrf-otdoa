@@ -6,6 +6,7 @@
 
 #include <otdoa_al/otdoa_al2otdoa_api.h>
 #include <otdoa_al/otdoa_otdoa2al_api.h>
+#include <otdoa_al/otdoa_http_api.h>
 #include <stdlib.h>
 #include <zephyr/kernel.h>
 #include <zephyr/posix/unistd.h>
@@ -17,7 +18,7 @@ LOG_MODULE_REGISTER(otdoa_al, LOG_LEVEL_INF);
 
 struct http_work {
 	struct k_work work;
-	tOTDOA_HTTP_MESSAGE msg;
+	char msg[OTDOA_HTTP_MAX_MSG_SIZE];
 };
 
 #define SLAB_COUNT (10)
@@ -141,7 +142,7 @@ void otdoa_queue_handle_http(struct k_work *work)
 			otdoa_rs_send_stop_req(stop_req->fail_or_cancel);
 			return;
 		}
-		otdoa_http_handle_message(&parent->msg);
+		otdoa_http_handle_message(parent->msg);
 		otdoa_message_free(parent);
 	}
 }
