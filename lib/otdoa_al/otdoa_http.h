@@ -45,10 +45,10 @@
 
 #define HTTPS_RANGE_MAX_DEFAULT 100000
 
+ssize_t otdoa_http_send(int fdSocket, const void *buffer, size_t n, int flags);
 
 /* Public members */
 void otdoa_http_init(void);
-int otdoa_http_handle_message(void *pMsg);
 void otdoa_disable_tls(bool bDisableTLS);
 void otdoa_skip_config_dl(bool bSkipConfigDL);
 bool otdoa_get_skip_config_dl(void);

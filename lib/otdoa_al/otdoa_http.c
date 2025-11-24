@@ -38,11 +38,6 @@ void http_set_ubsa_params(int enc, int comp)
 
 /* functions inside nordic code */
 extern ssize_t http_send(int socket, const void *buffer, size_t length, int flags);
-extern ssize_t http_recv(int socket, void *buffer, size_t length, int flags);
-extern int http_errno(void);
-extern bool SetSocketBlocking(int fd, bool blocking);
-extern void http_sleep(int msec);
-extern int32_t http_uptime(void);
 
 /* otdoa lib functions */
 extern void otdoa_http_h1_init(void);
@@ -74,7 +69,7 @@ int otdoa_http_send_request(int fdSocket, const char *request, const size_t n, s
 	int bytes;
 
 	do {
-		bytes = http_send(fdSocket, &request[*nOff], n - *nOff, 0);
+		bytes = otdoa_http_send(fdSocket, &request[*nOff], n - *nOff, 0);
 		if (bytes < 0) {
 			LOG_ERR("http_send_request: send failed: %s", strerror(errno));
 			return -1;
@@ -110,35 +105,6 @@ int http_write_to_file(const char *path, void *data, size_t len)
 	FCLOSE(fp);
 
 	return rc;
-}
-
-/**
- * Log a response string
- *
- * Searches for a string in a response, and logs the
- * line containing that string
- */
-#define OTDOA_MAX_LOG_LENGTH 96
-
-void log_response_string(const char *pszKey, const char *pszBuffer)
-{
-	const char *pszStart = strstr(pszBuffer, pszKey);
-
-	if (pszStart) {
-		size_t len = strstr(pszStart, "\n") - pszStart;
-
-		if (len >= OTDOA_MAX_LOG_LENGTH) {
-			len = OTDOA_MAX_LOG_LENGTH - 1;
-		}
-
-		static char szLog[OTDOA_MAX_LOG_LENGTH];
-
-		szLog[len] = '\0'; /* ensure null terimination */
-		strncpy(szLog, pszStart, len);
-		LOG_INF("    %s", szLog);
-	} else {
-		LOG_ERR("Key %s not found in response", pszKey);
-	}
 }
 
 /**
@@ -186,3 +152,10 @@ const char *otdoa_http_get_download_url(void)
 		return DEFAULT_BSA_DL_SERVER_URL;
 	}
 }
+
+#ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
+const char *otdoa_http_get_upload_pw(void)
+{
+	return RESULTS_UPLOAD_PW;
+}
+#endif

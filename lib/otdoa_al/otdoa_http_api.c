@@ -14,8 +14,8 @@
 
 LOG_MODULE_DECLARE(otdoa_al, LOG_LEVEL_INF);
 
+extern void otdoa_http_register_callback(otdoa_api_callback_t cb);
 
-static otdoa_api_callback_t al_event_callback;
 /**
  * @brief Initialize the OTDOA AL library
  * @param[in] event_callback Callback function used by the library
@@ -24,7 +24,7 @@ static otdoa_api_callback_t al_event_callback;
  */
 int32_t otdoa_al_init(otdoa_api_callback_t event_callback)
 {
-	al_event_callback = event_callback;
+	otdoa_http_register_callback(event_callback);
 	otdoa_http_init();
 	otdoa_log_init();
 
@@ -46,34 +46,6 @@ int32_t otdoa_al_init(otdoa_api_callback_t event_callback)
 #endif
 
 	return OTDOA_API_SUCCESS;
-}
-
-void otdoa_http_invoke_callback_dl_compl(int status)
-{
-	if (!al_event_callback) {
-		LOG_ERR("No registered callback");
-		return;
-	}
-
-	otdoa_api_event_data_t event_data = {0};
-
-	event_data.event = OTDOA_EVENT_UBSA_DL_COMPL;
-	event_data.dl_compl.status = status;
-	al_event_callback(&event_data);
-}
-
-void otdoa_http_invoke_callback_ul_compl(int status)
-{
-	if (!al_event_callback) {
-		LOG_ERR("No registered callback");
-		return;
-	}
-
-	otdoa_api_event_data_t event_data = {0};
-
-	event_data.event = OTDOA_EVENT_RESULTS_UL_COMPL;
-	event_data.ul_compl.status = status;
-	al_event_callback(&event_data);
 }
 
 

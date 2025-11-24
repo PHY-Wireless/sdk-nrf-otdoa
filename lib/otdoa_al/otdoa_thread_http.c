@@ -118,13 +118,16 @@ int tls_setup(int fd, const char *host)
 /**
  * Bind to server socket
  *
- * @param pG Pointer to gHTTP containing socket info
+ * @param addr A struct addrinfo** pointing to the start of a connection list
  * @param pURL Pointer to URL string, null to use otdoa_http_get_download_url()
+ * @param bDisableTls If HTTPS should be used to connect to the server
+ * @param[out] pSeverAddress String buffer to write server IP address to
+ * @param server_address_len Length of server address buffer
  * @return 0 for success, otherwise error value
  */
 #define MAX_BIND_RETRIES 2 /* Retries take ~30 seconds so don't do too many!  (was 5) */
 int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
-			char *pServerAddress, size_t server_address_len)
+		    char *pServerAddress, size_t server_address_len)
 {
 	int rc;
 
@@ -134,7 +137,7 @@ int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
 	};
 
 	/* always unbind first */
-	otdoa_http_unbind(*res);
+	otdoa_http_unbind(res);
 
 	if (pURL == NULL) {
 		pURL = otdoa_http_get_download_url();
@@ -159,25 +162,18 @@ int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
 		return -1;
 	}
 
-	struct addrinfo *info = *res;
-	struct sockaddr_in *ai_addr = (struct sockaddr_in *)(*res)->ai_addr;
-
-	while (info) {
-		if (!inet_ntop(AF_INET, &ai_addr->sin_addr,
-			       pServerAddress, server_address_len)) {
-			LOG_ERR("Failed to convert address to text form: %d %s",
-				      errno, strerror(errno));
-			return -1;
-		}
-		LOG_DBG("Found address %s", pServerAddress);
-		info = info->ai_next;
+	if (!inet_ntop(AF_INET, &((struct sockaddr_in *)(*res)->ai_addr)->sin_addr,
+		       pServerAddress, server_address_len)) {
+		LOG_ERR("Failed to convert address to text form: %d %s",
+			      errno, strerror(errno));
+		return -1;
 	}
 	LOG_INF("Server IP: %s", pServerAddress);
 
 	if (bDisableTls) {
-		ai_addr->sin_port = htons(HTTP_PORT);
+		((struct sockaddr_in *)(*res)->ai_addr)->sin_port = htons(HTTP_PORT);
 	} else {
-		ai_addr->sin_port = htons(HTTPS_PORT);
+		((struct sockaddr_in *)(*res)->ai_addr)->sin_port = htons(HTTPS_PORT);
 	}
 	return 0;
 }
@@ -185,13 +181,14 @@ int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
 /**
  * Unbind from server socket
  *
- * @param pG Pointer to gHTTP containing socket to unbind
+ * @param res Pointer to addrinfo to unbind
  */
-int otdoa_http_unbind(struct addrinfo *res)
+int otdoa_http_unbind(struct addrinfo **res)
 {
 	if (res) {
 		LOG_INF("http_unbind()");
-		freeaddrinfo(res);
+		freeaddrinfo(*res);
+		*res = NULL;
 	}
 
 	return 0;
@@ -290,7 +287,7 @@ int otdoa_http_disconnect(int *fdSocket)
  * @param blocking True for blocking, false for nonblocking
  * @return true on success, otherwise false
  */
-bool SetSocketBlocking(int fd, bool blocking)
+bool otdoa_http_set_sock_blocking(int fd, bool blocking)
 {
 	if (fd < 0) {
 		return false;
@@ -316,26 +313,26 @@ bool SetSocketBlocking(int fd, bool blocking)
 }
 
 /* wrappers */
-ssize_t http_recv(int socket, void *buffer, size_t length, int flags)
+ssize_t otdoa_http_recv(int socket, void *buffer, size_t length, int flags)
 {
 	return recv(socket, buffer, length, flags);
 }
-ssize_t http_send(int socket, const void *buffer, size_t length, int flags)
+ssize_t otdoa_http_send(int socket, const void *buffer, size_t length, int flags)
 {
 	return send(socket, buffer, length, flags);
 }
 
-int http_errno(void)
+int otdoa_http_errno(void)
 {
 	return errno;
 }
 
-void http_sleep(int msec)
+void otdoa_http_sleep(int msec)
 {
 	k_sleep(K_MSEC(msec));
 }
 
-int32_t http_uptime(void)
+int32_t otdoa_http_uptime(void)
 {
 	return k_uptime_get_32();
 }
