@@ -13,7 +13,7 @@
 
 #include <otdoa_al/otdoa_api.h>
 #include <otdoa_al/otdoa_nordic_at.h>
-#include "otdoa_http.h"
+#include <otdoa_al/otdoa_http_api.h>
 #include "otdoa_al_log.h"
 
 LOG_MODULE_DECLARE(otdoa_al, LOG_LEVEL_INF);
