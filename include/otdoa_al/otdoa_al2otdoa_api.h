@@ -97,6 +97,16 @@ int otdoa_rs_handle_msg(void *p_msg_union);
  */
 int otdoa_rs_handle_stop(uint32_t cancel_or_timeout);
 
+/**
+ * otdoa_http_handle_msg() - Handle HTTP messages
+ */
+int otdoa_http_handle_message(void *pMsg);
+
+/**
+ * otdoa_rs_handle_msg() - Handle combined HTTP and RS messages
+ */
+int otdoa_handle_message(void *pvMsg);
+
 #ifdef __cplusplus
 }
 #endif

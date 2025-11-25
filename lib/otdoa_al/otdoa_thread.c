@@ -6,6 +6,7 @@
 
 #include <otdoa_al/otdoa_al2otdoa_api.h>
 #include <otdoa_al/otdoa_otdoa2al_api.h>
+#include <otdoa_al/otdoa_http_api.h>
 #include <stdlib.h>
 #include <zephyr/kernel.h>
 #include <zephyr/posix/unistd.h>
@@ -15,30 +16,27 @@
 
 LOG_MODULE_REGISTER(otdoa_al, LOG_LEVEL_INF);
 
-struct http_work {
-	struct k_work work;
-	tOTDOA_HTTP_MESSAGE msg;
-};
-
 #define SLAB_COUNT (10)
 
-static struct k_work_q http_workq;
 static struct k_fifo rs_fifo;
 static struct k_thread rs_thread_data;
 static void *message_slab_buffer;
 struct k_mem_slab message_slab;
 
 static struct {
+	/* boolean termination control */
 	atomic_t terminate;
+
+	/* boolean ready state */
 	atomic_t ready;
+
+	/* integer stop-request pending state
+	 * the FAIL and CANCEL constants passed into otdoa_queue_stop_request are nonzero,
+	 * so a nonzero value stored here indicates a pending stop
+	 */
+	atomic_t http_stop_pending;
 } gOTDOA;
 
-static struct http_stop_work_item {
-	struct k_work work;
-	int fail_or_cancel;
-} http_stop_work;
-
-K_THREAD_STACK_DEFINE(http_workq_stack, CONFIG_OTDOA_HTTP_QUEUE_STACK_SIZE);
 K_THREAD_STACK_DEFINE(rs_thread_stack, CONFIG_OTDOA_RS_THREAD_STACK_SIZE);
 
 void rs_entry_point(void *p1, void *p2, void *p3);
@@ -46,24 +44,17 @@ void rs_entry_point(void *p1, void *p2, void *p3);
 int otdoa_start(void)
 {
 	/* init the message slab */
-	const unsigned int MAX_MSG_SIZE = MAX(OTDOA_MAX_MESSAGE_SIZE, sizeof(struct http_work));
+	const unsigned int MAX_MSG_SIZE = MAX(OTDOA_MAX_MESSAGE_SIZE, OTDOA_HTTP_MAX_MSG_SIZE);
 
 	message_slab_buffer = calloc(SLAB_COUNT, MAX_MSG_SIZE);
 	k_mem_slab_init(&message_slab, message_slab_buffer, MAX_MSG_SIZE, SLAB_COUNT);
-
-	/* init the HTTP workqueue */
-	struct k_work_queue_config http_cfg = {.name = "http_workq"};
-
-	k_work_queue_init(&http_workq);
-	k_work_queue_start(&http_workq, http_workq_stack, K_THREAD_STACK_SIZEOF(http_workq_stack),
-			   CONFIG_OTDOA_HTTP_QUEUE_PRIORITY, &http_cfg);
 
 	/* init the RS fifo thread */
 	k_fifo_init(&rs_fifo);
 	k_thread_create(&rs_thread_data, rs_thread_stack, K_THREAD_STACK_SIZEOF(rs_thread_stack),
 			rs_entry_point, NULL, NULL, NULL, CONFIG_OTDOA_RS_THREAD_PRIORITY,
 			K_FP_REGS, K_NO_WAIT);
-	k_thread_name_set(&rs_thread_data, "rs_thread");
+	k_thread_name_set(&rs_thread_data, "otdoa_thread");
 
 	return 0;
 }
@@ -117,7 +108,7 @@ void rs_entry_point(void *p1, void *p2, void *p3)
 			continue;
 		}
 
-		otdoa_ctrl_handle_message(msg);
+		otdoa_handle_message(msg);
 		otdoa_message_free(msg);
 	}
 
@@ -125,57 +116,9 @@ void rs_entry_point(void *p1, void *p2, void *p3)
 	atomic_clear(&gOTDOA.terminate);
 }
 
-void otdoa_queue_handle_http(struct k_work *work)
-{
-	if (!work) {
-		return;
-	}
-	struct http_work *parent = CONTAINER_OF(work, struct http_work, work);
-
-	if (parent) {
-		if ((void *)parent == (void *)&http_stop_work) {
-			/* Tell the RS to stop now that the pending HTTP operation has been stopped
-			 */
-			const struct http_stop_work_item *stop_req =
-				CONTAINER_OF(work, struct http_stop_work_item, work);
-			otdoa_rs_send_stop_req(stop_req->fail_or_cancel);
-			return;
-		}
-		otdoa_http_handle_message(&parent->msg);
-		otdoa_message_free(parent);
-	}
-}
-
 int otdoa_queue_http_message(const void *msg, const size_t length)
 {
-	if (!msg) {
-		LOG_ERR("no message");
-		return -1;
-	}
-
-	struct http_work *work;
-
-	work = otdoa_message_alloc(sizeof(struct k_work)+length);
-	if (!work) {
-		LOG_ERR("failed to alloate http message");
-		return -1;
-	}
-
-	k_work_init(&work->work, otdoa_queue_handle_http);
-	memcpy(&work->msg, msg, length);
-
-	int rc = k_work_submit_to_queue(&http_workq, &work->work);
-
-	if (rc != 1) {
-		/* 0 and 2 are success values, but imply the work item has be
-		 * double-allocated
-		 */
-		LOG_ERR("failed to queue http message: %d", rc);
-		otdoa_message_free(work);
-		return -1;
-	}
-
-	return 0;
+	return otdoa_queue_rs_message(msg, length);
 }
 
 int otdoa_queue_rs_message(const void *pv_msg, const size_t length)
@@ -200,27 +143,16 @@ int otdoa_queue_rs_message(const void *pv_msg, const size_t length)
 
 int otdoa_message_check_pending_stop(void)
 {
-	const bool pending = k_work_is_pending(&http_stop_work.work);
-
-	if (pending) {
-		k_work_cancel(&http_stop_work.work);
-	}
-	return pending;
+	/* we always want to reset the stop state when we check it */
+	return atomic_clear(&gOTDOA.http_stop_pending);
 }
 
 int32_t otdoa_queue_stop_request(int fail_or_cancel)
 {
-	http_stop_work.fail_or_cancel = fail_or_cancel;
-	k_work_init(&http_stop_work.work, otdoa_queue_handle_http);
-
-	int rc = k_work_submit_to_queue(&http_workq, &http_stop_work.work);
-
-	if (rc != 1) {
-		/* 0 and 2 are success values, but imply the work item has be
-		 * double-allocated
-		 */
-		LOG_ERR("failed to queue http stop message: %d", rc);
-		return -1;
+	if (0 != atomic_set(&gOTDOA.http_stop_pending, fail_or_cancel)) {
+		/* there was a non-zero value already pending, so we've "double-stopped" */
+		LOG_WRN("A stop has already been requested, overwriting previous request");
+		return OTDOA_API_INTERNAL_ERROR;
 	}
 
 	return 0;
