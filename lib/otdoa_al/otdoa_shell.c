@@ -14,9 +14,9 @@
 #include <zephyr/shell/shell.h>
 
 #include "otdoa_al/otdoa_api.h"
+#include "otdoa_al/otdoa_http_api.h"
 #include "otdoa_al/otdoa_nordic_at.h"
 #include "nrf_modem_at.h"
-#include "otdoa_http.h"
 
 /**
  *
