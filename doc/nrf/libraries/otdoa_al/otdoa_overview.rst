@@ -120,7 +120,6 @@ These options control the HTTP thread and the RS thread operations:
 
 These options control the BSA download server and the results upload server:
 
-* :kconfig:option:`CONFIG_OTDOA_BSA_DL_SERVER_URL` to configure the URL to download BSA files from.
 * :kconfig:option:`CONFIG_OTDOA_HTTPS_PORT` to configure the port to use for OTDOA HTTPS operations.
 * :kconfig:option:`CONFIG_OTDOA_HTTP_PORT` to configure the port to use for OTDOA HTTP operations.
 * :kconfig:option:`CONFIG_OTDOA_RESULTS_UPLOAD_PW` to configure the password to use for Phywi API authentication when uploading OTDOA results.
