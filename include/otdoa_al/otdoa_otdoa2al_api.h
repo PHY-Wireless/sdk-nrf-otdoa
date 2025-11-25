@@ -43,6 +43,7 @@ int32_t otdoa_http_send_stop_req(int cancel_or_timeout);
 int otdoa_rs_send_stop_req(uint32_t cancel_or_timeout);
 int otdoa_message_check_pending_stop(void);
 int otdoa_message_free(void *pMessage);
+int otdoa_handle_message(void *pvMsg);
 
 /***************************************************************************
  * Timer Handling Functions

@@ -79,10 +79,6 @@ config OTDOA_TLS_SEC_TAG
 	int "Modem security tag slot to install PhyWi TLS certificate to"
 	default 42
 
-config OTDOA_BSA_DL_SERVER_URL
-	string "URL to download BSA files from"
-	default "api.prod.hellaphy.cloud"
-
 config OTDOA_HTTPS_PORT
 	int "Port to use for OTDOA HTTPS operations"
 	default 443
