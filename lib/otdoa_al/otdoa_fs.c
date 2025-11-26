@@ -134,7 +134,6 @@ tOFS_FILE *ofs_fopen(const char *path, const char *psz_mode)
 		int iFS = fs_stat(path, &deFile);
 
 		if (0 == iFS) {
-			printk("ofs_fopen(\"%s\",\"%s\") unlink existing file\n", path, psz_mode);
 			fs_unlink(path);
 		}
 	}
