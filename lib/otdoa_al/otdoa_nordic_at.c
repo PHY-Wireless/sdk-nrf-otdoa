@@ -252,9 +252,9 @@ error_exit:
 	if (i_ret != 0
 		&& i_ret != OTDOA_EVENT_FAIL_NO_DLEARFCN && i_ret != OTDOA_EVENT_FAIL_NO_PCI) {
 		if (psz_resp) {
-			LOG_ERR("AT%%XMONITOR response %s", psz_resp);
+			LOG_WRN("AT%%XMONITOR response %s", psz_resp);
 		}
-		LOG_ERR("Failed to parse AT%%XMONITOR response.  returning %d\n", i_ret);
+		LOG_WRN("Failed to parse AT%%XMONITOR response.  returning %d\n", i_ret);
 	} else {
 		LOG_DBG("otdoa_nordic_at_parse_xmonitor_response: ECGI=%" PRIu32
 			      " (0x%08X), DLEARFCN=%" PRIu32 " returning %d\n",
@@ -273,7 +273,7 @@ int otdoa_nordic_at_get_xmonitor(otdoa_xmonitor_params_t *params)
 	memset(monitor_buf, 0, sizeof(monitor_buf));
 	i_ret = nrf_modem_at_cmd(monitor_buf, sizeof(monitor_buf), "AT%%XMONITOR");
 	if (i_ret) {
-		LOG_ERR("otdoa_nordic_at_get_xmonitor: ERROR (%d) Failed to get "
+		LOG_WRN("otdoa_nordic_at_get_xmonitor: ERROR (%d) Failed to get "
 			      "MODEM Status\n",
 			      i_ret);
 		i_ret = OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
@@ -343,12 +343,12 @@ int otdoa_nordic_at_get_imei_from_modem(void)
 		len = NRF_IMEI_LEN;
 	}
 	strncpy((char *)otdoa_nordic_at_imei, p_imei_token, len);
-	LOG_INF("Got IMEI %s\n", otdoa_nordic_at_imei);
+	LOG_INF("Got IMEI %s", otdoa_nordic_at_imei);
 
 	return 0;
 
 error_return:
-	LOG_ERR("otdoa_nordic_at_get_imei_from_modem() invalid response %s", imei_buf);
+	LOG_WRN("otdoa_nordic_at_get_imei_from_modem() invalid response %s", imei_buf);
 	return OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
 }
 
