@@ -88,14 +88,14 @@ int tls_setup(int fd, const char *host)
 
 	nErr = setsockopt(fd, SOL_TLS, TLS_PEER_VERIFY, &verify, sizeof(verify));
 	if (nErr) {
-		LOG_ERR("Failed to setup peer verification: %s", strerror(errno));
+		LOG_WRN("Failed to setup peer verification: %s", strerror(errno));
 		return nErr;
 	}
 
 	/* associate the socket with the security tag we have provisioned the certificate with */
 	nErr = setsockopt(fd, SOL_TLS, TLS_SEC_TAG_LIST, tls_sec_tag, sizeof(tls_sec_tag));
 	if (nErr) {
-		LOG_ERR("Failed to setup TLS sec tag: %s", strerror(errno));
+		LOG_WRN("Failed to setup TLS sec tag: %s", strerror(errno));
 		return nErr;
 	}
 
@@ -108,7 +108,7 @@ int tls_setup(int fd, const char *host)
 	LOG_INF("tls_setup(%d, %s)", fd, server);
 	nErr = setsockopt(fd, SOL_TLS, TLS_HOSTNAME, server, strlen(server) + 1);
 	if (nErr) {
-		LOG_ERR("Failed to setup TLS Hostname: %s", strerror(errno));
+		LOG_WRN("Failed to setup TLS Hostname: %s", strerror(errno));
 		return nErr;
 	}
 
@@ -157,7 +157,7 @@ int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
 		k_sleep(K_SECONDS(1));
 	}
 	if (nRetry >= MAX_BIND_RETRIES) {
-		LOG_ERR("getaddrinfo() retry %d failed, err: %s", nRetry,
+		LOG_WRN("getaddrinfo() retry %d failed, err: %s", nRetry,
 			      rc == EAI_SYSTEM ? strerror(errno) : gai_strerror(rc));
 		return -1;
 	}
@@ -217,7 +217,7 @@ int otdoa_http_connect(int *fdSocket, struct sockaddr *res, char *szModemAddress
 	LOG_INF("HTTP connect on protocol %d", proto);
 	*fdSocket = socket(AF_INET, SOCK_STREAM, proto);
 	if (*fdSocket == -1) {
-		LOG_ERR("failed to open socket");
+		LOG_WRN("failed to open socket");
 		return -1;
 	}
 
@@ -234,7 +234,7 @@ int otdoa_http_connect(int *fdSocket, struct sockaddr *res, char *szModemAddress
 	if (bFound) {
 		LOG_DBG("nrf9161 IP address %s", szModemAddress);
 	} else {
-		LOG_ERR("failed to get IP address\r\n");
+		LOG_WRN("failed to get IP address\r\n");
 		return -1;
 	}
 #endif
@@ -254,8 +254,8 @@ int otdoa_http_connect(int *fdSocket, struct sockaddr *res, char *szModemAddress
 	LOG_DBG("connect() on socket %d", *fdSocket);
 	nErr = connect(*fdSocket, res, sizeof(struct sockaddr_in));
 	if (nErr) {
-		LOG_ERR("connect failed: nErr = %d, %d -> %s", nErr, errno, strerror(errno));
-		LOG_ERR("connect failed: fdSocket = %d, ai_addr = %p", *fdSocket, (void *)res);
+		LOG_WRN("connect failed: nErr = %d, %d -> %s", nErr, errno, strerror(errno));
+		LOG_WRN("connect failed: fdSocket = %d, ai_addr = %p", *fdSocket, (void *)res);
 		otdoa_http_disconnect(fdSocket);
 		return -3;
 	}
