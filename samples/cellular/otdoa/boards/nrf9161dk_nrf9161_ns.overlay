@@ -58,7 +58,7 @@
 
 &uart0 {
 	status = "okay";
-	current-speed = <921600>;
+	current-speed = <115200>;
 };
 
 &uart1 {
