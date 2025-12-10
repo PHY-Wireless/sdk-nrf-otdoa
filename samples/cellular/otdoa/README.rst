@@ -53,7 +53,7 @@ Running the sample application
 |test_sample|
 
 #. |connect_kit|
-#. |connect_terminal|  The terminal application should be set for 921600 baud for this sample.
+#. |connect_terminal|  The terminal application should be set for 115200 baud for this sample.
 #. Power on or reset your device
 #. Observe that the sample starts and connects to the LTE network
 #. Enter 'phywi' on the terminal and verify that the phywi shell command help is displayed.
