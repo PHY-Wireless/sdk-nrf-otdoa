@@ -26,7 +26,10 @@ int32_t otdoa_al_init(otdoa_api_callback_t event_callback)
 {
 	otdoa_http_register_callback(event_callback);
 	otdoa_http_init();
+
+#if CONFIG_LOG
 	otdoa_log_init();
+#endif /* CONFIG_LOG */
 
 #if CONFIG_OTDOA_API_TLS_CERT_INSTALL
 	bool exists;
