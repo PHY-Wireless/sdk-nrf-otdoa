@@ -32,6 +32,8 @@ LOG_MODULE_REGISTER(otdoa, LOG_LEVEL_DBG);
 
 uint32_t otdoa_log_level_set(int level, const char *backend)
 {
+#if CONFIG_LOG
+
 	int source_id = log_source_id_get("otdoa");
 
 	if (source_id >= 0) {
@@ -39,11 +41,13 @@ uint32_t otdoa_log_level_set(int level, const char *backend)
 	} else {
 		LOG_WRN("otdoa_log_level_set(): Failed to find module otdoa");
 	}
+#endif /* CONFIG_LOG */
 	return 0;
 }
 
 void otdoa_log(int log_level, const char *string)
 {
+#if CONFIG_LOG
 	switch (log_level) {
 	case LOG_LEVEL_ERR:
 		LOG_ERR("%s", string);
@@ -61,6 +65,8 @@ void otdoa_log(int log_level, const char *string)
 		/* ignore the log */
 		break;
 	}
+#endif /* CONFIG_LOG */
+
 }
 
 void otdoa_log_init(void)
