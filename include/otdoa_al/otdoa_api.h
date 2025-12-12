@@ -118,6 +118,11 @@ typedef enum {
 	/** User already has a pending uBSA */
 	OTDOA_EVENT_FAIL_HTTP_CONFLICT = 409,
 
+	/** Expectation Failed - server will return this on failure in SSL verify
+	 * UE will retry as a workaround
+	 */
+	USER_EVENT_FAIL_HTTP_EXPECT_FAIL = 417,
+
 	/** uBSA generation was not possible */
 	OTDOA_EVENT_FAIL_HTTP_UNPROCESSABLE_CONTENT = 422,
 
