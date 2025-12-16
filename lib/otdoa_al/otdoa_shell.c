@@ -122,12 +122,16 @@ static void otdoa_shell_jwt_handler(const struct shell *shell, size_t argc, char
 /* Override the Serving Cell & DLEARFCN */
 extern uint32_t u32OverrideServCellECGI;
 extern uint32_t u32OverrideDLEARFCN;
+extern uint16_t u16OverrideMCC;
+extern uint16_t u16OverrideMNC;
+
 static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, char **argv)
 {
 	otdoa_xmonitor_params_t params;
 
 	otdoa_nordic_at_get_xmonitor(&params);
-	shell_print(shell, "Current : INFO ECGI=%u, DLEARFCN=%u\n", params.ecgi, params.dlearfcn);
+	shell_print(shell, "Current : INFO ECGI=%u, DLEARFCN=%u MCC=%u MNC=%u\n",
+		    params.ecgi, params.dlearfcn, params.mcc, params.mnc);
 
 	uint32_t u32ServCellECGI = 0; /* Zero means don't override */
 
@@ -138,12 +142,21 @@ static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, 
 			u32OverrideDLEARFCN = params.dlearfcn;
 		}
 	}
-	if (argc > 2) {
+	if (argc >= 3) {
 		u32OverrideDLEARFCN = strtoul(argv[2], NULL, 0);
 	}
+	if (argc >= 5) {
+		u16OverrideMCC = strtoul(argv[3], NULL, 0);
+		u16OverrideMNC = strtoul(argv[4], NULL, 0);
+	} else if (argc >= 2) {
+		/* Reset if ECGI parameter supplied */
+		u16OverrideMCC = 0;
+		u16OverrideMNC = 0;
+	}
 
-	shell_print(shell, "Serving Cell Override ECGI=%u DLEARFCN=%u\n", u32OverrideServCellECGI,
-		    u32OverrideDLEARFCN);
+	shell_print(shell, "Serving Cell Override ECGI=%u DLEARFCN=%u MCC=%u MNC=%u\n",
+		   u32OverrideServCellECGI,
+		   u32OverrideDLEARFCN, u16OverrideMCC, u16OverrideMNC);
 	return 0;
 }
 
@@ -168,6 +181,10 @@ static int otdoa_shell_get_ubsa_handler(const struct shell *shell, size_t argc, 
 
 	if (u32OverrideDLEARFCN > 0) {
 		params.dlearfcn = u32OverrideDLEARFCN;
+	}
+	if (u16OverrideMCC > 0) {
+		params.mcc = u16OverrideMCC;
+		params.mnc = u16OverrideMNC;
 	}
 
 	if (argc >= 2) {
@@ -306,7 +323,7 @@ SHELL_SUBCMD_ADD((phywi), reset, &otdoa_cmds, " Soft reset the device", otdoa_sh
 		 0, 0);
 SHELL_SUBCMD_ADD((phywi), ecgi, &otdoa_cmds,
 		 " Override the serving cell ECGI - 0 to reset, empty to display",
-		 otdoa_shell_override_handler, 0, 2);
+		 otdoa_shell_override_handler, 0, 5);
 
 SHELL_CMD_REGISTER(phywi, &otdoa_cmds, "PHY Wireless OTDOA Commands", NULL);
 
