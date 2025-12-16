@@ -146,10 +146,9 @@ static int otdoa_shell_override_handler(const struct shell *shell, size_t argc, 
 		u32OverrideDLEARFCN = strtoul(argv[2], NULL, 0);
 	}
 	if (argc >= 5) {
-		u16OverrideMCC = strtoul(argv[3], NULL, 0);;
-		u16OverrideMNC = strtoul(argv[4], NULL, 0);;
-	}
-	else if (argc >=2) {
+		u16OverrideMCC = strtoul(argv[3], NULL, 0);
+		u16OverrideMNC = strtoul(argv[4], NULL, 0);
+	} else if (argc >= 2) {
 		/* Reset if ECGI parameter supplied */
 		u16OverrideMCC = 0;
 		u16OverrideMNC = 0;
@@ -324,7 +323,7 @@ SHELL_SUBCMD_ADD((phywi), reset, &otdoa_cmds, " Soft reset the device", otdoa_sh
 		 0, 0);
 SHELL_SUBCMD_ADD((phywi), ecgi, &otdoa_cmds,
 		 " Override the serving cell ECGI - 0 to reset, empty to display",
-		 otdoa_shell_override_handler, 0, 2);
+		 otdoa_shell_override_handler, 0, 5);
 
 SHELL_CMD_REGISTER(phywi, &otdoa_cmds, "PHY Wireless OTDOA Commands", NULL);
 
