@@ -1,4 +1,5 @@
-zephyr_library()
+zephyr_library_get_current_dir_lib_name(${ZEPHYR_BASE} OTDOA_AL_LIB_TARGET_NAME)
+zephyr_library_named(${OTDOA_AL_LIB_TARGET_NAME})
 
 # lfs.h is not in the include path, so add it explicitly here
 zephyr_library_include_directories(${ZEPHYR_BASE}/../modules/fs/littlefs)
