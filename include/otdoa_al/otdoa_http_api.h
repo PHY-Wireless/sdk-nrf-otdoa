@@ -51,6 +51,8 @@ int32_t otdoa_http_uptime(void);
 
 int otdoa_http_send_message(void *pMsg, uint32_t len);
 
+int otdoa_http_api_dump_blacklist(void);
+
 const char *otdoa_http_get_download_url(void);
 int http_write_to_file(const char *path, void *data, size_t len);
 

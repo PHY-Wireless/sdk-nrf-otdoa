@@ -304,6 +304,12 @@ static int otdoa_shell_loc_handler(const struct shell *shell, size_t argc, char 
 	return 0;
 }
 
+static int otdoa_shell_blacklist_handler(const struct shell *shell, size_t argc, char **argv)
+{
+	otdoa_http_api_dump_blacklist();
+	return 0;
+}
+
 SHELL_SUBCMD_SET_CREATE(otdoa_cmds, (phywi));
 
 SHELL_SUBCMD_ADD((phywi), info, &otdoa_cmds, " Show current OTDOA info", otdoa_shell_info_handler,
@@ -324,6 +330,9 @@ SHELL_SUBCMD_ADD((phywi), reset, &otdoa_cmds, " Soft reset the device", otdoa_sh
 SHELL_SUBCMD_ADD((phywi), ecgi, &otdoa_cmds,
 		 " Override the serving cell ECGI - 0 to reset, empty to display",
 		 otdoa_shell_override_handler, 0, 5);
+SHELL_SUBCMD_ADD((phywi), blacklist, &otdoa_cmds,
+		 " Dump the uBSA DL ECGI blacklist",
+		 otdoa_shell_blacklist_handler, 0, 0);
 
 SHELL_CMD_REGISTER(phywi, &otdoa_cmds, "PHY Wireless OTDOA Commands", NULL);
 
