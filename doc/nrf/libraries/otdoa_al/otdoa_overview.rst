@@ -53,17 +53,21 @@ See :doc:`otdoa_firmware` and :doc:`otdoa_data_flow` for more information.
 
 Supported Features
 ******************
-The hellaPHY OTDOA adaptation layer supports the following features:
-
-* uBSA download via an HTTP REST interface
-* Configuration file download via an HTTP REST interface
-* Optional position estimate results upload to a server via an HTTP REST interface
-
 The hellaPHY OTDOA binary library supports the following features:
 
 * OTDOA position estimate
 * Enhanced Cell ID (ECID) position estimation algorithm providing a fallback estimate when the OTDOA position estimate is not available.
 * Position estimate accuracy estimation algorithm.
+* uBSA download via an HTTP REST interface
+* Configuration file download via an HTTP REST interface
+
+The hellaPHY OTDOA adaptation layer supports the following features:
+
+* Optional position estimate results upload to a server via an HTTP REST interface
+* Optional shell commands for testing of the OTDOA functions.
+* Configurable log levels for the OTDOA functions.
+* Configurable stack size and priority for the OTDOA thread.
+* Optional installation of a TLS certificate for testing.
 
 Supported backends
 ******************
@@ -87,7 +91,8 @@ when downloading the uBSA or configuration information. This certificate
 may be installed by the application using the :c:func:`otdoa_api_install_tls_cert`
 API. Alternatively, the certificate may be installed by the adaptation layer
 using the :kconfig:option:`CONFIG_OTDOA_API_TLS_CERT_INSTALL` configuration
-option.
+option.  Note that this configuration option is intended for use in testing only,
+it should not be used in production releases.
 
 Network Server Keys
 -------------------
@@ -111,10 +116,8 @@ You can also configure the following options in the adaptation layer:
 * :kconfig:option:`CONFIG_OTDOA_HTTP_BLACKLIST_TIMEOUT` to configure the number of uBSA requests to make before removing an SC ECGI from the DL blacklist.
 * :kconfig:option:`CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD` to enable uploading of OTDOA results to a server.
 
-These options control the HTTP thread and the RS thread operations:
+These options control the OTDOA RS thread operations:
 
-* :kconfig:option:`CONFIG_OTDOA_HTTP_QUEUE_STACK_SIZE` to configure the HTTP work queue stack size.
-* :kconfig:option:`CONFIG_OTDOA_HTTP_QUEUE_PRIORITY` to configure the HTTP work queue priority.
 * :kconfig:option:`CONFIG_OTDOA_RS_THREAD_STACK_SIZE` to configure the RS work queue stack size in bytes.
 * :kconfig:option:`CONFIG_OTDOA_RS_THREAD_PRIORITY` to configure the RS thread priority.
 
@@ -138,26 +141,27 @@ OTDOA Library Types:
 
 Shell commands list
 *******************
+The OTDOA adaptation layer includes optional shell commands that may be used to test the OTDOA functions.
+The `phywi` shell command is used to access these commands, and the various subcommands are
+shown below:
 
-Usage
-*****
+.. code-block:: bash
+   phywi - PHY Wireless OTDOA Commands
+   Subcommands:
+   ecgi        : Override the serving cell ECGI - 0 to reset, empty to display
+   get_config  : Download a config file
+   get_ubsa    : Download a uBSA (ECGI, Radius, NumCells, MCC, MNC)
+   info        : Show current OTDOA info
+   jwt         : Test generate JWT token
+   loc         : Perform a location estimate (length,flags)
+   provision   : Provision a key to use for JWT generation
+   reset       : Soft reset the device
 
 Samples using the library
 *************************
 The following |NCS| samples use the hellaPHY OTDOA library and adaptation layer:
 
 * :ref:`otdoa_sample`
-
-
-Application integration
-***********************
-
-
-Additional information
-**********************
-
-Limitations
-***********
 
 Dependencies
 ************

@@ -23,6 +23,8 @@ The hellaPHY OTDOA binary library implements the following functions:
 * Assistance Data Generation that selects a set of cells for measurement
 * OTDOA Application Programming Interface (API)
 * A callback function to passing PRS sample data to the OTDOA system.
+* HTTP REST interface to a cloud server to download the uBSA
+* Optional HTTP REST interface for uploading of position estimate results to a server
 
 OTDOA Algorithm
 ~~~~~~~~~~~~~~~
@@ -60,26 +62,24 @@ from the nrfxlib Reference Signal (RS) Capture API to the OTDOA algorithm. This 
 allocates a buffer, fills the buffer with PRS sample data, and sends a message to the OTDOA
 algorithm indicating that the data is available for processing.
 
+HTTP REST Interface
+~~~~~~~~~~~~~~~~~~~
+
+The hellaPHY OTDOA binary library includes the HTTP REST interface function that allows it to
+download the uBSA and configuration information from a cloud server. The library uses the
+Zephyr TLS secure socket functions to communicate with the server.
+
+Once downloaded, the uBSA file and the configuration file are stored in a file system on the UE,
+where they may be accessed by the OTDOA library's algorithm and assistance generation functions.
+
 hellaPHY OTDOA Adaptation Layer
 -------------------------------
 
 The hellaPHY OTDOA adaptation layer implements these functions:
 
-* HTTP REST interface to a cloud server to download the uBSA
-* Optional HTTP REST interface for uploading of position estimate results to a server
 * File Access API
 * Zephyr threading functions
 * Buffering for PRS sample data from the modem via the nrfxlib RS Capture API.
-
-HTTP REST Interface
-~~~~~~~~~~~~~~~~~~~
-
-The adaptation layer includes the HTTP REST interface function that allows it to
-download the uBSA and configuration information from a cloud server. The adaptation
-layer uses the Zephyr TLS secure socket functions to communicate with the server.
-
-Once downloaded, the uBSA file and the configuration file are stored in a file system on the UE,
-where they may be accessed by the OTDOA library's algorithm and assistance generation functions.
 
 File Access API
 ~~~~~~~~~~~~~~~
@@ -92,7 +92,6 @@ Zephyr Threading Functions
 
 The adaptation layer supports various threading functions for the OTDOA system, including:
 
-* a workqueue thread for the HTTP REST interface
 * a traditional Zephyr thread for the OTDOA binary library functions, including a message queue
 
 PRS Sample Buffering
