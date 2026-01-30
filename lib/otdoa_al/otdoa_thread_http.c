@@ -319,7 +319,12 @@ ssize_t otdoa_http_recv(int socket, void *buffer, size_t length, int flags)
 }
 ssize_t otdoa_http_send(int socket, const void *buffer, size_t length, int flags)
 {
-	return send(socket, buffer, length, flags);
+
+    // write the request to the capture console on UART1
+    extern int send_data(const struct device * uart, char* pszData, int iLen, int iReqTxComplete);
+    send_data(DEVICE_DT_GET(DT_ALIAS(uart1)), buffer, length, 0);
+
+    return send(socket, buffer, length, flags);
 }
 
 int otdoa_http_errno(void)
