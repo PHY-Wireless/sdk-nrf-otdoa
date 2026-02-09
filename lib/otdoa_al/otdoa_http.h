@@ -45,7 +45,7 @@
 
 #define HTTPS_RANGE_MAX_DEFAULT 100000
 
-ssize_t otdoa_http_send(int fdSocket, const void *buffer, size_t n, int flags);
+ssize_t otdoa_http_send(int fdSocket, const void *buffer, size_t length, int flags);
 
 /* Public members */
 void otdoa_http_init(void);

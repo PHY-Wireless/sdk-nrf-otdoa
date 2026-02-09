@@ -4,10 +4,8 @@
  * SPDX-License-Identifier: LicenseRef-PHYW
  */
 
-#include <fcntl.h>
 #include <modem/modem_info.h>
 #include <modem/nrf_modem_lib.h>
-#include <zephyr/net/socket.h>
 #include <zephyr/net/tls_credentials.h>
 
 
@@ -15,7 +13,6 @@
 #include "otdoa_al/otdoa_api.h"
 #include "otdoa_al_log.h"
 #include "otdoa_http.h"
-#include "arpa/inet.h"
 
 #define CHECK_IP
 
@@ -38,7 +35,7 @@ void http_modem_info_init(void)
  *
  * @return true or false
  */
-int is_ip_valid(char *szModemAddress, size_t szModemAddressLen)
+int is_ip_valid(char *szModemAddress, const size_t szModemAddressLen)
 {
 	memset(szModemAddress, 0, szModemAddressLen);
 	if (!bModemInfoInit) {
@@ -47,12 +44,12 @@ int is_ip_valid(char *szModemAddress, size_t szModemAddressLen)
 	}
 	modem_info_string_get(MODEM_INFO_IP_ADDRESS, szModemAddress, szModemAddressLen);
 
-	struct addrinfo addr;
+	struct nrf_addrinfo addr;
 	/**
 	 * inet_pton returns 1 if the network address was successfully converted,
 	 * 0 if not, and -1 if given an invalid address family
 	 */
-	return inet_pton(AF_INET, szModemAddress, &addr) == 1;
+	return nrf_inet_pton(NRF_AF_INET, szModemAddress, &addr) == 1;
 }
 #endif
 
@@ -63,7 +60,7 @@ int is_ip_valid(char *szModemAddress, size_t szModemAddressLen)
  * @param host Hostname to expect in TLS certificate
  * @return 0 on success, else error code
  */
-int tls_setup(int fd, const char *host)
+int tls_setup(const int fd, const char *host)
 {
 	int nErr = 0;
 
@@ -86,14 +83,14 @@ int tls_setup(int fd, const char *host)
 	verify = OPTIONAL;
 #endif
 
-	nErr = setsockopt(fd, SOL_TLS, TLS_PEER_VERIFY, &verify, sizeof(verify));
+	nErr = nrf_setsockopt(fd, SOL_TLS, TLS_PEER_VERIFY, &verify, sizeof(verify));
 	if (nErr) {
 		LOG_WRN("Failed to setup peer verification: %s", strerror(errno));
 		return nErr;
 	}
 
 	/* associate the socket with the security tag we have provisioned the certificate with */
-	nErr = setsockopt(fd, SOL_TLS, TLS_SEC_TAG_LIST, tls_sec_tag, sizeof(tls_sec_tag));
+	nErr = nrf_setsockopt(fd, SOL_TLS, TLS_SEC_TAG_LIST, tls_sec_tag, sizeof(tls_sec_tag));
 	if (nErr) {
 		LOG_WRN("Failed to setup TLS sec tag: %s", strerror(errno));
 		return nErr;
@@ -106,7 +103,7 @@ int tls_setup(int fd, const char *host)
 		server = otdoa_http_get_download_url();
 	}
 	LOG_INF("tls_setup(%d, %s)", fd, server);
-	nErr = setsockopt(fd, SOL_TLS, TLS_HOSTNAME, server, strlen(server) + 1);
+	nErr = nrf_setsockopt(fd, SOL_TLS, TLS_HOSTNAME, server, strlen(server) + 1);
 	if (nErr) {
 		LOG_WRN("Failed to setup TLS Hostname: %s", strerror(errno));
 		return nErr;
@@ -126,14 +123,14 @@ int tls_setup(int fd, const char *host)
  * @return 0 for success, otherwise error value
  */
 #define MAX_BIND_RETRIES 2 /* Retries take ~30 seconds so don't do too many!  (was 5) */
-int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
-		    char *pServerAddress, size_t server_address_len)
+int otdoa_http_bind(struct nrf_addrinfo **res, const char *pURL, const bool bDisableTls,
+		    char *pServerAddress, const size_t server_address_len)
 {
 	int rc;
 
-	struct addrinfo hints = {
-		.ai_family = AF_INET,
-		.ai_socktype = SOCK_STREAM,
+	const struct nrf_addrinfo hints = {
+		.ai_family = NRF_AF_INET,
+		.ai_socktype = NRF_SOCK_STREAM,
 	};
 
 	/* always unbind first */
@@ -145,12 +142,12 @@ int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
 
 	LOG_INF("Binding to server [%s]", pURL);
 
-	/* wait for successful bind */
+	/* wait for a successful bind */
 	int nRetry;
 
 	for (nRetry = 0; nRetry < MAX_BIND_RETRIES; nRetry++) {
 		LOG_DBG("Trying getaddrinfo() %d", nRetry);
-		rc = getaddrinfo(pURL, NULL, &hints, res);
+		rc = nrf_getaddrinfo(pURL, NULL, &hints, res);
 		if (rc == 0) {
 			break;
 		}
@@ -162,7 +159,7 @@ int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
 		return -1;
 	}
 
-	if (!inet_ntop(AF_INET, &((struct sockaddr_in *)(*res)->ai_addr)->sin_addr,
+	if (!nrf_inet_ntop(NRF_AF_INET, &((struct nrf_sockaddr_in *)(*res)->ai_addr)->sin_addr,
 		       pServerAddress, server_address_len)) {
 		LOG_ERR("Failed to convert address to text form: %d %s",
 			      errno, strerror(errno));
@@ -171,9 +168,9 @@ int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
 	LOG_INF("Server IP: %s", pServerAddress);
 
 	if (bDisableTls) {
-		((struct sockaddr_in *)(*res)->ai_addr)->sin_port = htons(HTTP_PORT);
+		((struct nrf_sockaddr_in *)(*res)->ai_addr)->sin_port = htons(HTTP_PORT);
 	} else {
-		((struct sockaddr_in *)(*res)->ai_addr)->sin_port = htons(HTTPS_PORT);
+		((struct nrf_sockaddr_in *)(*res)->ai_addr)->sin_port = htons(HTTPS_PORT);
 	}
 	return 0;
 }
@@ -183,11 +180,11 @@ int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls,
  *
  * @param res Pointer to addrinfo to unbind
  */
-int otdoa_http_unbind(struct addrinfo **res)
+int otdoa_http_unbind(struct nrf_addrinfo **res)
 {
 	if (res) {
 		LOG_INF("http_unbind()");
-		freeaddrinfo(*res);
+		nrf_freeaddrinfo(*res);
 		*res = NULL;
 	}
 
@@ -197,17 +194,20 @@ int otdoa_http_unbind(struct addrinfo **res)
 /**
  * Open a secure connection to the server
  *
- * @param pG pointer to gHTTP containing settings
+ * @param fdSocket Pointer to int to store socket descriptor in
+ * @param res Pointer to socket address struct
+ * @param szModemAddress Address to connect to
+ * @param szModemAddressLen Length of address
  * @param tls_host Hostname to configure if TLS is used
  * @return 0 for success, -1 for socket open failure, -2 for tls_setup failure, -3 for connect
  * failure
  */
-int otdoa_http_connect(int *fdSocket, struct sockaddr *res, char *szModemAddress,
-	size_t szModemAddressLen, const char *tls_host)
+int otdoa_http_connect(int *fdSocket, const struct nrf_sockaddr *res, char *szModemAddress,
+	const size_t szModemAddressLen, const char *tls_host)
 {
 	int nErr = 0;
 	bool bFound = false;
-	int proto = tls_host ? IPPROTO_TLS_1_2 : IPPROTO_TCP;
+	const int proto = tls_host ? NRF_SPROTO_TLS1v2 : NRF_IPPROTO_TCP;
 
 	if (!fdSocket) {
 		LOG_ERR("fdSocket is NULL");
@@ -215,7 +215,7 @@ int otdoa_http_connect(int *fdSocket, struct sockaddr *res, char *szModemAddress
 	}
 
 	LOG_INF("HTTP connect on protocol %d", proto);
-	*fdSocket = socket(AF_INET, SOCK_STREAM, proto);
+	*fdSocket = nrf_socket(NRF_AF_INET, NRF_SOCK_STREAM, proto);
 	if (*fdSocket == -1) {
 		LOG_WRN("failed to open socket");
 		return -1;
@@ -250,14 +250,23 @@ int otdoa_http_connect(int *fdSocket, struct sockaddr *res, char *szModemAddress
 			return -2;
 		}
 	}
+
+    /* inform RAI that this connection will continue to be used so the eNB will not try to disconnect us */
+    const int option = NRF_RAI_ONGOING;
+    nErr = nrf_setsockopt(*fdSocket, NRF_SOL_SOCKET, NRF_SO_RAI, &option, sizeof(option));
+    if (nErr) {
+        LOG_ERR("nrf_setsockopt failed: %s", strerror(errno));
+        return -3;
+    }
+
 	/* connect */
 	LOG_DBG("connect() on socket %d", *fdSocket);
-	nErr = connect(*fdSocket, res, sizeof(struct sockaddr_in));
+	nErr = nrf_connect(*fdSocket, res, sizeof(struct nrf_sockaddr_in));
 	if (nErr) {
 		LOG_WRN("connect failed: nErr = %d, %d -> %s", nErr, errno, strerror(errno));
 		LOG_WRN("connect failed: fdSocket = %d, ai_addr = %p", *fdSocket, (void *)res);
 		otdoa_http_disconnect(fdSocket);
-		return -3;
+		return -4;
 	}
 	return nErr;
 }
@@ -265,7 +274,7 @@ int otdoa_http_connect(int *fdSocket, struct sockaddr *res, char *szModemAddress
 /**
  * Disconnect from the server
  *
- * @param pG Pointer to gHTTP containing socket info
+ * @param fdSocket Pointer to socket descriptor to disconnect
  * @return 0 on success, -1 on failure
  */
 int otdoa_http_disconnect(int *fdSocket)
@@ -274,7 +283,7 @@ int otdoa_http_disconnect(int *fdSocket)
 
 	if (*fdSocket >= 0) {
 		LOG_DBG("closing socket %d", *fdSocket);
-		nReturn = close(*fdSocket);
+		nReturn = nrf_close(*fdSocket);
 		*fdSocket = -1;
 	}
 	return nReturn;
@@ -287,7 +296,7 @@ int otdoa_http_disconnect(int *fdSocket)
  * @param blocking True for blocking, false for nonblocking
  * @return true on success, otherwise false
  */
-bool otdoa_http_set_sock_blocking(int fd, bool blocking)
+bool otdoa_http_set_sock_blocking(const int fd, const bool blocking)
 {
 	if (fd < 0) {
 		return false;
@@ -297,34 +306,34 @@ bool otdoa_http_set_sock_blocking(int fd, bool blocking)
 	 * Use zsock_fcntl() as described here:
 	 *   https://github.com/zephyrproject-rtos/zephyr/issues/54347
 	 */
-	int flags = zsock_fcntl(fd, F_GETFL, 0);
+	int flags = nrf_fcntl(fd, NRF_F_GETFL, 0);
 
-	if (flags == -1) {
-		LOG_ERR("fcntl() returned %d. errno = %d", flags, errno);
-		return false;
-	}
-	flags = blocking ? (flags & ~O_NONBLOCK) : (flags | O_NONBLOCK);
-	bool rv = (zsock_fcntl(fd, F_SETFL, flags) == 0) ? true : false;
+    if (flags == -1) {
+        LOG_ERR("fcntl() returned %d. errno = %d", flags, errno);
+        return false;
+    }
+    flags = blocking ? (flags & ~NRF_O_NONBLOCK) : (flags | NRF_O_NONBLOCK);
+    const bool rv = (nrf_fcntl(fd, NRF_F_SETFL, flags) == 0) ? true : false;
 
-	if (!rv) {
-		LOG_ERR("failed fctrl().  errno = %d", errno);
-	}
-	return rv;
+    if (!rv) {
+        LOG_ERR("failed fctrl().  errno = %d", errno);
+    }
+    return rv;
 }
 
 /* wrappers */
-ssize_t otdoa_http_recv(int socket, void *buffer, size_t length, int flags)
+ssize_t otdoa_http_recv(const int fdSocket, void *buffer, const size_t length, const int flags)
 {
-	return recv(socket, buffer, length, flags);
+	return nrf_recv(fdSocket, buffer, length, flags);
 }
-ssize_t otdoa_http_send(int socket, const void *buffer, size_t length, int flags)
+ssize_t otdoa_http_send(const int fdSocket, const void *buffer, const size_t length, const int flags)
 {
 
     // write the request to the capture console on UART1
     extern int send_data(const struct device * uart, char* pszData, int iLen, int iReqTxComplete);
-    send_data(DEVICE_DT_GET(DT_ALIAS(uart1)), buffer, length, 0);
+    send_data(DEVICE_DT_GET(DT_ALIAS(uart1)), (char*)buffer, (int)length, 0);
 
-    return send(socket, buffer, length, flags);
+    return nrf_send(fdSocket, buffer, length, flags);
 }
 
 int otdoa_http_errno(void)
@@ -332,7 +341,7 @@ int otdoa_http_errno(void)
 	return errno;
 }
 
-void otdoa_http_sleep(int msec)
+void otdoa_http_sleep(const int msec)
 {
 	k_sleep(K_MSEC(msec));
 }
@@ -346,8 +355,8 @@ int32_t otdoa_http_uptime(void)
 /**
  * Provision a TLS certificate to the modem
  *
- * @param[in] cert PEM-formatted TLS certificate to install for server
- * @param[in] len Length of the PEM certificate
+ * @param[in] tls_cert PEM-formatted TLS certificate to install for server
+ * @param[in] cert_len Length of the PEM certificate
  * @return 0 on success, else error code
  */
 int otdoa_api_install_tls_cert(const char *tls_cert, const size_t cert_len)

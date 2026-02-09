@@ -36,12 +36,12 @@ struct addrinfo {
  */
 #define OTDOA_HTTP_MAX_MSG_SIZE 128
 
-int otdoa_http_connect(int *fdSocket, struct sockaddr *res, char *szModemAddress,
+int otdoa_http_connect(int *fdSocket, const struct nrf_sockaddr *res, char *szModemAddress,
 			size_t szModemAddressLen, const char *tls_host);
-int otdoa_http_disconnect(int *sockfd);
-int otdoa_http_bind(struct addrinfo **res, const char *pURL, bool bDisableTls, char *pServerAddress,
+int otdoa_http_disconnect(int *fdSocket);
+int otdoa_http_bind(struct nrf_addrinfo **res, const char *pURL, bool bDisableTls, char *pServerAddress,
 			size_t server_address_len);
-int otdoa_http_unbind(struct addrinfo **res);
+int otdoa_http_unbind(struct nrf_addrinfo **res);
 int otdoa_http_rebind(const char *url);
 int otdoa_http_send_request(int fdSocket, const char *request, const size_t n, size_t *nOff);
 int otdoa_http_errno(void);
