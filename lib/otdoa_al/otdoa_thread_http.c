@@ -331,10 +331,16 @@ bool otdoa_http_set_sock_blocking(const int fd, const bool blocking)
 /* wrappers */
 ssize_t otdoa_http_recv(const int fdSocket, void *buffer, const size_t length, const int flags)
 {
-	return nrf_recv(fdSocket, buffer, length, flags);
+    // flag that we're waiting for the client to send more after this recv
+    const int option = NRF_RAI_ONGOING;
+    nrf_setsockopt(fdSocket, NRF_SOL_SOCKET, NRF_SO_RAI, &option, sizeof(option));
+    return nrf_recv(fdSocket, buffer, length, flags);
 }
 ssize_t otdoa_http_send(const int fdSocket, const void *buffer, const size_t length, const int flags)
 {
+    // flag that we're waiting for the server to send more after this send
+    const int option = NRF_RAI_WAIT_MORE;
+    nrf_setsockopt(fdSocket, NRF_SOL_SOCKET, NRF_SO_RAI, &option, sizeof(option));
     return nrf_send(fdSocket, buffer, length, flags);
 }
 
