@@ -281,7 +281,14 @@ int otdoa_http_disconnect(int *fdSocket)
 {
 	int nReturn = -1;
 
-	if (*fdSocket >= 0) {
+    /* inform RAI that we are done sending and the connection can be dropped */
+    const int option = NRF_RAI_NO_DATA;
+    if (nrf_setsockopt(*fdSocket, NRF_SOL_SOCKET, NRF_SO_RAI, &option, sizeof(option))) {
+        LOG_ERR("nrf_setsockopt failed: %s", strerror(errno));
+        return -3;
+    }
+
+    if (*fdSocket >= 0) {
 		LOG_DBG("closing socket %d", *fdSocket);
 		nReturn = nrf_close(*fdSocket);
 		*fdSocket = -1;
