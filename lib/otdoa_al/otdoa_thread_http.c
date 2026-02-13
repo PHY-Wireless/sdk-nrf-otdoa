@@ -252,7 +252,7 @@ int otdoa_http_connect(int *fdSocket, const struct nrf_sockaddr *res, char *szMo
 	}
 
     /* inform RAI that this connection will continue to be used so the eNB will not try to disconnect us */
-    const int option = NRF_RAI_ONGOING;
+    const int option = NRF_RAI_WAIT_MORE;
     nErr = nrf_setsockopt(*fdSocket, NRF_SOL_SOCKET, NRF_SO_RAI, &option, sizeof(option));
     if (nErr) {
         LOG_ERR("nrf_setsockopt failed: %s", strerror(errno));
