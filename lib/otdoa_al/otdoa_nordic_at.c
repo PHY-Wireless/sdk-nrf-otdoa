@@ -402,3 +402,16 @@ int otdoa_nordic_at_get_modem_version(char *psz_ver, unsigned int max_len)
 
 	return OTDOA_API_SUCCESS;
 }
+
+int otdoa_nordic_at_set_rai(const bool enable) {
+    char resp[MODEM_VER_RESP_LEN] = {0};
+    int err = 0;
+    err = nrf_modem_at_cmd(resp, sizeof(resp), "AT%%RAI=%d", (int)enable);
+
+    if (err) {
+        LOG_ERR("Failed to set RAI: %d\n", err);
+        return OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
+    }
+
+	return OTDOA_API_SUCCESS;
+}

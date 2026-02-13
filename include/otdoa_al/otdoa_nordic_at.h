@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 /**
  * @file otdoa_nordic_at.h
@@ -109,6 +110,12 @@ char *otdoa_nordic_at_strtok_r(char *s, char delim, char **save_ptr);
  */
 int otdoa_nordic_at_get_modem_version(char *psz_ver, unsigned int max_len);
 
+/**
+ * @brief Returns the version string from the modem firmware
+ * @param enable [in] Whether to enable or disable Release Assistance Information.
+ * @return 0 on success
+ */
+int otdoa_nordic_at_set_rai(bool enable);
 /** @} */
 
 #endif /* INCLUDE_OTDOA_NORDIC_AT_H1_H_ */

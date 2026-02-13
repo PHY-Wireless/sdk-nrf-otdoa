@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: LicenseRef-PHYW
  */
 
+#include <stddef.h>
 #include <modem/modem_info.h>
 #include <modem/nrf_modem_lib.h>
 #include <zephyr/net/tls_credentials.h>
-
 
 #include "otdoa_al/otdoa_http_api.h"
 #include "otdoa_al/otdoa_api.h"
