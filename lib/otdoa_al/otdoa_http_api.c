@@ -37,20 +37,19 @@ int32_t otdoa_al_init(otdoa_api_callback_t event_callback)
 
 	if (rc) {
 		LOG_ERR("otdoa_al_init: failed to check for TLS certificate in tag %d: %d",
-			      CONFIG_OTDOA_TLS_SEC_TAG, rc);
+			CONFIG_OTDOA_TLS_SEC_TAG, rc);
 		return OTDOA_API_INTERNAL_ERROR;
 	}
 
 	if (!exists) {
 		LOG_ERR("otdoa_al_init: TLS certificate not found in tag %d",
-			      CONFIG_OTDOA_TLS_SEC_TAG);
+			CONFIG_OTDOA_TLS_SEC_TAG);
 		return OTDOA_API_INTERNAL_ERROR;
 	}
 #endif
 
 	return OTDOA_API_SUCCESS;
 }
-
 
 #ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
 int32_t otdoa_api_upload_results(const otdoa_api_results_t *p_results, const char *true_lat,
@@ -65,8 +64,8 @@ int32_t otdoa_api_upload_results(const otdoa_api_results_t *p_results, const cha
 		return OTDOA_API_INTERNAL_ERROR;
 	}
 	memcpy(p_http_results, p_results, sizeof(otdoa_api_results_t));
-	int rv = otdoa_http_send_results_upload(UPLOAD_SERVER_URL, p_http_results, notes, true_lat,
-						true_lon);
+	const int rv = otdoa_http_send_results_upload(otdoa_http_get_upload_url(), p_http_results,
+						      notes, true_lat, true_lon);
 	return (rv == 0 ? OTDOA_API_SUCCESS : OTDOA_API_INTERNAL_ERROR);
 }
 #endif

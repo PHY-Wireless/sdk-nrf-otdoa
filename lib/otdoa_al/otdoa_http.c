@@ -158,4 +158,23 @@ const char *otdoa_http_get_upload_pw(void)
 {
 	return RESULTS_UPLOAD_PW;
 }
+
+static char szResultsUploadURL[51] = {0};
+void otdoa_http_set_results_upload_url(const char *const pszURL)
+{
+	if (pszURL == NULL) {
+		memset(szResultsUploadURL, 0, sizeof(szResultsUploadURL));
+	} else {
+		strncpy(szResultsUploadURL, pszURL, sizeof(szResultsUploadURL) - 1);
+	}
+}
+
+const char *otdoa_http_get_upload_url(void)
+{
+	if (szResultsUploadURL[0] != '\0') {
+		return szResultsUploadURL;
+	} else {
+		return UPLOAD_SERVER_URL;
+	}
+}
 #endif

@@ -56,6 +56,8 @@ int http_write_to_file(const char *path, void *data, size_t len);
 
 #ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
 extern const char *otdoa_http_get_upload_pw(void);
+extern void otdoa_http_set_results_upload_url(const char *pszURL);
+extern const char *otdoa_http_get_upload_url(void);
 #endif
 
 #endif /* ifndef OTDOA_HTTP_API_H */
