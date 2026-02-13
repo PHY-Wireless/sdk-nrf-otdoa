@@ -328,11 +328,6 @@ ssize_t otdoa_http_recv(const int fdSocket, void *buffer, const size_t length, c
 }
 ssize_t otdoa_http_send(const int fdSocket, const void *buffer, const size_t length, const int flags)
 {
-
-    // write the request to the capture console on UART1
-    extern int send_data(const struct device * uart, char* pszData, int iLen, int iReqTxComplete);
-    send_data(DEVICE_DT_GET(DT_ALIAS(uart1)), (char*)buffer, (int)length, 0);
-
     return nrf_send(fdSocket, buffer, length, flags);
 }
 
