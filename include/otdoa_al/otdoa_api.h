@@ -112,6 +112,9 @@ typedef enum {
 	/** Unable to validate JWT */
 	OTDOA_EVENT_FAIL_HTTP_UNAUTHORIZED = 401,
 
+	/** Requested token does not exist */
+	OTDOA_EVENT_FAIL_HTTP_BAD_TOKEN = 410,
+
 	/** Requested resource not found */
 	OTDOA_EVENT_FAIL_HTTP_NOT_FOUND = 404,
 
