@@ -313,7 +313,7 @@ static int otdoa_shell_blacklist_handler(const struct shell *shell, size_t argc,
 		otdoa_http_api_blacklist_add(u32Ecgi);
 	}
 
-	otdoa_http_api_blacklist_dump();
+	otdoa_http_api_blacklist_dump(shell);
 	return 0;
 }
 
