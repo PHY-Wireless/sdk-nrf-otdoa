@@ -18,6 +18,18 @@
 #include "otdoa_al/otdoa_nordic_at.h"
 #include "nrf_modem_at.h"
 
+void otdoa_shell_printf(void* psh, const char* pstring)
+{
+    shell_fprintf(psh, SHELL_NORMAL, "%s", pstring);
+}
+
+void otdoa_shell_puts(const void* psh, const char* pfmt, ...) {
+    va_list args;
+    va_start(args, pfmt);
+    shell_vfprintf(psh, SHELL_NORMAL, pfmt, args);
+    va_end(args);
+}
+
 /**
  *
  * otdoa_shell_info_handler() - Handler for "info" command
