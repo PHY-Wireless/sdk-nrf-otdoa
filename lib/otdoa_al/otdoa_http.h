@@ -61,8 +61,8 @@ int otdoa_http_get_override_auth_resp(void);
 int otdoa_http_send_log_upload(const char *vf, uint32_t repeat);
 int otdoa_http_send_vector_upload(const char *vf, uint32_t repeat);
 int otdoa_http_send_results_upload(const char *pURL, otdoa_api_results_t *pResults,
-				   const char *p_notes, const char *p_true_lat,
-				   const char *p_true_lon);
+	const char *p_notes, const char *p_true_lat, const char *p_true_lon,
+	const char *p_iccid, const char *p_imsi);
 int otdoa_http_send_test_jwt(void);
 int otdoa_http_send_rebind_socket(void);
 
