@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "nrf_modem_at.h"
+#include <modem/modem_info.h>
 
 #include <otdoa_al/otdoa_api.h>
 #include <otdoa_al/otdoa_nordic_at.h>
@@ -401,4 +402,16 @@ int otdoa_nordic_at_get_modem_version(char *psz_ver, unsigned int max_len)
 	strncpy(psz_ver, p_ver_token, max_len);
 
 	return OTDOA_API_SUCCESS;
+}
+
+int otdoa_nordic_at_get_iccid(char *psz_iccid, const unsigned int len)
+{
+	return modem_info_string_get(MODEM_INFO_ICCID, psz_iccid, len) > 0
+		? OTDOA_API_SUCCESS : OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
+}
+
+int otdoa_nordic_at_get_imsi(char *psz_imsi, const unsigned int len)
+{
+	return modem_info_string_get(MODEM_INFO_IMSI, psz_imsi, len) > 0
+		? OTDOA_API_SUCCESS : OTDOA_EVENT_FAIL_BAD_MODEM_RESP;
 }

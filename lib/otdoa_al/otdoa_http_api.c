@@ -53,7 +53,7 @@ int32_t otdoa_al_init(otdoa_api_callback_t event_callback)
 
 #ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
 int32_t otdoa_api_upload_results(const otdoa_api_results_t *p_results, const char *true_lat,
-				 const char *true_lon, const char *notes)
+				const char *true_lon, const char *notes)
 {
 	if (!p_results) {
 		return OTDOA_API_ERROR_PARAM;
@@ -64,8 +64,23 @@ int32_t otdoa_api_upload_results(const otdoa_api_results_t *p_results, const cha
 		return OTDOA_API_INTERNAL_ERROR;
 	}
 	memcpy(p_http_results, p_results, sizeof(otdoa_api_results_t));
-	const int rv = otdoa_http_send_results_upload(otdoa_http_get_upload_url(), p_http_results,
-						      notes, true_lat, true_lon);
+
+	static char iccid[24];
+	static char imsi[16];
+	int rv = 0;
+
+	rv = otdoa_nordic_at_get_iccid(iccid, sizeof(iccid));
+	if (rv) {
+		return rv;
+	}
+
+	rv = otdoa_nordic_at_get_imsi(imsi, sizeof(imsi));
+	if (rv) {
+		return rv;
+	}
+
+	rv = otdoa_http_send_results_upload(otdoa_http_get_upload_url(), p_http_results,
+						notes, true_lat, true_lon, iccid, imsi);
 	return (rv == 0 ? OTDOA_API_SUCCESS : OTDOA_API_INTERNAL_ERROR);
 }
 #endif

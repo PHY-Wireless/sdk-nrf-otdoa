@@ -109,6 +109,24 @@ char *otdoa_nordic_at_strtok_r(char *s, char delim, char **save_ptr);
  */
 int otdoa_nordic_at_get_modem_version(char *psz_ver, unsigned int max_len);
 
+/**
+ * @brief Returns the SIM ICCID
+ * @param psz_iccid [out] output iccid string
+ * @param len [inmaximim length of data to write
+ * @return 0 on success
+ *         OTDOA_EVENT_FAIL_BAD_MODEM_RESP for any failure
+ */
+int otdoa_nordic_at_get_iccid(char *psz_iccid, unsigned int len);
+
+/**
+ * @brief Returns the SIM IMSI
+ * @param psz_imsi [out] output iccid string
+ * @param len [inmaximim length of data to write
+ * @return 0 on success
+ *         OTDOA_EVENT_FAIL_BAD_MODEM_RESP for any failure
+ */
+int otdoa_nordic_at_get_imsi(char *psz_imsi, unsigned int len);
+
 /** @} */
 
 #endif /* INCLUDE_OTDOA_NORDIC_AT_H1_H_ */
