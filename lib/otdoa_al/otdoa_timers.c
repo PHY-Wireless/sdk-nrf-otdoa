@@ -82,3 +82,30 @@ int otdoa_timer_active(unsigned int u_timer_no)
 	}
 	return 0;
 }
+
+#include <zephyr/timing/timing.h>
+#include <zephyr/random/random.h>
+void otdoa_soc_timing_init(void) {
+	timing_init();
+}
+void otdoa_soc_timing_stop(void) {
+	timing_stop();
+}
+uint64_t otdoa_soc_timing_counter_get(void) {
+	return timing_counter_get();
+}
+uint64_t otdoa_soc_timing_cycles_get(uint64_t* a, uint64_t* b) {
+	return timing_cycles_get(a, b);
+}
+uint64_t otdoa_soc_timing_cycles_to_ns(uint64_t c) {
+	return timing_cycles_to_ns(c);
+}
+unsigned int otdoa_irq_lock(void) {
+	return irq_lock();
+}
+void otdoa_irq_unlock(unsigned int r) {
+	irq_unlock(r);
+}
+int otdoa_sys_rand32_get(void) {
+	return sys_rand32_get();
+}

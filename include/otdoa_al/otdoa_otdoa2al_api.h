@@ -65,6 +65,18 @@ int otdoa_free_samples(void *pBuffer);
  */
 void otdoa_sleep_msec(int msec);
 
+/***************************************************************************
+ * Profiling Functions
+ */
+void otdoa_soc_timing_init(void);
+void otdoa_soc_timing_stop(void);
+uint64_t otdoa_soc_timing_counter_get(void);
+uint64_t otdoa_soc_timing_cycles_get(uint64_t*, uint64_t*);
+uint64_t otdoa_soc_timing_cycles_to_ns(uint64_t c);
+unsigned int otdoa_irq_lock(void);
+void otdoa_irq_unlock(unsigned int);
+int otdoa_sys_rand32_get(void);
+
 #ifdef __cplusplus
 }
 #endif
