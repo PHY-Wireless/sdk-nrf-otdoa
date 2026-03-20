@@ -100,6 +100,9 @@ typedef enum {
 	/** Failed to get PCI from Modem */
 	OTDOA_EVENT_FAIL_NO_PCI = 17,
 
+	/** Failed to get RSRP from Modem */
+	OTDOA_EVENT_FAIL_NO_RSRP = 18,
+
 	/** The uBSA is still being generated */
 	OTDOA_EVENT_HTTP_NOT_READY = 202,
 

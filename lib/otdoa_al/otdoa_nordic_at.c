@@ -84,6 +84,7 @@ char *otdoa_nordic_at_strtok_r(char *s, char delim, char **save_ptr)
 #define XMONITOR_UNKNOWN_ACT      0xFFFFFFFF
 #define XMONITOR_UNKNOWN_MCC      0xFFFF
 #define XMONITOR_UNKNOWN_MNC      0xFFFF
+#define XMONITOR_UNKNOWN_RSRP     0xFF
 
 /* Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN */
 int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u_resp_len,
@@ -100,6 +101,7 @@ int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u
 	uint16_t u16_mcc = XMONITOR_UNKNOWN_MCC;
 	uint16_t u16_mnc = XMONITOR_UNKNOWN_MNC;
 	uint16_t u16_pci = UNKNOWN_UBSA_PCI;
+	uint16_t u16_rsrp = XMONITOR_UNKNOWN_RSRP;
 
 	if (!psz_resp) {
 		LOG_ERR("otdoa_nordic_at_parse_xmonitor_response(): NULL pointer\n");
@@ -202,6 +204,15 @@ int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u
 			}
 			break;
 		}
+		case 10: /* RSRP */
+		{
+			const int i_scn_rv = sscanf(token, "%"SCNu16, &u16_rsrp);
+
+			if (1 != i_scn_rv || u16_rsrp == 0) {
+				i_ret = OTDOA_EVENT_FAIL_NO_RSRP;
+			}
+			break;
+		}
 		default:
 			break;
 		}
@@ -229,6 +240,7 @@ error_exit:
 			params->mnc = u16_mnc;
 			params->pci = u16_pci;
 			params->reg_status = u32_reg_status;
+			params->rsrp = u16_rsrp;
 		}
 	} else if (OTDOA_EVENT_FAIL_NO_DLEARFCN == i_ret && u32_egci != 0) {
 		/* return the ECGI and default DLEARFCN, and error code indicating no DLEARFCN */
@@ -239,6 +251,7 @@ error_exit:
 		params->mnc = u16_mnc;
 		params->pci = u16_pci;
 		params->reg_status = u32_reg_status;
+		params->rsrp = u16_rsrp;
 	} else if (OTDOA_EVENT_FAIL_NO_PCI == i_ret && u32_egci != 0) {
 		/* return the ECGI and default DLEARFCN, and error code indicating no DLEARFCN */
 		params->ecgi = u32_egci;
@@ -248,6 +261,7 @@ error_exit:
 		params->mnc = u16_mnc;
 		params->pci = UNKNOWN_UBSA_PCI;
 		params->reg_status = u32_reg_status;
+		params->rsrp = u16_rsrp;
 	}
 
 	if (i_ret != 0

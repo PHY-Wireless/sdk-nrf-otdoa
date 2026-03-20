@@ -54,6 +54,9 @@ typedef struct {
 	 * 9: E-UTRAN NB-S1
 	 */
 	uint16_t act;
+
+	/** RSRP */
+	uint8_t rsrp;
 } otdoa_xmonitor_params_t;
 
 /** @brief Parse the response to AT%%XMONITOR and return ECGI & DLEARFCN
