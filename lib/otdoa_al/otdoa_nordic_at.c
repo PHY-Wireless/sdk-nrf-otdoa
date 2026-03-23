@@ -209,7 +209,7 @@ int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u
 			const int i_scn_rv = sscanf(token, "%"SCNu16, &u16_rsrp);
 
 			if (1 != i_scn_rv || u16_rsrp == 0) {
-				i_ret = OTDOA_EVENT_FAIL_NO_RSRP;
+				i_ret = 0;
 			}
 			break;
 		}
