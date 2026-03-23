@@ -167,7 +167,7 @@ typedef struct {
 	uint32_t dlearfcn;
 
 	/** Text description of the algorithm used (OTDOA, eCID)*/
-	char estimate_algorithm[30];
+	char estimate_algorithm[64];
 
 	/** The length of the PRS session in PRS occasions */
 	uint32_t session_length;
