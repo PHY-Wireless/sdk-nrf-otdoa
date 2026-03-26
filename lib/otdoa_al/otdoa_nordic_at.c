@@ -208,8 +208,10 @@ int otdoa_nordic_at_parse_xmonitor_response(const char *const psz_resp, size_t u
 		{
 			const int i_scn_rv = sscanf(token, "%"SCNu16, &u16_rsrp);
 
-			if (1 != i_scn_rv || u16_rsrp == 0) {
-				i_ret = 0;
+			/* 97 is the max RSRP the modem should return */
+			if (1 != i_scn_rv || u16_rsrp > 97) {
+				/* failure to parse RSRP is not an error */
+				u16_rsrp = XMONITOR_UNKNOWN_RSRP;
 			}
 			break;
 		}
@@ -269,10 +271,10 @@ error_exit:
 		if (psz_resp) {
 			LOG_WRN("AT%%XMONITOR response %s", psz_resp);
 		}
-		LOG_WRN("Failed to parse AT%%XMONITOR response.  returning %d\n", i_ret);
+		LOG_WRN("Failed to parse AT%%XMONITOR response.  returning %d", i_ret);
 	} else {
 		LOG_DBG("otdoa_nordic_at_parse_xmonitor_response: ECGI=%" PRIu32
-			      " (0x%08X), DLEARFCN=%" PRIu32 " returning %d\n",
+			      " (0x%08X), DLEARFCN=%" PRIu32 " returning %d",
 			      u32_egci, (unsigned int)u32_egci, u32_dlearfcn, i_ret);
 	}
 
