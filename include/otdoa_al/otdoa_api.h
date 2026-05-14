@@ -115,6 +115,9 @@ typedef enum {
 	/** Unable to validate JWT */
 	OTDOA_EVENT_FAIL_HTTP_UNAUTHORIZED = 401,
 
+	/** Attempted to use unsupported request method */
+	OTDOA_EVENT_FAIL_HTTP_METHOD_NOT_ALLOWED = 405,
+
 	/** Requested token does not exist */
 	OTDOA_EVENT_FAIL_HTTP_BAD_TOKEN = 410,
 
