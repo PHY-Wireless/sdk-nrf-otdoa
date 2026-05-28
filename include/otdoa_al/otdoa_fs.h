@@ -57,6 +57,7 @@ int ofs_stat(const char *path, struct fs_dirent *entry);
 /* directory functions */
 int ofs_opendir(tOFS_DIR *zdp, const char *path);
 int ofs_closedir(tOFS_DIR *zdp);
+int ofs_mkdir(const char *path);
 int ofs_readdir(tOFS_DIR *zdp, tOFS_DIRENT *entry);
 int ofs_readmount(int *index, const char **name);
 void ofs_dir_t_init(struct fs_dir_t *zdp);

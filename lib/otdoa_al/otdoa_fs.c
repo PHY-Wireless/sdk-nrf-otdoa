@@ -230,6 +230,15 @@ int ofs_closedir(tOFS_DIR *zdp)
 	return i_ret;
 }
 
+int ofs_mkdir(const char *path) {
+	OFS_LOCK(-EAGAIN);
+
+	int i_ret = fs_mkdir(path);
+
+	OFS_UNLOCK();
+	return i_ret;
+}
+
 int ofs_readdir(tOFS_DIR *zdp, tOFS_DIRENT *entry)
 {
 	OFS_LOCK(-EAGAIN);
