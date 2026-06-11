@@ -84,67 +84,65 @@ int otdoa_timer_active(unsigned int u_timer_no)
 	return 0;
 }
 
-static timing_t start_time, stop_time;
-static uint64_t total_cycles;
+static timing_t starts[10], stops[10];
+static uint64_t totals[10];
 
 // Initialize the Timer & cycle counter
 void TST_initTimerAndCycleCnt(void)
 {
 	timing_init();
-	total_cycles = 0;
-}
-
-void TST_timerStart(void)
-{
 	timing_start();
-	start_time = timing_counter_get();
+    memset(starts, 0, sizeof starts);
+    memset(stops, 0, sizeof stops);
+    memset(totals, 0, sizeof totals);
 }
 
-void TST_timerStop(void)
+void TST_timerStart(const unsigned int timer)
 {
-	stop_time = timing_counter_get();
-	timing_stop();
-	total_cycles += timing_cycles_get(&start_time, &stop_time);
+    if (timer >= 10) {
+        printk("Invalid timer: %u\n", timer);
+        return;
+    }
+    totals[timer] = 0;
+	starts[timer] = timing_counter_get();
+}
+
+void TST_timerStop(const unsigned int timer)
+{
+    if (timer >= 10) {
+        printk("Invalid timer: %u\n", timer);
+        return;
+    }
+    stops[timer] = timing_counter_get();
+	totals[timer] += timing_cycles_get(&starts[timer], &stops[timer]);
 }
 
 // log the count of cycles
-void TST_logCycles( const char* const pszName, int16_t i16Count, const char* pszUnits)
+void TST_logCycles( const char* const pszName, int16_t i16Count, const char* pszUnits, const unsigned int timer)
 {
-	printk("Timer %s: %lld cycles (%d %s)\n", pszName, total_cycles, i16Count, pszUnits);
+    if (timer >= 10) {
+        printk("Invalid timer: %u\n", timer);
+        return;
+    }
+    printk("Timer %s: %lld cycles (%d %s)\n", pszName, totals[timer], i16Count, pszUnits);
 }
 
 // Pause the timer and accumulate cycles
-void TST_pauseTimer(void)
+void TST_pauseTimer(const unsigned int timer)
 {
-	stop_time = timing_counter_get();
-	total_cycles += timing_cycles_get(&start_time, &stop_time);
-	start_time = stop_time;
+    if (timer >= 10) {
+        printk("Invalid timer: %u\n", timer);
+        return;
+    }
+    stops[timer] = timing_counter_get();
+	totals[timer] += timing_cycles_get(&starts[timer], &stops[timer]);
+	starts[timer] = stops[timer];
 }
 
-static timing_t dwt_start_time, dwt_stop_time;
-static uint64_t dwt_total_cycles;
-
-// DWT timer functions
-void TST_InitDWT()
-{
-	timing_init();
-	dwt_total_cycles = 0;
-}
-
-void TST_DWTStart(void)
-{
-	timing_start();
-	dwt_start_time = timing_counter_get();
-}
-
-void TST_DWTStop(void)
-{
-	dwt_stop_time = timing_counter_get();
-	timing_stop();
-	dwt_total_cycles += timing_cycles_get(&dwt_start_time, &dwt_stop_time);
-}
-
-void TST_DWTlogCycles(const char *const pszName, int16_t i16Count, const char *pszUnits)
-{
-	printk("DWT %s: %lld cycles (%d %s)\n", pszName, dwt_total_cycles, i16Count, pszUnits);
+void TST_resumeTimer(const unsigned int timer) {
+    if (timer >= 10) {
+        printk("Invalid timer: %u\n", timer);
+        return;
+    }
+	starts[timer] = timing_counter_get();
 }
