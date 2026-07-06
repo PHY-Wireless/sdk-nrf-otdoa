@@ -22,6 +22,9 @@
 #ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
 #define RESULTS_UPLOAD_PW CONFIG_OTDOA_RESULTS_UPLOAD_PW
 #define UPLOAD_SERVER_URL CONFIG_OTDOA_UPLOAD_SERVER_URL
+#else
+#define RESULTS_UPLOAD_PW "<Request PW from PhyWi>"
+#define UPLOAD_SERVER_URL "<Request URL from PhyWi>"
 #endif
 
 /* set to 1 to have HTTP functions use scratchpad, else use malloc()/free() */
