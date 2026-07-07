@@ -133,10 +133,39 @@ static void otdoa_event_handler(const otdoa_api_event_data_t *p_event_data)
 		LOG_INF("  accuracy: %.01f m", (double)(p_event_data->results.accuracy));
 		display_result_details(&p_event_data->results.details);
 		LOG_INF("OTDOA position estimate SUCCESS");
+
+#ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
+		LOG_INF("Uploading results.");
+
+		int res = otdoa_api_upload_results(&p_event_data->results, NULL, NULL, NULL);
+
+		if (res != 0) {
+			LOG_ERR("Upload results failed: %d", res);
+			set_blink_error();
+			pos_est_timer_restart();
+		} else {
+			LOG_INF("Results upload started");
+		}
+#else
 		set_blink_sleep();
+		pos_est_timer_restart();
+#endif
+		break;
+	}
+
+#ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
+	case OTDOA_EVENT_RESULTS_UL_COMPL:
+	{
+		LOG_INF("OTDOA_EVENT_RESULTS_UL_COMPL: status: %d", p_event_data->ul_compl.status);
+		if (p_event_data->ul_compl.status != 0) {
+			set_blink_error();
+		} else {
+			set_blink_sleep();
+		}
 		pos_est_timer_restart();
 		break;
 	}
+#endif
 
 	case OTDOA_EVENT_FAIL: {
 		LOG_ERR("OTDOA_EVENT_FAIL:  failure code = %d", p_event_data->failure_code);

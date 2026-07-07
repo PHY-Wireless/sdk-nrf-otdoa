@@ -153,7 +153,6 @@ const char *otdoa_http_get_download_url(void)
 	}
 }
 
-#ifdef CONFIG_OTDOA_ENABLE_RESULTS_UPLOAD
 const char *otdoa_http_get_upload_pw(void)
 {
 	return RESULTS_UPLOAD_PW;
@@ -177,4 +176,3 @@ const char *otdoa_http_get_upload_url(void)
 		return UPLOAD_SERVER_URL;
 	}
 }
-#endif
