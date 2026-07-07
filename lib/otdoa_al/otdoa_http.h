@@ -27,24 +27,6 @@
 #define UPLOAD_SERVER_URL "<Request URL from PhyWi>"
 #endif
 
-/* set to 1 to have HTTP functions use scratchpad, else use malloc()/free() */
-#define HTTP_USE_SCRATCHPAD		0
-#if HTTP_USE_SCRATCHPAD
-#error "Need to resolve scratchpad use" /* See PHYW-496 */
-#endif
-
-/* decrease again to allow for the addition of ubsa-seed that server is now adding to response */
-#if HTTP_USE_SCRATCHPAD
-#define HTTP_RANGE_REQUEST_SIZE 6200 /* NB: HTTP req size can be larger than limit for HTTPS */
-#define HTTP_BUF_SIZE		6700
-#else
-/* can use larger buffers because we dynamically allocate them */
-#define HTTP_RANGE_REQUEST_SIZE 12000 /* NB: HTTP req size can be larger than limit for HTTPS */
-#define HTTP_BUF_SIZE		12288
-#endif
-/* HTTPS buffer size is limited by Nordic TLS implementation */
-#define HTTPS_RANGE_REQUEST_SIZE 1500
-#define HTTPS_BUF_SIZE		 2048
 
 #define HTTPS_RANGE_MAX_DEFAULT 100000
 
