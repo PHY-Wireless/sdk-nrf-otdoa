@@ -16,7 +16,7 @@
 
 LOG_MODULE_REGISTER(otdoa_al, LOG_LEVEL_INF);
 
-#define SLAB_COUNT (10)
+#define SLAB_COUNT (CONFIG_OTDOA_MESSAGE_SLAB_COUNT)
 
 static struct k_fifo rs_fifo;
 static struct k_thread rs_thread_data;

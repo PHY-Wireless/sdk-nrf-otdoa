@@ -101,6 +101,10 @@ config OTDOA_UPLOAD_SERVER_URL
 	default "api.prod.hellaphy.cloud"
 	depends on OTDOA_ENABLE_RESULTS_UPLOAD
 
+config OTDOA_MESSAGE_SLAB_COUNT
+	int "Number of messages to size the memory slab for"
+	default 10
+
 choice "OTDOA_AL_LOG_LEVEL_CHOICE"
 	prompt "Max compiled-in log level for $(module-str)"
 	default OTDOA_AL_LOG_LEVEL_DEFAULT
